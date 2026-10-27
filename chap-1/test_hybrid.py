@@ -56,3 +56,31 @@ assert torch.allclose(
 )
 
 print("Causal test: PASSED")
+
+
+import random
+import torch
+
+def seed_everything(seed: int):
+    # TODO 1: Set Python's random seed
+    random.seed(seed)
+
+    # TODO 2: Set PyTorch's CPU random seed
+    torch.manual_seed(seed)
+
+    # TODO 3: If CUDA is available,
+    # seed all CUDA devices
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+
+seed_everything(42)
+a = torch.rand(3)
+
+seed_everything(42)
+b = torch.rand(3)
+
+print("A:", a)
+print("B:", b)
+print("Identical:", torch.equal(a, b))
