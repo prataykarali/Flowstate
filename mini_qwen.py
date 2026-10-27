@@ -268,20 +268,23 @@ class GatedDeltaNet(nn.Module):
             vt = v[:, t]
             qt = q[:, t]
 
-            # Predict value from previous memory
+            # Decay and update gates
+            alpha_t = decay[:, t, :, None, None]
+            beta_t = beta[:, t, :, None, None]
+            # Decay previous memory exactly once
+            S=alpha_t*S 
+
+            # Predict from decayed memory
             v_hat = torch.einsum(
-                "bhd,bhde->bhe", kt, S
-            )
+            "bhd,bhde->bhe", kt, S
+         )
 
             # Delta-rule correction
             delta = vt - v_hat
 
-            # Apply decay and beta gates
-            alpha_t = decay[:, t, :, None, None]
-            beta_t = beta[:, t, :, None, None]
-
+            # Update memory
             S = (
-                alpha_t * S
+                 S
                 + beta_t
                 * kt.unsqueeze(-1)
                 * delta.unsqueeze(-2)
