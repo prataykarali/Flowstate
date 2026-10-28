@@ -1,6 +1,9 @@
 import torch
 import torch.nn.functional as F
 
+import random
+import torch
+
 from mini_qwen import Config, MiniHybridLM
 
 torch.manual_seed(42)
@@ -56,10 +59,6 @@ assert torch.allclose(
 )
 
 print("Causal test: PASSED")
-
-
-import random
-import torch
 
 def seed_everything(seed: int):
     # TODO 1: Set Python's random seed

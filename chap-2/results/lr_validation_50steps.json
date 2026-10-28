@@ -1,0 +1,45 @@
+{
+    "experiment": "learning_rate_validation",
+    "steps": 50,
+    "seeds": [
+        7,
+        21,
+        42,
+        99,
+        123
+    ],
+    "train_texts": [
+        "A dragon guards a tiny library.",
+        "A dragon reads a dusty book.",
+        "A wizard guards an old library.",
+        "A knight reads a tiny book."
+    ],
+    "val_texts": [
+        "A wizard reads a dusty book.",
+        "A knight guards an old library."
+    ],
+    "results": {
+        "0.001": {
+            "validation_losses": [
+                0.45572155714035034,
+                0.40966905653476715,
+                0.40788546204566956,
+                0.4267624318599701,
+                0.3412720412015915
+            ],
+            "mean": 0.4082621097564697,
+            "std": 0.04208459252398345
+        },
+        "0.01": {
+            "validation_losses": [
+                0.6229593753814697,
+                0.5266672968864441,
+                0.5465103685855865,
+                0.6608665287494659,
+                0.6004694998264313
+            ],
+            "mean": 0.5914946138858795,
+            "std": 0.055020918113121285
+        }
+    }
+}

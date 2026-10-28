@@ -1,0 +1,34 @@
+{
+  "experiment": "FlowState_Chapter2_Memory_Benchmark",
+  "fixed_value_memory": {
+    "matrix_2d": {
+      "bytes": 24,
+      "errors": [
+        1.0126169919967651,
+        1.0126169919967651,
+        1.0745380052412656e-07
+      ]
+    },
+    "orthogonal_3d": {
+      "bytes": 36,
+      "errors": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "explicit_slots": {
+      "bytes": 36,
+      "errors": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "variable_length_memory": {
+    "dynamic_payload_bytes": 64,
+    "padded_payload_bytes": 96,
+    "length_metadata_bytes": 24
+  }
+}
