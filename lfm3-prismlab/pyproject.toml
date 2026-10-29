@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prismlab"
+version = "0.2.0"
+description = "PrismLab: LFM3 Multimodal Workbench & Deterministic Model Router"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Pratay Karali"}
+]
+dependencies = [
+    "requests>=2.31.0",
+    "pillow>=10.0.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+visuals = [
+    "manim>=0.18.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["prismlab*"]

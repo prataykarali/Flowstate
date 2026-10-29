@@ -370,7 +370,7 @@ The expanding orthogonal representation and explicit slots preserved the synthet
 
 ### Memory Interference Scaling
 
-![Memory Interference Scaling](figures/memory_interference.png)
+![Memory Interference Scaling](figures/memory_inference.png)
 
 **Figure 1:** Mean L2 retrieval error as stored associations increase
 from 1 to 100. The fixed-size matrix experiences interference,

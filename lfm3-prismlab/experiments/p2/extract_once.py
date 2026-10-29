@@ -5,7 +5,9 @@ from prismlab.vision.vision_io import read_file_image
 from prismlab.vision.vision_api import build_vision_payload, generate_vision
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-image_path = PROJECT_ROOT / "data" / "images" / "imag2_half.png"
+image_path = PROJECT_ROOT / "data" / "test_images" / "imag2_half.png"
+if not image_path.is_file():
+    image_path = PROJECT_ROOT / "data" / "images" / "imag2_half.png"
 if not image_path.is_file():
     image_path = Path("imag2_half.png")
 
