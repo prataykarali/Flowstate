@@ -1,16 +1,59 @@
+# ==============================================================================
+# FlowState Δ & PrismLab Git Ignore Specification
+# ==============================================================================
+
+# Python Environments & Packages
 .venv/
-__pycache__/
-*.pyc
-*.pyo
-.ipynb_checkpoints/
-.DS_Store
+**/.venv/
+venv/
+ENV/
 *.egg-info/
 dist/
 build/
 .python-version
+
+# Bytecode & Caches
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook Checkpoints & Run Artifacts
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Environment Variables & Secrets
 .env
 .env.*
 !.env.example
+
+# OS Intermediates
+.DS_Store
+Thumbs.db
+
+# Model Weights & Large Checkpoints (Preserve code, not GGUFs)
 *.pt
 *.pth
-.pytest_cache/
+*.bin
+*.gguf
+*.safetensors
+
+# PrismLab Caches
+lfm3-prismlab/data/cache/
+**/data/cache/
+
+# Manim Temporary Rendering Caches & Chunk Fragments
+**/media/texts/
+**/media/videos/**/partial_movie_files/
+**/media/jupyter/
+_manim_cache/
+
+# Keep explicitly preserved research visual assets and demonstration MP4s
+!lfm3-prismlab/visuals/manim/*.mp4
+!chap-2/figures/*.png
+!lfm3-prismlab/docs/**/figures/*.png
+!lfm3-prismlab/docs/**/figures/*.svg
+!lfm3-prismlab/data/synthetic_ocr/contact_sheet.png
