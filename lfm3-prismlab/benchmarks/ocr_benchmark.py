@@ -15,7 +15,17 @@ from pathlib import Path
 import requests
 
 ROOT = Path(__file__).resolve().parent
-CASES = json.loads((ROOT / 'manifest.json').read_text(encoding='utf-8'))['cases']
+PROJECT_DIR = ROOT.parent
+
+MANIFEST_PATH = PROJECT_DIR / 'data' / 'synthetic_ocr' / 'manifest.json'
+if not MANIFEST_PATH.is_file():
+    MANIFEST_PATH = ROOT / 'manifest.json'
+
+IMAGES_DIR = PROJECT_DIR / 'data' / 'synthetic_ocr' / 'images'
+if not IMAGES_DIR.is_dir():
+    IMAGES_DIR = ROOT / 'images'
+
+CASES = json.loads(MANIFEST_PATH.read_text(encoding='utf-8'))['cases']
 
 
 def norm(s):
@@ -92,7 +102,7 @@ def vision_input(image_path, prompt):
 
 
 def evaluate_case(case, vision_url, vision_model, text_url, text_model, mode):
-    image_path=ROOT/'images'/case['filename']
+    image_path = IMAGES_DIR / case['filename']
     q=case['question']; expected=case['expected_answer']
     record={
         'id':case['id'],'filename':case['filename'],'category':case['category'],
@@ -186,7 +196,8 @@ def main():
     print(f'Vision: {vis} at {args.vision_url}',flush=True)
     if txt:print(f'Text:   {txt} at {args.text_url}',flush=True)
     selected=CASES if args.limit==0 else CASES[:args.limit]
-    outdir=ROOT/'results'; outdir.mkdir(exist_ok=True)
+    outdir = PROJECT_DIR / 'results' / 'p2_n3_ocr_benchmark'
+    outdir.mkdir(parents=True, exist_ok=True)
     jsonl=outdir/(args.tag+'_raw.jsonl')
     csvfile=outdir/(args.tag+'_results.csv')
     # A run always starts a new results file; do not append different configurations.

@@ -4,8 +4,11 @@ All texts, dates, prices, credentials, and organizations are fictional sample da
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import json, math, random
-ROOT=Path(__file__).resolve().parent
-IMDIR=ROOT/'images'; IMDIR.mkdir(exist_ok=True)
+ROOT = Path(__file__).resolve().parent
+PROJECT_DIR = ROOT.parent
+DATA_DIR = PROJECT_DIR / 'data' / 'synthetic_ocr'
+IMDIR = DATA_DIR / 'images'
+IMDIR.mkdir(parents=True, exist_ok=True)
 FONT='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 BOLD='/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 MONO='/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
@@ -165,5 +168,5 @@ txt(d,(95,787),'Demo data: not from production systems',21,'#768696')
 save(im,'10_research_brief');rec(10,'10_research_brief','dense two-column document','What is the reviewer tag?','RPT-06-DELTA',['BENCH-074','18.7 s','REVIEW REQUIRED','RPT-06-DELTA'],'hard')
 
 manifest={'title':'PrismLab controlled OCR challenge set','version':'1.0','origin':'Generated locally with Pillow; all content is fictional and synthetic','sample_count':len(entries),'notes':['Each image includes exact-answer question and reference OCR phrases.','Phrase recall is a limited proxy for transcription quality, not full character error rate.','All examples are synthetic; evaluate on real photos later for generalization.'],'cases':entries}
-(ROOT/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+(DATA_DIR/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
 print('Created',len(entries),'images in',IMDIR)

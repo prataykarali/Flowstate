@@ -10,7 +10,9 @@ from pathlib import Path
 
 # Use the small image so testing is inexpensive
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-default_image = PROJECT_ROOT / "data" / "images" / "test_discover.png"
+default_image = PROJECT_ROOT / "data" / "test_images" / "test_discover.png"
+if not default_image.is_file():
+    default_image = PROJECT_ROOT / "data" / "images" / "test_discover.png"
 if not default_image.is_file():
     default_image = Path("test_discover.png")
 
