@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-gqa-20261028-200700/candidate.json",
+    "sha256": "f3aaa6ca265b6b843d28f0ddb1d172fe5b4332481b1656035548832d54058e26",
+    "bytes": 7470
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/gqa-mechanism.html",
+    "sha256": "e98f68868e9b066801df669d94fec3fc54cd81c66817943e98108f16098e1c10",
+    "bytes": 855408
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/gqa-mechanism.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/gqa-mechanism.finalize-summary.json",
+    "browserCheckReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/gqa-mechanism.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4546,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

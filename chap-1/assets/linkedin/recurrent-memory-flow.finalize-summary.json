@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/dataflow-memory-flow-20261028-200700/candidate.json",
+    "sha256": "8a94713f58c9fd0ae51011e88248cac7cba1d2f27143baed1be85dd18b638de1",
+    "bytes": 8458
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/recurrent-memory-flow.html",
+    "sha256": "fa6411542f343dea4662908b25a8ea0e2f0f9ff19f9ad02c1aa568f8f7e0028d",
+    "bytes": 859994
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/recurrent-memory-flow.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/recurrent-memory-flow.finalize-summary.json",
+    "browserCheckReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/recurrent-memory-flow.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 5239,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "visualReviewRecommendation": {
+    "action": "inspect-route-readability",
+    "signals": {
+      "routesOverSuggestedBends": 1
+    },
+    "reason": "Automated gates passed, but crossings or detours still need perceptual review before claiming visual quality.",
+    "affectedRoutes": {
+      "crossings": [],
+      "detours": [
+        {
+          "relationship": {
+            "id": "gates_to_update",
+            "from": "gating_network",
+            "to": "state_update",
+            "label": "beta rate",
+            "collectionIndex": 6,
+            "artifactIndex": 7
+          },
+          "bends": 4,
+          "stretch": 1.175,
+          "directCorridorBlockers": [
+            {
+              "id": "state_decay",
+              "label": "State Decay",
+              "box": [
+                480,
+                280,
+                150,
+                60
+              ]
+            }
+          ]
+        }
+      ],
+      "truncated": false
+    },
+    "repair": "Trace these relationships at the desktop viewport. For Architecture, use references/architecture-layout-repair.md: reflow a blocked main path or tangled connected scene, and repair an isolated defect locally only when the surrounding composition is accepted. Preserve all semantic content and user-fixed geometry. Rerun finalize once after the edit."
+  }
+}

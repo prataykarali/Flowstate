@@ -1,0 +1,41 @@
+[
+  {
+    "trial": 1,
+    "scale": 1.0,
+    "resolution": "836x470",
+    "ttft_s": 28.01,
+    "first_event_s": 19.76,
+    "total_s": 28.41,
+    "answer": "NIRANTAR",
+    "valid_output": true,
+    "correct": true,
+    "finish_reason": "stop",
+    "reasoning_seen": true
+  },
+  {
+    "trial": 1,
+    "scale": 0.5,
+    "resolution": "418x235",
+    "ttft_s": 15.33,
+    "first_event_s": 4.86,
+    "total_s": 15.8,
+    "answer": "NIRANTAR",
+    "valid_output": true,
+    "correct": true,
+    "finish_reason": "stop",
+    "reasoning_seen": true
+  },
+  {
+    "trial": 1,
+    "scale": 0.25,
+    "resolution": "209x118",
+    "ttft_s": 13.12,
+    "first_event_s": 4.68,
+    "total_s": 13.57,
+    "answer": "Nirantar",
+    "valid_output": true,
+    "correct": true,
+    "finish_reason": "stop",
+    "reasoning_seen": true
+  }
+]

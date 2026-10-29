@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/dataflow-training-20261028-200700/candidate.json",
+    "sha256": "594008018c82b9d2e39dd79443256edf188d5986c25c555a6ad35c52858af8b3",
+    "bytes": 7309
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/training-vs-generalization.html",
+    "sha256": "ec801201edc1b61f1f674173e87c0122089ea323c9ff170c5ca215995f651a9c",
+    "bytes": 851456
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/training-vs-generalization.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/training-vs-generalization.finalize-summary.json",
+    "browserCheckReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/training-vs-generalization.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4276,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

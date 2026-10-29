@@ -1,0 +1,4 @@
+trial,scale,resolution,ttft_s,first_event_s,total_s,answer,valid_output,correct,finish_reason,reasoning_seen
+1,1.0,836x470,28.01,19.76,28.41,NIRANTAR,True,True,stop,True
+1,0.5,418x235,15.33,4.86,15.8,NIRANTAR,True,True,stop,True
+1,0.25,209x118,13.12,4.68,13.57,Nirantar,True,True,stop,True

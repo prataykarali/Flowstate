@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "facf6b28-834c-4897-9a74-9c5ce30c65e0",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/pratay-karali/Desktop/flowstate/.archify/dataflow-training-20261028-200700/candidate.json",
+  "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/training-vs-generalization.html",
+  "specification": {
+    "sha256": "594008018c82b9d2e39dd79443256edf188d5986c25c555a6ad35c52858af8b3",
+    "bytes": 7309
+  },
+  "artifact": {
+    "sha256": "ec801201edc1b61f1f674173e87c0122089ea323c9ff170c5ca215995f651a9c",
+    "bytes": 851456
+  }
+}

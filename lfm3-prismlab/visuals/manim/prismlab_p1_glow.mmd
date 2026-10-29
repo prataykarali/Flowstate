@@ -1,0 +1,47 @@
+flowchart TB
+    U["User Request<br/>Text / Image / Audio / Video"]
+    PRE["Input Validation<br/>modality + payload"]
+    P["Python Core<br/>pipeline.py"]
+    R["Model Registry<br/>registry.py"]
+    S{"Deterministic Router<br/>router.py"}
+    D["Model Dispatcher"]
+    H["Backend Adapter<br/>llama.cpp / API"]
+
+    subgraph MODELS["Six Specialized LFM3 Paths"]
+      direction LR
+      T["LFM3-1.7B<br/>Text / Tools"]
+      V["LFM3-VL-2B<br/>Vision / Video"]
+      A["LFM3-Audio-2B<br/>Speech / Audio"]
+      O["LFM3-Omni-2B<br/>Multimodal"]
+      J["d1-2B<br/>Visual Decisions"]
+      K["d1-Omni-2B<br/>Audio-Visual Decisions"]
+    end
+
+    OUT["Unified Model Output"]
+    F["Response Formatter<br/>Text / JSON / Decision"]
+    B["Benchmarking<br/>Latency / Memory / Tests"]
+
+    U --> PRE --> P --> S --> D --> H
+    R -.-> S
+    H --> T
+    H --> V
+    H -.-> A
+    H -.-> O
+    H -.-> J
+    H -.-> K
+    T --> OUT
+    V --> OUT
+    A -.-> OUT
+    O -.-> OUT
+    J -.-> OUT
+    K -.-> OUT
+    OUT --> F --> B
+
+    classDef live fill:#123d35,color:#d1fae5,stroke:#34d399,stroke-width:2px
+    classDef planned fill:#1f2937,color:#e2e8f0,stroke:#94a3b8,stroke-width:1.3px
+    classDef core fill:#132d4b,color:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    classDef io fill:#29313f,color:#f8fafc,stroke:#a0aebe,stroke-width:1.5px
+    class T,V live
+    class A,O,J,K planned
+    class PRE,P,R,S,D,H,OUT,F,B core
+    class U io

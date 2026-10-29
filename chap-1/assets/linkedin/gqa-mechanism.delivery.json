@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "cbe9d0fd-f2bb-4b90-84e0-a6efe6103e65",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-gqa-20261028-200700/candidate.json",
+  "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/gqa-mechanism.html",
+  "specification": {
+    "sha256": "f3aaa6ca265b6b843d28f0ddb1d172fe5b4332481b1656035548832d54058e26",
+    "bytes": 7470
+  },
+  "artifact": {
+    "sha256": "e98f68868e9b066801df669d94fec3fc54cd81c66817943e98108f16098e1c10",
+    "bytes": 855408
+  }
+}

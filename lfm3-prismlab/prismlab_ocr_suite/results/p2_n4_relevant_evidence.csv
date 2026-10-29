@@ -1,0 +1,23 @@
+filename,expected,answer,correct,text_latency_s,finish_reason,error,raw
+01_event_poster.png,RBL-42,RBL-42,True,3.98,stop,,RBL-42
+02_cafe_receipt.png,446.25,"The provided text does not contain any information about a ""grand total amount"" for NORTH PIER CAFE ORDER 0048 dated 29 OCT 2026. Therefore, the grand total amount cannot be determined from the given evidence.
+
+No answer can be derived without additional data.",False,7.13,stop,,"The provided text does not contain any information about a ""grand total amount"" for NORTH PIER CAFE ORDER 0048 dated 29 OCT 2026. Therefore, the grand total amount cannot be determined from the given evidence.
+
+No answer can be derived without additional data."
+03_department_notice.png,"07 DEC 2026, 5:30 PM","The provided text does not include a specific submission deadline or time; it only lists ""DEPARTMENT NOTICE AI / ML PROJECT REVIEW"" and the label ""Submission deadline:"" without further details. Therefore, based on the given evidence, the deadline and its associated time are not specified.
+
+Answer: The information about the project submission deadline and its time is not provided in the evidence.",False,6.63,stop,,"The provided text does not include a specific submission deadline or time; it only lists ""DEPARTMENT NOTICE AI / ML PROJECT REVIEW"" and the label ""Submission deadline:"" without further details. Therefore, based on the given evidence, the deadline and its associated time are not specified.
+
+Answer: The information about the project submission deadline and its time is not provided in the evidence."
+04_lab_schedule.png,14:00 - 15:30,Robotics Lab is scheduled on Wednesday from 14:00 to 15:30 in room D-412.,False,3.35,stop,,Robotics Lab is scheduled on Wednesday from 14:00 to 15:30 in room D-412.
+05_shipping_label.png,AX-7049-2261,AX-7049-2261,True,1.99,stop,,AX-7049-2261
+06_terminal_logs.png,E_ALLOC_17,E_ALLOC_17,True,2.01,stop,,E_ALLOC_17
+07_workshop_invite.png,DS-218,DS-218,True,1.95,stop,,DS-218
+08_train_ticket.png,G-06,The gate printed on the ticket is **G-06**.,False,2.91,stop,,The gate printed on the ticket is **G-06**.
+09_low_contrast_note.png,PLB-7602,PLB-7602,True,2.6,stop,,PLB-7602
+10_research_brief.png,RPT-06-DELTA,"The provided text does not contain any information about a ""reviewer tag"" for the issue. Therefore, it is impossible to answer based on the given evidence.
+
+Answer: The reviewer tag is not mentioned in the provided evidence.",False,5.54,stop,,"The provided text does not contain any information about a ""reviewer tag"" for the issue. Therefore, it is impossible to answer based on the given evidence.
+
+Answer: The reviewer tag is not mentioned in the provided evidence."

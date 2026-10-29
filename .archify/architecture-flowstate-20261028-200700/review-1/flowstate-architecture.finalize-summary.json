@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+    "sha256": "2ac808b03be2d409503d02facf7f64cbcf74e09028e0dbd01fda8809aab49e2e",
+    "bytes": 8252
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+    "sha256": "3bdecfcca3324b6116d1b4c81caff607ac3e05ef2b27c023bdf52cda36f3bfb3",
+    "bytes": 859502
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "pass"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/review-1/flowstate-architecture.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/review-1/flowstate-architecture.finalize-summary.json",
+    "browserCheckReceipt": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/review-1/flowstate-architecture.browser-check.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 4950,
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  }
+}

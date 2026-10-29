@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing:border-box; }
+body { margin:0; background:#07111f; color:#dbeafe; font-family:Inter,system-ui,sans-serif; }
+.top { position:sticky; top:0; z-index:10; padding:13px 20px; display:flex; gap:18px; align-items:center;
+       flex-wrap:wrap; background:rgba(7,17,31,.96); border-bottom:1px solid #23354a; }
+.title { font-size:15px; font-weight:750; letter-spacing:.3px; }
+.hint { font-size:12px; color:#94a3b8; }
+.spacer { flex:1; }
+.controls {display:flex; align-items:center; gap:9px; font-size:12px;}
+button { background:#163254; border:1px solid #3b82f6; color:#e5f1ff; padding:7px 13px;
+         border-radius:7px; cursor:pointer; }
+button:hover { background:#214774; }
+input { accent-color:#22d3ee; cursor:pointer; width:110px; }
+.legend { padding:12px 23px 3px; color:#91a8c3; font-size:12px; }
+.legend b {color:#6ee7b7;}
+#viewport { width:100%; height:calc(100vh - 104px); min-height:620px; overflow:auto; scrollbar-color:#31577d #07111f; }
+#diagram { display:block; width:max-content; min-width:100%; padding:26px 35px 75px; }
+.mermaid { display:block; }
+.mermaid svg { display:block; overflow:visible; max-width:none !important; }
+/* Borders glow while labels stay readable. */
+.mermaid svg g.node rect, .mermaid svg g.node polygon {
+  animation: prismGlow 2.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 3px rgba(96,165,250,.5));
+}
+.mermaid svg g.node.live rect, .mermaid svg g.node.live polygon {
+  filter:drop-shadow(0 0 8px rgba(52,211,153,.85));
+}
+@keyframes prismGlow {
+  0% { filter:drop-shadow(0 0 2px rgba(56,189,248,.25)); }
+  100% { filter:drop-shadow(0 0 9px rgba(56,189,248,.85)); }
+}
+/* Applied to Mermaid's actual SVG edge paths after rendering. */
+.mermaid svg path.prism-wire {
+  stroke:#38bdf8 !important;
+  stroke-width:2.2px !important;
+  stroke-dasharray:8 11 !important;
+  opacity:.83;
+  animation: prismFlow .95s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(34,211,238,.85));
+}
+@keyframes prismFlow { to { stroke-dashoffset:-19; } }
+.mermaid svg circle.prism-dot {
+  fill:#bffcff; stroke:#22d3ee; stroke-width:.6px;
+  filter:drop-shadow(0 0 5px #22d3ee) drop-shadow(0 0 10px #38bdf8);
+  pointer-events:none;
+}
+body.paused .mermaid svg path.prism-wire,
+body.paused .mermaid svg g.node rect,
+body.paused .mermaid svg g.node polygon { animation-play-state:paused; }
+#error { padding:30px; color:#fda4af; font:14px monospace; }
+</style></head>
+<body>
+<header class="top">
+ <div class="title">PRISMLAB <span style="color:#38bdf8">/</span> P1 Architecture</div>
+ <div class="hint">Animated Mermaid • Visual simulation, not live inference</div>
+ <div class="spacer"></div>
+ <div class="controls"><label for="scale">Width</label><input id="scale" type="range" min="1300" max="2500" step="100" value="1800"/><span id="size">1800px</span></div>
+ <button id="toggle">Pause</button>
+</header>
+<div class="legend"><b>GREEN</b> = locally tested text/vision paths &nbsp; • &nbsp; GRAY = planned integrations &nbsp; • &nbsp; CYAN = animated data flow</div>
+<div id="viewport"><div id="diagram"><pre class="mermaid">flowchart TB
+    U[&quot;User Request&lt;br/&gt;Text / Image / Audio / Video&quot;]
+    PRE[&quot;Input Validation&lt;br/&gt;modality + payload&quot;]
+    P[&quot;Python Core&lt;br/&gt;pipeline.py&quot;]
+    R[&quot;Model Registry&lt;br/&gt;registry.py&quot;]
+    S{&quot;Deterministic Router&lt;br/&gt;router.py&quot;}
+    D[&quot;Model Dispatcher&quot;]
+    H[&quot;Backend Adapter&lt;br/&gt;llama.cpp / API&quot;]
+
+    subgraph MODELS[&quot;Six Specialized LFM3 Paths&quot;]
+      direction LR
+      T[&quot;LFM3-1.7B&lt;br/&gt;Text / Tools&quot;]
+      V[&quot;LFM3-VL-2B&lt;br/&gt;Vision / Video&quot;]
+      A[&quot;LFM3-Audio-2B&lt;br/&gt;Speech / Audio&quot;]
+      O[&quot;LFM3-Omni-2B&lt;br/&gt;Multimodal&quot;]
+      J[&quot;d1-2B&lt;br/&gt;Visual Decisions&quot;]
+      K[&quot;d1-Omni-2B&lt;br/&gt;Audio-Visual Decisions&quot;]
+    end
+
+    OUT[&quot;Unified Model Output&quot;]
+    F[&quot;Response Formatter&lt;br/&gt;Text / JSON / Decision&quot;]
+    B[&quot;Benchmarking&lt;br/&gt;Latency / Memory / Tests&quot;]
+
+    U --&gt; PRE --&gt; P --&gt; S --&gt; D --&gt; H
+    R -.-&gt; S
+    H --&gt; T
+    H --&gt; V
+    H -.-&gt; A
+    H -.-&gt; O
+    H -.-&gt; J
+    H -.-&gt; K
+    T --&gt; OUT
+    V --&gt; OUT
+    A -.-&gt; OUT
+    O -.-&gt; OUT
+    J -.-&gt; OUT
+    K -.-&gt; OUT
+    OUT --&gt; F --&gt; B
+
+    classDef live fill:#123d35,color:#d1fae5,stroke:#34d399,stroke-width:2px
+    classDef planned fill:#1f2937,color:#e2e8f0,stroke:#94a3b8,stroke-width:1.3px
+    classDef core fill:#132d4b,color:#eff6ff,stroke:#60a5fa,stroke-width:2px
+    classDef io fill:#29313f,color:#f8fafc,stroke:#a0aebe,stroke-width:1.5px
+    class T,V live
+    class A,O,J,K planned
+    class PRE,P,R,S,D,H,OUT,F,B core
+    class U io</pre></div></div>
+<div id="error" hidden></div>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const scale = document.getElementById('scale');
+const size = document.getElementById('size');
+const toggle = document.getElementById('toggle');
+const svgNS = 'http://www.w3.org/2000/svg';
+let graphic = null;
+try {
+  mermaid.initialize({
+    startOnLoad:false,
+    securityLevel:'strict',
+    theme:'dark',
+    flowchart:{useMaxWidth:false, nodeSpacing:68, rankSpacing:80,
+               minNodeWidth:175, wrappingWidth:210, curve:'basis'}
+  });
+  await mermaid.run({querySelector:'.mermaid'});
+  graphic = document.querySelector('.mermaid svg');
+  if (!graphic) throw Error('Mermaid did not create an SVG.');
+  function resize() {
+    graphic.style.setProperty('width', scale.value + 'px', 'important');
+    graphic.style.setProperty('height', 'auto', 'important');
+    size.textContent = scale.value + 'px';
+  }
+  scale.addEventListener('input', resize);
+  resize();
+
+  // The SVG wires are the paths that Mermaid just drew.
+  const wires = [...new Set(graphic.querySelectorAll('g.edgePaths path, path.flowchart-link'))]
+      .filter(p => p.getAttribute('d') && !p.closest('defs'));
+  wires.forEach((wire, i) => {
+    wire.classList.add('prism-wire');
+    const dot = document.createElementNS(svgNS, 'circle');
+    dot.setAttribute('r', i % 3 === 0 ? '3.6' : '2.7');
+    dot.setAttribute('class','prism-dot');
+    const motion = document.createElementNS(svgNS, 'animateMotion');
+    motion.setAttribute('path', wire.getAttribute('d'));
+    motion.setAttribute('dur', (2.2 + (i % 5) * .34) + 's');
+    motion.setAttribute('begin', (-i*.23) + 's');
+    motion.setAttribute('repeatCount','indefinite');
+    dot.appendChild(motion);
+    // Put the dot beside its wire so it inherits the same transform/coordinates.
+    wire.parentNode.appendChild(dot);
+  });
+  toggle.addEventListener('click', () => {
+    const paused = document.body.classList.toggle('paused');
+    if (paused) graphic.pauseAnimations();
+    else graphic.unpauseAnimations();
+    toggle.textContent = paused ? 'Resume' : 'Pause';
+  });
+} catch (err) {
+  const box = document.getElementById('error');
+  box.hidden = false;
+  box.textContent = 'Mermaid render error: ' + String(err);
+  console.error(err);
+}
+</script>
+</body></html>

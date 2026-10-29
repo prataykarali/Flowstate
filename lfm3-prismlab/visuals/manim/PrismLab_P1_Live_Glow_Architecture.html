@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>PrismLab · Live Architecture — P1</title>
+<style>
+  :root {color-scheme: dark; --panel: #0e182b; --ink:#e9f0ff; --muted:#8799b6;}
+  * {box-sizing:border-box}
+  body {margin:0; color:var(--ink); background:#060c18; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+  body:before {content:""; position:fixed; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse at 55% 35%,#16274885 0%,transparent 65%),radial-gradient(ellipse at 10% 86%,#082d3b6a 0%,transparent 42%);}
+  .app {max-width:1650px; margin:0 auto; padding:29px 28px 23px; position:relative;}
+  .header {display:flex;justify-content:space-between;align-items:start;gap:25px;flex-wrap:wrap;margin-bottom:18px;}
+  .eyebrow {font-size:11px; color:#83b8fb;letter-spacing:.23em;font-weight:800;}
+  h1 {margin:7px 0 6px;font-size:30px;line-height:1.18;font-weight:750;letter-spacing:-.04em}
+  .desc {color:#8e9fbc;margin:0;font-size:13px;max-width:710px;line-height:1.6}
+  .indicator {display:flex;align-items:center;gap:9px;color:#a8e7cd;border:1px solid #204a49;background:#0a272c;font-size:11px;font-weight:800;letter-spacing:.08em;border-radius:20px;padding:10px 13px;white-space:nowrap;}
+  .dot-live {display:inline-block;width:8px;height:8px;background:#4be5b6;border-radius:50%;box-shadow:0 0 12px #4be5b6;animation:blink 2s infinite}
+  .toolbar {display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin:5px 0 14px;}
+  .toolbar .label {font-size:11px;color:#8b9bb8;text-transform:uppercase;letter-spacing:.15em;font-weight:800;}
+  .pills {display:flex;flex:1;flex-wrap:wrap;gap:6px;}
+  button {font:inherit;cursor:pointer}
+  .pick {border:1px solid #2e3f5d;border-radius:9px;padding:9px 11px;background:#101c31;color:#a9b9d4;font-size:12px;font-weight:700;white-space:nowrap;transition:background .2s,border-color .2s,box-shadow .2s,transform .15s;}
+  .pick:hover{border-color:#7898ca;transform:translateY(-1px)}
+  .pick.active {border-color:var(--pill);color:#f7fbff;background:#1c2c47;box-shadow:inset 0 0 12px #29446b,0 0 13px color-mix(in srgb,var(--pill),transparent 79%);}
+  .control {border:1px solid #375476;background:#14243d;color:#dcecff;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:750;white-space:nowrap}
+  .control:hover{background:#1e3554}
+  .speedwrap {display:flex;align-items:center;gap:8px;font-size:11px;color:#a5b6d0;white-space:nowrap}
+  input[type=range] {width:82px;accent-color:#56a8ff}
+  .stage {border-radius:20px;overflow:hidden;border:1px solid #253550;background:linear-gradient(180deg,#0c1628 0%,#0a1222 100%);box-shadow:0 24px 68px #020714a1;}
+  .stage svg {display:block;width:100%;height:auto; min-height:430px;}
+  .stage .gridline {stroke:#304263;stroke-width:.7;opacity:.32}
+  .stage .subtitle {font-size:12px;letter-spacing:.18em;font-weight:750;fill:#91a7cb;}
+  .stage .tiny {font-size:12px;fill:#8ea3c4;}
+  .stage .stage-label {font-size:13px;fill:#7d9bc2;letter-spacing:.12em;font-weight:750;}
+  .wire {--wire:#70b5ff}
+  .wire .edge-base {fill:none;stroke:#384a67;stroke-width:1.8;stroke-linecap:round;opacity:.65}
+  .wire .edge-glow {fill:none;stroke:var(--wire);stroke-width:9;opacity:0;filter:url(#blurGlow);transition:opacity .2s}
+  .wire .edge-flow {fill:none;stroke:var(--wire);stroke-width:2.9;stroke-linecap:round;stroke-dasharray:8 17;opacity:0;filter:url(#lineGlow);animation:travel 1s linear infinite;transition:opacity .2s}
+  .wire.active .edge-flow {opacity:.96}
+  .wire.active .edge-glow {opacity:.65}
+  .particle {opacity:0;fill:var(--wire);filter:url(#lineGlow);transition:opacity .2s;pointer-events:none}
+  .wire.active .particle {opacity:1}
+  @keyframes travel {to{stroke-dashoffset:-50}}
+  @keyframes blink {50%{opacity:.5}}
+  @keyframes ringpulse {50% {opacity:.58}}
+  .base-shadow {fill:#1b365f;opacity:.16;filter:url(#blurGlow)}
+  .base-rect {fill:url(#nodeFill);stroke:#385577;stroke-width:1.6}
+  .base-title {fill:#ecf5ff;font-size:23px;font-weight:800;letter-spacing:-.035em}
+  .base-detail {fill:#8da4c3;font-size:14px}
+  .base-caps {fill:#83a7d6;font-size:11px;letter-spacing:.15em;font-weight:750}
+  .core-node {animation:ringpulse 3s ease-in-out infinite}
+  .model-card {cursor:pointer;outline:none}
+  .model-card .card-aura {fill:none;stroke:var(--accent);stroke-width:9;filter:url(#blurGlow);opacity:0;transition:opacity .24s}
+  .model-card .card-bg {fill:#111e33;stroke:#354963;stroke-width:1.7;transition:stroke .2s,fill .2s}
+  .model-card .card-accent {fill:var(--accent);opacity:.5;transition:opacity .2s}
+  .model-card .card-name {font-size:21px;font-weight:800;letter-spacing:-.02em;fill:#dce6f5;}
+  .model-card .card-sub {font-size:12.4px;fill:#7e92b2}
+  .model-card .card-icon-ring {fill:#132036;stroke:var(--accent);stroke-width:2;opacity:.75}
+  .model-card .card-icon-dot {fill:var(--accent)}
+  .model-card .card-index {font-size:10px;fill:#7891b8;font-weight:800}
+  .model-card .card-status-bg {fill:#1b2c3e;stroke:#304761;stroke-width:.7}
+  .model-card .card-status {font-size:10px;font-weight:900;fill:#a5bcda}
+  .model-card.active .card-bg,.model-card:focus .card-bg {fill:#172b45;stroke:var(--accent);stroke-width:2.5}
+  .model-card.active .card-aura {opacity:.58;animation:ringpulse 2.3s ease-in-out infinite}
+  .model-card.active .card-accent {opacity:1}
+  .model-card.active .card-name {fill:#fff}
+  .model-card:hover .card-bg {stroke:var(--accent)}
+  .inbox {border:1px solid #2d405e;border-radius:13px;background:#0b1729;padding:18px 20px;margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) auto;align-items:center;gap:18px}
+  .inbox .mini {color:#8197ba;font-size:10px;font-weight:800;letter-spacing:.15em}
+  .inbox .value {font-size:15px;font-weight:750;color:#e8efff;margin-top:5px}
+  .inbox .meta {font-size:11px;color:#8ba4c5;line-height:1.5}
+  .state {font-size:11px;color:#8be2c7;font-weight:800;white-space:nowrap}
+  .state.pending{color:#ffc57a}
+  .footnote {font-size:11px;color:#7289aa;line-height:1.7;margin:13px 1px 0}
+  @media(max-width:1000px) {.app{padding:16px}.inbox{grid-template-columns:1fr 1fr}.state{grid-column:1/-1}}
+  @media(max-width:640px) {h1{font-size:24px}.inbox{grid-template-columns:1fr;gap:10px}.state{grid-column:auto}.toolbar .label{width:100%}.pick{padding:8px;font-size:11px}.stage svg{min-height:270px}}
+  @media(prefers-reduced-motion:reduce){.wire .edge-flow,.core-node,.dot-live,.model-card.active .card-aura{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+ <div><div class="eyebrow">PRISMLAB / ARCHITECTURE 01 / P1</div>
+ <h1>Interactive Multimodal Routing</h1>
+ <p class="desc">Select a model to follow a luminous request path through the registry, deterministic router, selected LFM3 backend and response logger.</p></div>
+ <div class="indicator"><span class="dot-live"></span> LIVE SVG · NO VIDEO EXPORT</div>
+</div>
+<div class="toolbar" aria-label="Route selection controls">
+ <span class="label">Activate path</span>
+ <div class="pills" id="pickers"></div>
+ <button type="button" id="autobtn" class="control">Ⅱ Pause demo</button>
+ <label class="speedwrap" for="speed">Pulse speed <input type="range" id="speed" min="25" max="200" value="100" step="5"><span id="speedlabel">1.0×</span></label>
+</div>
+<div class="stage">
+<svg id="architecture" viewBox="0 0 1600 940" aria-label="PrismLab input goes to Python core, router, one of six specialized model backends, response and evaluation logger" role="img" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+   <linearGradient id="nodeFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#152943"/><stop offset="1" stop-color="#0d192c"/></linearGradient>
+   <filter id="blurGlow" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+   <filter id="lineGlow" x="-75%" y="-100%" width="250%" height="300%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+   <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M 28 0 L 0 0 0 28" fill="none" class="gridline"/></pattern>
+ </defs>
+ <rect x="0" y="0" width="1600" height="940" fill="url(#grid)"/>
+ <text x="59" y="72" class="stage-label">01 / INPUT</text>
+ <text x="302" y="72" class="stage-label">02 / PIPELINE</text>
+ <text x="568" y="72" class="stage-label">03 / ROUTING</text>
+ <text x="904" y="72" class="stage-label">04 / SIX SPECIALISTS</text>
+ <text x="1330" y="72" class="stage-label">05 / OUTPUT</text>
+ <text x="904" y="103" class="tiny">select any model card to trace its path</text>
+ <text x="58" y="845" class="tiny">Selected route is simulated · Backend inference is not executed</text>
+ <text x="58" y="870" class="tiny">Green/blue: locally tested · Others: planned integration</text>
+ <!-- Edges render first, below the nodes -->
+ <g class="wire" id="w-in" style="--wire:#63b8ff">
+     <path class="edge-base" d="M 240 481 C 255 481, 276 481, 294 481"/>
+     <path class="edge-glow" d="M 240 481 C 255 481, 276 481, 294 481"/>
+     <path class="edge-flow" d="M 240 481 C 255 481, 276 481, 294 481"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-core" style="--wire:#63b8ff">
+     <path class="edge-base" d="M 506 481 C 529 481, 536 481, 552 481"/>
+     <path class="edge-glow" d="M 506 481 C 529 481, 536 481, 552 481"/>
+     <path class="edge-flow" d="M 506 481 C 529 481, 536 481, 552 481"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-0" style="--wire:#52aaff">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 181, 890 181"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 181, 890 181"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 181, 890 181"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-0" style="--wire:#52aaff">
+     <path class="edge-base" d="M 1238 181 C 1307 181, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 181 C 1307 181, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 181 C 1307 181, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-1" style="--wire:#44dfb7">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 301, 890 301"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 301, 890 301"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 301, 890 301"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-1" style="--wire:#44dfb7">
+     <path class="edge-base" d="M 1238 301 C 1307 301, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 301 C 1307 301, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 301 C 1307 301, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-2" style="--wire:#ffbf69">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 421, 890 421"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 421, 890 421"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 421, 890 421"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-2" style="--wire:#ffbf69">
+     <path class="edge-base" d="M 1238 421 C 1307 421, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 421 C 1307 421, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 421 C 1307 421, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-3" style="--wire:#ff7dcc">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 541, 890 541"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 541, 890 541"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 541, 890 541"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-3" style="--wire:#ff7dcc">
+     <path class="edge-base" d="M 1238 541 C 1307 541, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 541 C 1307 541, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 541 C 1307 541, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-4" style="--wire:#be91ff">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 661, 890 661"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 661, 890 661"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 661, 890 661"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-4" style="--wire:#be91ff">
+     <path class="edge-base" d="M 1238 661 C 1307 661, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 661 C 1307 661, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 661 C 1307 661, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-route-5" style="--wire:#ff927c">
+     <path class="edge-base" d="M 801 481 C 850 481, 844 781, 890 781"/>
+     <path class="edge-glow" d="M 801 481 C 850 481, 844 781, 890 781"/>
+     <path class="edge-flow" d="M 801 481 C 850 481, 844 781, 890 781"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-return-5" style="--wire:#ff927c">
+     <path class="edge-base" d="M 1238 781 C 1307 781, 1269 486, 1320 486"/>
+     <path class="edge-glow" d="M 1238 781 C 1307 781, 1269 486, 1320 486"/>
+     <path class="edge-flow" d="M 1238 781 C 1307 781, 1269 486, 1320 486"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+<g class="wire" id="w-logger" style="--wire:#64d6ff">
+     <path class="edge-base" d="M 1429 540 C 1429 607, 1429 643, 1429 670"/>
+     <path class="edge-glow" d="M 1429 540 C 1429 607, 1429 643, 1429 670"/>
+     <path class="edge-flow" d="M 1429 540 C 1429 607, 1429 643, 1429 670"/>
+     <circle class="particle p0" r="5.8"/><circle class="particle p1" r="3.2"/>
+   </g>
+ <!-- Incoming payload -->
+ <g>
+ <rect class="base-shadow" x="54" y="433" width="190" height="105" rx="18"/>
+ <rect class="base-rect" x="54" y="433" width="186" height="105" rx="18"/>
+ <circle cx="82" cy="461" r="9" fill="#235b95" stroke="#73c8ff" stroke-width="2"/>
+ <text x="102" y="466" class="base-caps">USER REQUEST</text>
+ <text x="73" y="502" class="base-title">Multimodal</text>
+ <text x="73" y="523" class="base-detail">text · image · audio</text>
+ </g>
+ <!-- Pipeline -->
+ <g>
+ <rect class="base-shadow" x="294" y="433" width="212" height="105" rx="18"/>
+ <rect class="base-rect" x="294" y="433" width="212" height="105" rx="18"/>
+ <text x="314" y="464" class="base-caps">pipeline.py</text>
+ <text x="314" y="498" class="base-title">Python Core</text>
+ <text x="314" y="519" class="base-detail">parse · prepare · dispatch</text>
+ </g>
+ <!-- Router -->
+ <g>
+ <rect class="base-shadow core-node" x="553" y="409" width="254" height="152" rx="22"/>
+ <rect class="base-rect" x="553" y="409" width="254" height="152" rx="22" stroke="#64bcff"/>
+ <text x="576" y="445" class="base-caps">registry.py + router.py</text>
+ <text x="576" y="483" class="base-title" style="font-size:27px">Route Selector</text>
+ <text x="576" y="512" class="base-detail">Deterministic rules</text>
+ <rect x="573" y="531" width="214" height="16" rx="8" fill="#143556"/>
+ <text x="680" y="542.6" text-anchor="middle" style="font-size:10px;fill:#99d7ff;letter-spacing:.10em;font-weight:800">CHOOSE ONE BACKEND</text>
+ </g>
+ <!-- Models -->
+ <g class="model-card" id="model-0" data-index="0" role="button" tabindex="0" aria-label="Route through LFM3-1.7B" style="--accent:#52aaff">
+  <rect class="card-aura" x="887" y="134" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="137" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="149" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="165" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="165" r="5"/>
+  <text class="card-name" x="945" y="169">LFM3-1.7B</text>
+  <text class="card-sub" x="945" y="192">Text generation and tool requests</text>
+  <text class="card-index" x="920" y="204">01</text>
+  <rect class="card-status-bg" x="1126" y="149" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="162.6" text-anchor="middle">TESTED P1</text>
+  </g>
+<g class="model-card" id="model-1" data-index="1" role="button" tabindex="0" aria-label="Route through LFM3-VL-2B" style="--accent:#44dfb7">
+  <rect class="card-aura" x="887" y="254" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="257" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="269" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="285" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="285" r="5"/>
+  <text class="card-name" x="945" y="289">LFM3-VL-2B</text>
+  <text class="card-sub" x="945" y="312">Images, OCR and video frames</text>
+  <text class="card-index" x="920" y="324">02</text>
+  <rect class="card-status-bg" x="1126" y="269" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="282.6" text-anchor="middle">TESTED P2</text>
+  </g>
+<g class="model-card" id="model-2" data-index="2" role="button" tabindex="0" aria-label="Route through LFM3-Audio-2B" style="--accent:#ffbf69">
+  <rect class="card-aura" x="887" y="374" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="377" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="389" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="405" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="405" r="5"/>
+  <text class="card-name" x="945" y="409">LFM3-Audio-2B</text>
+  <text class="card-sub" x="945" y="432">Speech and acoustic input/output</text>
+  <text class="card-index" x="920" y="444">03</text>
+  <rect class="card-status-bg" x="1126" y="389" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="402.6" text-anchor="middle">PLANNED</text>
+  </g>
+<g class="model-card" id="model-3" data-index="3" role="button" tabindex="0" aria-label="Route through LFM3-Omni-2B" style="--accent:#ff7dcc">
+  <rect class="card-aura" x="887" y="494" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="497" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="509" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="525" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="525" r="5"/>
+  <text class="card-name" x="945" y="529">LFM3-Omni-2B</text>
+  <text class="card-sub" x="945" y="552">Vision, audio and language</text>
+  <text class="card-index" x="920" y="564">04</text>
+  <rect class="card-status-bg" x="1126" y="509" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="522.6" text-anchor="middle">PLANNED</text>
+  </g>
+<g class="model-card" id="model-4" data-index="4" role="button" tabindex="0" aria-label="Route through d1-2B" style="--accent:#be91ff">
+  <rect class="card-aura" x="887" y="614" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="617" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="629" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="645" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="645" r="5"/>
+  <text class="card-name" x="945" y="649">d1-2B</text>
+  <text class="card-sub" x="945" y="672">Typed decisions on text + pictures</text>
+  <text class="card-index" x="920" y="684">05</text>
+  <rect class="card-status-bg" x="1126" y="629" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="642.6" text-anchor="middle">PLANNED</text>
+  </g>
+<g class="model-card" id="model-5" data-index="5" role="button" tabindex="0" aria-label="Route through d1-Omni-2B" style="--accent:#ff927c">
+  <rect class="card-aura" x="887" y="734" width="356" height="94" rx="19"/>
+  <rect class="card-bg" x="891" y="737" width="347" height="88" rx="16"/>
+  <rect class="card-accent" x="891" y="749" width="3" height="64" rx="2"/>
+  <circle class="card-icon-ring" cx="920" cy="765" r="13"/>
+  <circle class="card-icon-dot" cx="920" cy="765" r="5"/>
+  <text class="card-name" x="945" y="769">d1-Omni-2B</text>
+  <text class="card-sub" x="945" y="792">Decisions including audio context</text>
+  <text class="card-index" x="920" y="804">06</text>
+  <rect class="card-status-bg" x="1126" y="749" width="99" height="19" rx="10"/>
+  <text class="card-status" x="1175.5" y="762.6" text-anchor="middle">PLANNED</text>
+  </g>
+ <!-- Output -->
+ <g>
+ <rect class="base-shadow" x="1320" y="432" width="228" height="108" rx="19"/>
+ <rect class="base-rect" x="1320" y="432" width="228" height="108" rx="19"/>
+ <text x="1342" y="466" class="base-caps">RESPONSE</text>
+ <text x="1342" y="501" class="base-title">Model Result</text>
+ <text x="1342" y="522" class="base-detail">text / speech / decision</text>
+ </g>
+ <!-- Logger -->
+ <g>
+ <rect class="base-rect" x="1310" y="670" width="242" height="108" rx="19" stroke="#376274"/>
+ <text x="1333" y="702" class="base-caps">EVALUATE</text>
+ <text x="1333" y="737" class="base-title" style="font-size:21px">Benchmark Logs</text>
+ <text x="1333" y="759" class="base-detail">latency · correctness · RAM</text>
+ </g>
+ <g>
+ <text x="58" y="913" class="subtitle">P1 / WHOLE-SYSTEM OVERVIEW</text>
+ <text x="1548" y="913" text-anchor="end" class="tiny">PrismLab / interactive schematic</text>
+ </g>
+</svg>
+</div>
+<div class="inbox" role="status" aria-live="polite">
+ <div><div class="mini">ACTIVE BACKEND</div><div class="value" id="active-name">LFM3-VL-2B</div><div class="meta" id="active-input">Image + question</div></div>
+ <div><div class="mini">EXPECTED RESPONSE FORMAT</div><div class="value" id="active-out">Image-grounded response</div><div class="meta">Animation traces routing only. No artificial benchmark claims.</div></div>
+ <div id="active-status" class="state">● TESTED LOCALLY</div>
+</div>
+<p class="footnote">This diagram is a <strong>frontend architecture simulation</strong>, not a live connection to localhost:8080/8081. Model descriptions follow Liquid AI's LFM3 launch; the local integration labels reflect the PrismLab P1/P2 work completed so far.</p>
+</div>
+<script>
+(() => {
+ 'use strict';
+ const models = [{"name": "LFM3-1.7B", "tag": "TEXT + TOOLS", "sub": "Text generation and tool requests", "status": "TESTED P1", "color": "#52aaff", "input": "Text prompt", "output": "Text / tool request", "klass": "tested"}, {"name": "LFM3-VL-2B", "tag": "VISION", "sub": "Images, OCR and video frames", "status": "TESTED P2", "color": "#44dfb7", "input": "Image + question", "output": "Image-grounded response", "klass": "tested"}, {"name": "LFM3-Audio-2B", "tag": "AUDIO", "sub": "Speech and acoustic input/output", "status": "PLANNED", "color": "#ffbf69", "input": "Audio stream", "output": "Speech / transcription", "klass": "planned"}, {"name": "LFM3-Omni-2B", "tag": "OMNI", "sub": "Vision, audio and language", "status": "PLANNED", "color": "#ff7dcc", "input": "Audio + image + text", "output": "Multimodal response", "klass": "planned"}, {"name": "d1-2B", "tag": "DECISION", "sub": "Typed decisions on text + pictures", "status": "PLANNED", "color": "#be91ff", "input": "Text + image + questions", "output": "Typed decision + probabilities", "klass": "planned"}, {"name": "d1-Omni-2B", "tag": "DECISION OMNI", "sub": "Decisions including audio context", "status": "PLANNED", "color": "#ff927c", "input": "Audio + visual + questions", "output": "Typed multimodal decision", "klass": "planned"}];
+ const picks = document.getElementById('pickers');
+ const routeNames = ['Text','Vision','Audio','Omni','d1 Vision','d1 Omni'];
+ const wires = ['w-in','w-core',...models.map((_,i)=>'w-route-'+i), ...models.map((_,i)=>'w-return-'+i),'w-logger'];
+ const g = id => document.getElementById(id);
+ let active = 1, auto = true, rate = 1, nextSwitch = performance.now()+4700;
+ let particles = [];
+ function setRoute(i) {
+  active = i;
+  document.querySelectorAll('.model-card').forEach((c,j) => c.classList.toggle('active',i===j));
+  document.querySelectorAll('.wire').forEach(w=>w.classList.remove('active'));
+  ['w-in','w-core','w-route-'+i,'w-return-'+i,'w-logger'].forEach(id=>g(id).classList.add('active'));
+  document.querySelectorAll('.pick').forEach((b,j) => {b.classList.toggle('active',j===i); b.setAttribute('aria-pressed',String(i===j));});
+  g('active-name').textContent = models[i].name;
+  g('active-input').textContent = 'Input: '+models[i].input;
+  g('active-out').textContent = models[i].output;
+  g('active-status').textContent = models[i].klass === 'tested' ? '● TESTED LOCALLY' : '◌ PLANNED INTEGRATION';
+  g('active-status').classList.toggle('pending',models[i].klass!=='tested');
+  nextSwitch = performance.now()+4700;
+ }
+ for (let i=0;i<models.length;i++) {
+  const b=document.createElement('button');b.type='button';b.className='pick';b.textContent=routeNames[i];
+  b.style.setProperty('--pill',models[i].color);
+  b.addEventListener('click',()=>{auto=false;setPlayState();setRoute(i)});
+  picks.appendChild(b);
+  const card=g('model-'+i);
+  card.addEventListener('click',()=>{auto=false;setPlayState();setRoute(i)});
+  card.addEventListener('keydown', e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();auto=false;setPlayState();setRoute(i)}});
+ }
+ function setPlayState(){ g('autobtn').textContent=auto?'Ⅱ Pause demo':'▶ Auto demo'; }
+ g('autobtn').addEventListener('click',()=>{auto=!auto;nextSwitch=performance.now()+4700;setPlayState()});
+ g('speed').addEventListener('input',e=>{rate=Number(e.target.value)/100;g('speedlabel').textContent=rate.toFixed(1)+'×';});
+ setRoute(1);
+ document.querySelectorAll('.wire').forEach((w) => {
+  const path=w.querySelector('.edge-base');
+  particles.push({w,path,length:path.getTotalLength(),dots:[...w.querySelectorAll('.particle')]});
+ });
+ let t0=performance.now();
+ function frame(now){
+  const elapsed=(now-t0)/1000;
+  if(auto && now>=nextSwitch)setRoute((active+1)%models.length);
+  // Each glowing dot travels along the EXACT SVG path geometry.
+  for (let j=0;j<particles.length;j++){
+   const p=particles[j];
+   if(!p.w.classList.contains('active'))continue;
+   for (let k=0;k<p.dots.length;k++){
+    const progress=((elapsed*0.20*rate)+(j*0.11)+(k*0.48))%1;
+    const pt=p.path.getPointAtLength(progress*p.length);
+    p.dots[k].setAttribute('cx',pt.x.toFixed(2));
+    p.dots[k].setAttribute('cy',pt.y.toFixed(2));
+   }
+  }
+  requestAnimationFrame(frame);
+ }
+ requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Grouped Query Attention (GQA) & Rotary Position Embedding",
+    "output": "chap-1/assets/linkedin/gqa-mechanism.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/prataykarali/Flowstate.git",
+      "revision": "b0b91f5f6cbc19146f6c1c83f1cb21a4854b8e81",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "input_x",
+      "type": "external",
+      "label": "Input Hidden State",
+      "sublabel": "x: [B, T, 128]",
+      "pos": [40, 200],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 163, "end_line": 163, "label": "GQA input x" }
+      ]
+    },
+    {
+      "id": "pre_norm",
+      "type": "backend",
+      "label": "Pre-RMSNorm",
+      "sublabel": "RMSNorm(128, eps=1e-6)",
+      "pos": [210, 200],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 149, "end_line": 149, "label": "RMSNorm" }
+      ]
+    },
+    {
+      "id": "q_proj",
+      "type": "backend",
+      "label": "Query Projection",
+      "sublabel": "4 heads x 32 dim (128)",
+      "tag": "4 Query Heads",
+      "pos": [380, 80],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 77, "end_line": 81, "label": "q_proj linear" }
+      ]
+    },
+    {
+      "id": "k_proj",
+      "type": "backend",
+      "label": "Key Projection",
+      "sublabel": "2 heads x 32 dim (64)",
+      "tag": "2 KV Heads",
+      "pos": [380, 200],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 83, "end_line": 87, "label": "k_proj linear" }
+      ]
+    },
+    {
+      "id": "v_proj",
+      "type": "backend",
+      "label": "Value Projection",
+      "sublabel": "2 heads x 32 dim (64)",
+      "tag": "2 KV Heads",
+      "pos": [380, 320],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 89, "end_line": 93, "label": "v_proj linear" }
+      ]
+    },
+    {
+      "id": "rope_module",
+      "type": "backend",
+      "label": "Rotary Embedding (RoPE)",
+      "sublabel": "Pairwise frequency rotation",
+      "tag": "apply_rope",
+      "pos": [560, 140],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 114, "end_line": 141, "label": "apply_rope definition" }
+      ]
+    },
+    {
+      "id": "kv_sharing",
+      "type": "backend",
+      "label": "KV Head Sharing",
+      "sublabel": "repeat_interleave(2, dim=1)",
+      "tag": "2 KV -> 4 Q",
+      "pos": [560, 280],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 174, "end_line": 177, "label": "repeat_interleave" }
+      ]
+    },
+    {
+      "id": "causal_attn",
+      "type": "backend",
+      "label": "Causal Softmax Attention",
+      "sublabel": "scores / sqrt(32) + tril mask",
+      "tag": "Softmax",
+      "pos": [750, 200],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 180, "end_line": 194, "label": "Scaled causal attention" }
+      ]
+    },
+    {
+      "id": "context_merge",
+      "type": "backend",
+      "label": "Weighted Value Merge",
+      "sublabel": "context = attn @ v",
+      "tag": "[B, T, 128]",
+      "pos": [940, 200],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 196, "end_line": 202, "label": "context merge" }
+      ]
+    },
+    {
+      "id": "o_proj",
+      "type": "backend",
+      "label": "Output Linear",
+      "sublabel": "Linear(128, 128) + Residual",
+      "pos": [1120, 200],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 204, "end_line": 208, "label": "o_proj & residual" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Grouped Query Attention Sublayer (GQAAttention Module)",
+      "wraps": ["pre_norm", "q_proj", "k_proj", "v_proj", "rope_module", "kv_sharing", "causal_attn", "context_merge", "o_proj"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "x_to_norm",
+      "from": "input_x",
+      "to": "pre_norm",
+      "label": "input tokens",
+      "variant": "emphasis"
+    },
+    {
+      "id": "norm_to_q",
+      "from": "pre_norm",
+      "to": "q_proj",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "norm_to_k",
+      "from": "pre_norm",
+      "to": "k_proj"
+    },
+    {
+      "id": "norm_to_v",
+      "from": "pre_norm",
+      "to": "v_proj",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "q_to_rope",
+      "from": "q_proj",
+      "to": "rope_module",
+      "label": "Q heads",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "k_to_rope",
+      "from": "k_proj",
+      "to": "rope_module",
+      "label": "K heads",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "v_to_sharing",
+      "from": "v_proj",
+      "to": "kv_sharing",
+      "label": "V heads",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "rope_to_sharing",
+      "from": "rope_module",
+      "to": "kv_sharing",
+      "label": "rotated K",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "rope_to_attn",
+      "from": "rope_module",
+      "to": "causal_attn",
+      "label": "rotated Q",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "sharing_to_attn",
+      "from": "kv_sharing",
+      "to": "causal_attn",
+      "label": "repeated K, V",
+      "fromSide": "right",
+      "toSide": "bottom"
+    },
+    {
+      "id": "attn_to_merge",
+      "from": "causal_attn",
+      "to": "context_merge",
+      "label": "attn weights",
+      "variant": "emphasis"
+    },
+    {
+      "id": "merge_to_out",
+      "from": "context_merge",
+      "to": "o_proj",
+      "label": "context out",
+      "variant": "emphasis"
+    },
+    {
+      "id": "skip_residual",
+      "from": "input_x",
+      "to": "o_proj",
+      "label": "identity residual skip",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "GQA Head Sharing",
+      "items": [
+        "4 query heads share 2 key/value heads, reducing KV cache and projection parameter footprint by 50%",
+        "repeat_interleave broadcasts the 2 KV heads across adjacent query heads before dot-product attention",
+        "Head dimension is 32; total model dimension remains 4 * 32 = 128"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Rotary Position Embedding (RoPE)",
+      "items": [
+        "Rotates adjacent feature pairs in Q and K by position-dependent angles with base frequency 10000.0",
+        "Preserves vector norms while encoding relative token distance directly into the attention inner product",
+        "Position 0 undergoes zero rotation (identity), preserving first-token representation"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Causality & Decoupled State",
+      "items": [
+        "Lower-triangular causal mask enforces strict autoregressive factorization (future tokens masked to -inf)",
+        "Chapter 1 tests verify prefix-invariance: modifying future tokens does not alter past output logits",
+        "Operates as Layer 3 in the hybrid pipeline, complementing the 3 recurrent GatedDeltaNet layers"
+      ]
+    }
+  ]
+}

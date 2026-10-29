@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GatedDeltaNet Recurrent Mechanism & Associative Memory Flow",
+    "output": "chap-1/assets/linkedin/recurrent-memory-flow.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/prataykarali/Flowstate.git",
+      "revision": "b0b91f5f6cbc19146f6c1c83f1cb21a4854b8e81",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "input_norm",
+      "type": "backend",
+      "label": "RMSNorm Input",
+      "sublabel": "h = RMSNorm(x) [B, T, 128]",
+      "pos": [40, 200],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 242, "end_line": 242, "label": "RMSNorm pre-norm" }
+      ]
+    },
+    {
+      "id": "qkv_proj",
+      "type": "backend",
+      "label": "Q, K, V Projections",
+      "sublabel": "Linear(128, 128) + L2 Norm",
+      "pos": [260, 100],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 245, "end_line": 251, "label": "q, k, v projections" }
+      ]
+    },
+    {
+      "id": "gating_network",
+      "type": "security",
+      "label": "Gating Projections",
+      "sublabel": "alpha (decay), beta (write), z (out)",
+      "pos": [260, 280],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 254, "end_line": 258, "label": "decay, beta, z gates" }
+      ]
+    },
+    {
+      "id": "state_decay",
+      "type": "database",
+      "label": "State Decay",
+      "sublabel": "S_decayed = alpha * S_{t-1}",
+      "tag": "S: (H, 32, 32)",
+      "pos": [480, 280],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 272, "end_line": 275, "label": "Memory decay" }
+      ]
+    },
+    {
+      "id": "delta_correction",
+      "type": "backend",
+      "label": "Delta Prediction Error",
+      "sublabel": "delta = v_t - (k_t @ S)",
+      "tag": "v_hat prediction",
+      "pos": [480, 100],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 278, "end_line": 284, "label": "Delta rule error" }
+      ]
+    },
+    {
+      "id": "state_update",
+      "type": "database",
+      "label": "Associative Update",
+      "sublabel": "S = S + beta * (k (x) delta)",
+      "tag": "Rank-1 update",
+      "pos": [700, 280],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 286, "end_line": 291, "label": "Associative state update" }
+      ]
+    },
+    {
+      "id": "query_readout",
+      "type": "backend",
+      "label": "Query Readout",
+      "sublabel": "y = q_t @ S_updated",
+      "pos": [700, 100],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 294, "end_line": 296, "label": "Updated memory readout" }
+      ]
+    },
+    {
+      "id": "gated_output",
+      "type": "backend",
+      "label": "Gated Output",
+      "sublabel": "x + Linear(y * z_t)",
+      "tag": "Output projection",
+      "pos": [920, 100],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 299, "end_line": 308, "label": "Output gate & residual" }
+      ]
+    },
+    {
+      "id": "interference_bench",
+      "type": "database",
+      "label": "Overlapping Keys",
+      "sublabel": "2D Keys: 1.0126 L2 Error",
+      "tag": "Interference",
+      "pos": [260, 440],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 230, "end_line": 260, "label": "Overlapping keys test" }
+      ]
+    },
+    {
+      "id": "orthogonal_bench",
+      "type": "database",
+      "label": "Orthogonal / Slots",
+      "sublabel": "3D Keys: 0.0000 L2 Error",
+      "tag": "Exact Retrieval",
+      "pos": [530, 440],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 262, "end_line": 275, "label": "Orthogonal keys test" }
+      ]
+    },
+    {
+      "id": "confidence_bench",
+      "type": "security",
+      "label": "Confidence Gate",
+      "sublabel": "Cosine tau=0.80 Abstention",
+      "tag": "Noise Robustness",
+      "pos": [800, 440],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 465, "end_line": 492, "label": "Confidence gating test" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "GatedDeltaNet Recurrent Token-Mixing Sublayer (Chapter 1 Code)",
+      "wraps": ["input_norm", "qkv_proj", "gating_network", "state_decay", "delta_correction", "state_update", "query_readout", "gated_output"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Chapter 2 Standalone Key-Value Research & Benchmarks (External Experiments)",
+      "wraps": ["interference_bench", "orthogonal_bench", "confidence_bench"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "norm_to_qkv",
+      "from": "input_norm",
+      "to": "qkv_proj",
+      "label": "h features",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "norm_to_gates",
+      "from": "input_norm",
+      "to": "gating_network",
+      "label": "gate logits",
+      "fromSide": "bottom",
+      "toSide": "left"
+    },
+    {
+      "id": "gates_to_decay",
+      "from": "gating_network",
+      "to": "state_decay",
+      "label": "alpha factor",
+      "variant": "emphasis"
+    },
+    {
+      "id": "qkv_to_delta",
+      "from": "qkv_proj",
+      "to": "delta_correction",
+      "label": "k_t, v_t keys/values",
+      "variant": "emphasis"
+    },
+    {
+      "id": "decay_to_delta",
+      "from": "state_decay",
+      "to": "delta_correction",
+      "label": "decayed S",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "delta_to_update",
+      "from": "delta_correction",
+      "to": "state_update",
+      "label": "error delta",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "gates_to_update",
+      "from": "gating_network",
+      "to": "state_update",
+      "label": "beta rate",
+      "variant": "emphasis"
+    },
+    {
+      "id": "update_to_readout",
+      "from": "state_update",
+      "to": "query_readout",
+      "label": "updated S",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "qkv_to_readout",
+      "from": "qkv_proj",
+      "to": "query_readout",
+      "label": "query q_t",
+      "fromSide": "top",
+      "toSide": "top"
+    },
+    {
+      "id": "readout_to_gated",
+      "from": "query_readout",
+      "to": "gated_output",
+      "label": "memory y",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gates_to_out",
+      "from": "gating_network",
+      "to": "gated_output",
+      "label": "gate z",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "id": "interf_to_ortho",
+      "from": "interference_bench",
+      "to": "orthogonal_bench",
+      "label": "orthogonal fix",
+      "route": "straight"
+    },
+    {
+      "id": "ortho_to_conf",
+      "from": "orthogonal_bench",
+      "to": "confidence_bench",
+      "label": "noise robustness",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Recurrent Associative Cycle",
+      "items": [
+        "Normalized hidden state h projects into key k, value v, query q, and gating scalars (alpha, beta, z)",
+        "Memory decay fades past matrix: S = alpha * S. Delta prediction subtracts predicted value v_hat = k @ S",
+        "Memory update adds outer product: S += beta * (k (x) delta). Output query reads updated state: y = q @ S"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chapter 2 KV Research Results",
+      "items": [
+        "Overlapping key directions create severe retrieval interference (L2 error = 1.0126 in 2D synthetic test)",
+        "Orthogonal keys and independent vector slots yield exact 0.0000 retrieval error in controlled tests",
+        "Storage trade-off: fixed matrix is 36 bytes (constant); orthogonal state scales linearly with slot count"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Robustness & Limitations",
+      "items": [
+        "Gaussian query noise degrades linear retrieval (L2 error rises from 0.0 to 1.7737 at sigma=1.0)",
+        "Cosine confidence gating (tau=0.80) abstains on ambiguous queries, increasing accepted accuracy to 73.8%",
+        "Standalone synthetic experiments: not integrated into the trained neural decoder"
+      ]
+    }
+  ]
+}

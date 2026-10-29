@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "1959bc69-4664-4fdb-8cb6-18215aa29b61",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+  "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+  "specification": {
+    "sha256": "2ac808b03be2d409503d02facf7f64cbcf74e09028e0dbd01fda8809aab49e2e",
+    "bytes": 8252
+  },
+  "artifact": {
+    "sha256": "3bdecfcca3324b6116d1b4c81caff607ac3e05ef2b27c023bdf52cda36f3bfb3",
+    "bytes": 859502
+  }
+}

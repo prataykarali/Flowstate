@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "FlowState Δ — Mini Hybrid Language Model & Associative Memory",
+    "output": "chap-1/assets/linkedin/flowstate-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/prataykarali/Flowstate.git",
+      "revision": "b0b91f5f6cbc19146f6c1c83f1cb21a4854b8e81",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "token_input",
+      "type": "external",
+      "label": "Byte Token IDs",
+      "sublabel": "UTF-8 Bytes [0..255]",
+      "pos": [40, 180],
+      "size": [130, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 9, "end_line": 9, "label": "vocab_size 256" }
+      ]
+    },
+    {
+      "id": "embedding",
+      "type": "backend",
+      "label": "Byte Embedding",
+      "sublabel": "nn.Embedding(256, 128)",
+      "pos": [210, 180],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 332, "end_line": 334, "label": "Embedding lookup" }
+      ]
+    },
+    {
+      "id": "recurrent_blocks",
+      "type": "backend",
+      "label": "3x GatedDeltaNet",
+      "sublabel": "Recurrent Blocks 0..2",
+      "tag": "S: (B, H, 32, 32)",
+      "pos": [400, 180],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 337, "end_line": 340, "label": "3 GatedDeltaNet blocks" }
+      ]
+    },
+    {
+      "id": "gqa_block",
+      "type": "backend",
+      "label": "1x Causal GQA",
+      "sublabel": "Block 3 (4 Q, 2 KV)",
+      "tag": "RoPE + Mask",
+      "pos": [600, 180],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 341, "end_line": 341, "label": "GQAAttention block" }
+      ]
+    },
+    {
+      "id": "swiglu_ffn",
+      "type": "backend",
+      "label": "FFNResidual",
+      "sublabel": "RMSNorm + SwiGLU(256)",
+      "pos": [500, 60],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 53, "end_line": 67, "label": "FFNResidual module" }
+      ]
+    },
+    {
+      "id": "final_norm",
+      "type": "backend",
+      "label": "Final RMSNorm",
+      "sublabel": "d_model=128, eps=1e-6",
+      "pos": [790, 180],
+      "size": [130, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 349, "end_line": 349, "label": "final_norm" }
+      ]
+    },
+    {
+      "id": "lm_head",
+      "type": "backend",
+      "label": "Linear Head",
+      "sublabel": "Linear(128, 256)",
+      "pos": [970, 180],
+      "size": [130, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 351, "end_line": 355, "label": "lm_head" }
+      ]
+    },
+    {
+      "id": "logits_output",
+      "type": "external",
+      "label": "Logits [B, T, 256]",
+      "sublabel": "Next-token prediction",
+      "pos": [1150, 180],
+      "size": [130, 60],
+      "sources": [
+        { "path": "chap-1/mini_qwen.py", "line": 365, "end_line": 367, "label": "logits return" }
+      ]
+    },
+    {
+      "id": "exp_a_delta",
+      "type": "database",
+      "label": "Exp A: Delta Memory",
+      "sublabel": "Fixed matrix S (36B)",
+      "tag": "Overwriting",
+      "pos": [60, 360],
+      "size": [140, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 153, "end_line": 173, "label": "Delta rule update" }
+      ]
+    },
+    {
+      "id": "exp_b_orthogonal",
+      "type": "database",
+      "label": "Exp B: Orthogonal",
+      "sublabel": "3x3 matrix & slots (36B)",
+      "tag": "Zero Error",
+      "pos": [320, 360],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 230, "end_line": 274, "label": "Orthogonal separation" }
+      ]
+    },
+    {
+      "id": "exp_c_variable",
+      "type": "database",
+      "label": "Exp C: Variable Size",
+      "sublabel": "Dynamic (64B) / Padded (120B)",
+      "tag": "Dim 3, 5, 8",
+      "pos": [590, 360],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 306, "end_line": 340, "label": "Variable length" }
+      ]
+    },
+    {
+      "id": "exp_d_confidence",
+      "type": "security",
+      "label": "Exp D: Confidence",
+      "sublabel": "Cosine threshold (tau=0.80)",
+      "tag": "Abstention",
+      "pos": [860, 360],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 465, "end_line": 492, "label": "Confidence gating" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "MiniHybridLM 4-Layer Decoder Pipeline (Chapter 1)",
+      "wraps": ["embedding", "recurrent_blocks", "gqa_block", "swiglu_ffn", "final_norm", "lm_head"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Chapter 2 Experimental Foundations & Associative Memory (Standalone / Isolated)",
+      "wraps": ["exp_a_delta", "exp_b_orthogonal", "exp_c_variable", "exp_d_confidence"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "tok_to_emb",
+      "from": "token_input",
+      "to": "embedding",
+      "label": "token_ids",
+      "variant": "emphasis"
+    },
+    {
+      "id": "emb_to_rec",
+      "from": "embedding",
+      "to": "recurrent_blocks",
+      "label": "[B, T, 128]",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rec_to_gqa",
+      "from": "recurrent_blocks",
+      "to": "gqa_block",
+      "label": "recurrent out",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sublayer_ffn",
+      "from": "recurrent_blocks",
+      "to": "swiglu_ffn",
+      "label": "sublayer FFN",
+      "variant": "default",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "ffn_return",
+      "from": "swiglu_ffn",
+      "to": "gqa_block",
+      "label": "+ residual",
+      "variant": "default",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "gqa_to_norm",
+      "from": "gqa_block",
+      "to": "final_norm",
+      "label": "attended out",
+      "variant": "emphasis"
+    },
+    {
+      "id": "norm_to_lm",
+      "from": "final_norm",
+      "to": "lm_head",
+      "label": "normed [B,T,128]",
+      "variant": "emphasis"
+    },
+    {
+      "id": "lm_to_out",
+      "from": "lm_head",
+      "to": "logits_output",
+      "label": "W_lm @ x",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ch1_inspires_a",
+      "from": "recurrent_blocks",
+      "to": "exp_a_delta",
+      "label": "state math study",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "exp_a_to_b",
+      "from": "exp_a_delta",
+      "to": "exp_b_orthogonal",
+      "label": "key interference",
+      "route": "straight"
+    },
+    {
+      "id": "exp_b_to_c",
+      "from": "exp_b_orthogonal",
+      "to": "exp_c_variable",
+      "label": "multi-dim value",
+      "route": "straight"
+    },
+    {
+      "id": "exp_c_to_d",
+      "from": "exp_c_variable",
+      "to": "exp_d_confidence",
+      "label": "noisy queries",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Chapter 1 Trained Decoder",
+      "items": [
+        "4-layer mini hybrid: 3 GatedDeltaNet recurrent layers + 1 causal GQA layer",
+        "RMSNorm pre-normalization, SwiGLU feed-forward, and residual connections throughout",
+        "256-byte vocabulary with 128 hidden dimension; next-token cross-entropy objective"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chapter 2 Standalone KV Research",
+      "items": [
+        "Component-level investigation of associative memory and delta-rule updates",
+        "Overlapping keys introduce interference (L2 error ~1.01); orthogonal keys & slots eliminate it in synthetic tests",
+        "Chapter 2 external memory mechanisms are standalone benchmarks, NOT integrated into the Chapter 1 decoder"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Educational Status & Limits",
+      "items": [
+        "Educational Qwen3.5-inspired architecture; not official Qwen3.5 or Liquid AI code",
+        "Zero-error results reflect synthetic, idealized one-hot keys and exclude runtime index overhead",
+        "Confidence gating (threshold 0.80) trades coverage (100% -> 45%) for accepted accuracy under noise"
+      ]
+    }
+  ]
+}

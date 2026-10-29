@@ -1,0 +1,239 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "FlowState Δ — Training Optimization vs Generalization Failure",
+    "output": "chap-1/assets/linkedin/training-vs-generalization.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/prataykarali/Flowstate.git",
+      "revision": "b0b91f5f6cbc19146f6c1c83f1cb21a4854b8e81",
+      "provider": "github",
+      "link_mode": "web"
+    }
+  },
+  "components": [
+    {
+      "id": "train_data",
+      "type": "external",
+      "label": "Training Corpus",
+      "sublabel": "\"A dragon guards a tiny library.\"",
+      "pos": [40, 100],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/train_hybrid.py", "line": 12, "end_line": 18, "label": "Training sentence" }
+      ]
+    },
+    {
+      "id": "adamw_opt",
+      "type": "backend",
+      "label": "AdamW Optimizer",
+      "sublabel": "lr=1e-3, steps=201, clip=1.0",
+      "tag": "Cross-Entropy",
+      "pos": [300, 100],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/train_hybrid.py", "line": 20, "end_line": 49, "label": "AdamW training loop" }
+      ]
+    },
+    {
+      "id": "loss_curve",
+      "type": "backend",
+      "label": "99.96% Loss Reduction",
+      "sublabel": "Loss: 5.6243 -> 0.0023",
+      "tag": "Step 0 -> 200",
+      "pos": [560, 100],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/README.md", "line": 104, "end_line": 113, "label": "Observed training loss" }
+      ]
+    },
+    {
+      "id": "prompt_seen",
+      "type": "external",
+      "label": "Seen Prompt",
+      "sublabel": "\"A dragon\"",
+      "pos": [40, 240],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/train_hybrid.py", "line": 55, "end_line": 63, "label": "Prompt evaluation" }
+      ]
+    },
+    {
+      "id": "memorization_out",
+      "type": "backend",
+      "label": "Exact Memorization",
+      "sublabel": "\"guards a tiny library.\"",
+      "tag": "Greedy Decode",
+      "pos": [290, 240],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-1/README.md", "line": 117, "end_line": 122, "label": "Autoregressive generation" }
+      ]
+    },
+    {
+      "id": "prompt_unseen",
+      "type": "external",
+      "label": "Unseen Prompt",
+      "sublabel": "\"A rabbit\"",
+      "pos": [560, 240],
+      "size": [150, 60],
+      "sources": [
+        { "path": "chap-1/README.md", "line": 129, "end_line": 130, "label": "Generalization test" }
+      ]
+    },
+    {
+      "id": "failure_out",
+      "type": "security",
+      "label": "Generalization Collapse",
+      "sublabel": "\"iny library.y.y.y libra\"",
+      "tag": "Incoherent",
+      "pos": [810, 240],
+      "size": [170, 60],
+      "sources": [
+        { "path": "chap-1/README.md", "line": 131, "end_line": 135, "label": "Generalization failure" }
+      ]
+    },
+    {
+      "id": "lr_study_setup",
+      "type": "database",
+      "label": "Multi-Sentence Setup",
+      "sublabel": "4 train + 2 held-out texts",
+      "tag": "5 Seeds: 7..123",
+      "pos": [40, 380],
+      "size": [160, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 90, "end_line": 107, "label": "Multi-seed sentences" }
+      ]
+    },
+    {
+      "id": "lr_001_opt",
+      "type": "backend",
+      "label": "LR = 0.001 (Optimal)",
+      "sublabel": "Mean Val: 0.4083 +/- 0.042",
+      "tag": "5/5 Seeds Won",
+      "pos": [300, 380],
+      "size": [170, 60],
+      "sources": [
+        { "path": "chap-2/results/lr_validation_50steps.json", "line": 22, "end_line": 32, "label": "LR 0.001 results" }
+      ]
+    },
+    {
+      "id": "lr_01_subopt",
+      "type": "security",
+      "label": "LR = 0.01 (Suboptimal)",
+      "sublabel": "Mean Val: 0.5915 +/- 0.055",
+      "tag": "Higher Overfitting",
+      "pos": [570, 380],
+      "size": [170, 60],
+      "sources": [
+        { "path": "chap-2/results/lr_validation_50steps.json", "line": 33, "end_line": 43, "label": "LR 0.01 results" }
+      ]
+    },
+    {
+      "id": "empirical_conclusion",
+      "type": "backend",
+      "label": "Optimization Law",
+      "sublabel": "Fast fit does not imply generalization",
+      "tag": "Delta Loss 0.183",
+      "pos": [840, 380],
+      "size": [180, 60],
+      "sources": [
+        { "path": "chap-2/README.md", "line": 124, "end_line": 128, "label": "LR observations" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Chapter 1 Single-Sentence Optimization & Generalization Failure",
+      "wraps": ["train_data", "adamw_opt", "loss_curve", "prompt_seen", "memorization_out", "prompt_unseen", "failure_out"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Chapter 2 Controlled Learning-Rate Sensitivity (5 Seeds, 50 Steps)",
+      "wraps": ["lr_study_setup", "lr_001_opt", "lr_01_subopt", "empirical_conclusion"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "data_to_opt",
+      "from": "train_data",
+      "to": "adamw_opt",
+      "label": "tokens",
+      "route": "straight"
+    },
+    {
+      "id": "opt_to_loss",
+      "from": "adamw_opt",
+      "to": "loss_curve",
+      "label": "201 steps",
+      "route": "straight"
+    },
+    {
+      "id": "seen_to_mem",
+      "from": "prompt_seen",
+      "to": "memorization_out",
+      "label": "greedy decode",
+      "route": "straight"
+    },
+    {
+      "id": "unseen_to_fail",
+      "from": "prompt_unseen",
+      "to": "failure_out",
+      "label": "greedy decode",
+      "route": "straight",
+      "variant": "security"
+    },
+    {
+      "id": "setup_to_lr001",
+      "from": "lr_study_setup",
+      "to": "lr_001_opt",
+      "label": "eval 5 seeds",
+      "route": "straight"
+    },
+    {
+      "id": "lr001_to_lr01",
+      "from": "lr_001_opt",
+      "to": "lr_01_subopt",
+      "label": "+0.1832 val gap",
+      "route": "straight"
+    },
+    {
+      "id": "lr_to_conclusion",
+      "from": "lr_01_subopt",
+      "to": "empirical_conclusion",
+      "label": "paired diff",
+      "route": "straight"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Single-Sentence Memorization",
+      "items": [
+        "Single-sentence training achieves 99.96% loss reduction (5.6243 down to 0.0023) after 200 AdamW steps",
+        "Autoregressive generation on seen prefix 'A dragon' reproduces the memorized sentence perfectly",
+        "Demonstrates architectural capability to store and reproduce sequence tokens end-to-end"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Generalization Limitations",
+      "items": [
+        "Unseen prompt 'A rabbit' causes immediate repetition collapse: 'A rabbitiny library.y.y.y libra'",
+        "Near-zero training loss does not imply linguistic generalization or robust language modeling",
+        "Highlights the fundamental distinction between neural memorization and true generalization"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Chapter 2 LR Findings",
+      "items": [
+        "Across 5 random seeds (7, 21, 42, 99, 123), LR = 0.001 achieved lower validation loss in all 5/5 trials",
+        "Mean validation loss: 0.4083 (LR=0.001) vs 0.5915 (LR=0.01) after 50 optimization updates",
+        "Faster initial training optimization does not translate to better held-out generalization"
+      ]
+    }
+  ]
+}

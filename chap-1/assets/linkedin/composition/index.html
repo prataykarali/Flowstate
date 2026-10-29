@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg-deep: #050811;
+        --cyan-glow: #38bdf8;
+        --violet-glow: #c084fc;
+        --emerald-glow: #34d399;
+        --rose-glow: #fb7185;
+        --amber-glow: #fbbf24;
+        --text-pure: #ffffff;
+        --text-dim: #94a3b8;
+        --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-mono: ui-monospace, Menlo, Monaco, Consolas, monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg-deep);
+        font-family: var(--font-main);
+        color: var(--text-pure);
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: #000000;
+      }
+
+      /* Ambient Technical Grid */
+      .ambient-grid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+          radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.06) 0%, transparent 75%),
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 100% 100%, 75px 75px, 75px 75px;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .scene {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      /* Backdrop image treatment */
+      .bg-layer {
+        position: absolute;
+        top: -40px;
+        left: -40px;
+        width: 2000px;
+        height: 1160px;
+        object-fit: cover;
+        opacity: 0.35;
+        filter: saturate(1.2) contrast(1.15);
+      }
+      .bg-vignette {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1920px;
+        height: 1080px;
+        background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(5, 8, 17, 0.94) 85%);
+        z-index: 1;
+      }
+
+      .scene-content {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        height: 100%;
+        padding: 60px 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      /* Glassmorphism card */
+      .glass-card {
+        background: rgba(13, 20, 36, 0.85);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      }
+
+      /* Header Bar */
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 18px;
+      }
+      .scene-title {
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--text-pure);
+      }
+
+      /* Micro badges */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 9999px;
+        font-family: var(--font-mono);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid;
+      }
+      .pill-cyan { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.5); }
+      .pill-violet { background: rgba(192, 132, 252, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.5); }
+      .pill-emerald { background: rgba(52, 211, 153, 0.15); color: #34d399; border-color: rgba(52, 211, 153, 0.5); }
+      .pill-rose { background: rgba(251, 113, 133, 0.15); color: #fb7185; border-color: rgba(251, 113, 133, 0.5); }
+      .pill-amber { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border-color: rgba(251, 191, 36, 0.5); }
+
+      /* Kinetic typography */
+      .hero-heading {
+        font-size: 64px;
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -0.03em;
+        text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+      }
+      .stat-number {
+        font-family: var(--font-mono);
+        font-size: 68px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      /* Mathematical formula boxes */
+      .formula-box {
+        font-family: var(--font-mono);
+        font-size: 23px;
+        color: #f1f5f9;
+        background: rgba(0, 0, 0, 0.65);
+        padding: 16px 22px;
+        border-radius: 12px;
+        border-left: 4px solid var(--cyan-glow);
+      }
+
+      /* Plot Container */
+      .plot-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: #000;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+        position: relative;
+      }
+      .plot-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      /* Animated SVG Matrix Grid */
+      .matrix-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        width: 280px;
+        margin: auto;
+      }
+      .matrix-cell {
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 8px;
+        padding: 12px 0;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--cyan-glow);
+      }
+
+      /* Dynamic Callout Highlight */
+      .data-ring {
+        position: absolute;
+        border: 2px solid var(--rose-glow);
+        border-radius: 12px;
+        box-shadow: 0 0 25px rgba(251, 113, 133, 0.65);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="34"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div class="ambient-grid"></div>
+
+      <!-- AUDIO BED & SYNCHRONIZED SOUND EFFECTS -->
+      <audio id="audio-music" src="assets/music.mp3" class="clip" data-start="0" data-duration="34" data-volume="0.35"></audio>
+      <audio id="sfx-0" src="assets/sfx_drop.ogg" class="clip" data-start="0.1" data-duration="1.5" data-volume="0.65"></audio>
+      <audio id="sfx-1" src="assets/sfx_switch.ogg" class="clip" data-start="4.0" data-duration="1.0" data-volume="0.55"></audio>
+      <audio id="sfx-2" src="assets/sfx_switch.ogg" class="clip" data-start="9.0" data-duration="1.0" data-volume="0.55"></audio>
+      <audio id="sfx-3" src="assets/sfx_click.ogg" class="clip" data-start="17.0" data-duration="1.0" data-volume="0.55"></audio>
+      <audio id="sfx-4" src="assets/sfx_switch.ogg" class="clip" data-start="24.0" data-duration="1.0" data-volume="0.55"></audio>
+      <audio id="sfx-5" src="assets/sfx_drop.ogg" class="clip" data-start="30.0" data-duration="1.5" data-volume="0.65"></audio>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 1: THE OPENING HOOK (0.0s – 4.0s)                        -->
+      <!-- ============================================================== -->
+      <div id="scene1" class="scene clip" data-start="0" data-duration="4.0">
+        <img id="s1-bg" class="bg-layer" src="assets/chip_macro_2.jpg" alt="Processor Macro" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content" style="justify-content: center; align-items: flex-start; max-width: 1440px; margin: auto;">
+          <div id="s1-tag" class="pill pill-cyan" style="margin-bottom: 24px;">FlowState Δ // AI Research Investigation</div>
+          <h1 id="s1-title" class="hero-heading">
+            What happens when<br />
+            <span style="color: var(--cyan-glow);">neural memory</span> starts forgetting?
+          </h1>
+          <div id="s1-sub" style="font-size: 24px; color: var(--text-dim); margin-top: 24px; max-width: 950px; line-height: 1.4;">
+            An empirical investigation into recurrent state updating, key interference, and bounded associative recall in PyTorch.
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 2: WHAT WAS IMPLEMENTED — MINI HYBRID DECODER (4.0s – 9.0s) -->
+      <!-- ============================================================== -->
+      <div id="scene2" class="scene clip" data-start="4.0" data-duration="5.0">
+        <img id="s2-bg" class="bg-layer" src="assets/model_flow.png" alt="Model Architecture" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content">
+          <div class="top-bar">
+            <div id="s2-header" class="scene-title">
+              FlowState <span style="color: var(--cyan-glow);">MiniHybridLM</span> Decoder Architecture
+            </div>
+            <div class="pill pill-violet">Chapter 1 Verified Implementation</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 50px; align-items: center; margin: 24px 0;">
+            <!-- Left: Architecture Blocks -->
+            <div id="s2-blocks" class="glass-card" style="padding: 34px; display: flex; flex-direction: column; gap: 14px;">
+              <div style="font-size: 18px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">
+                4-Layer Hybrid Transformer-RNN Backbone
+              </div>
+              <div id="l0" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: rgba(56, 189, 248, 0.12); border-left: 4px solid var(--cyan-glow); border-radius: 8px;">
+                <span style="font-weight: 600; font-size: 19px;">Layers 0–2: GatedDeltaNet</span>
+                <span style="font-family: var(--font-mono); color: var(--cyan-glow);">Recurrent State S (H, 32, 32)</span>
+              </div>
+              <div id="l1" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: rgba(192, 132, 252, 0.12); border-left: 4px solid var(--violet-glow); border-radius: 8px;">
+                <span style="font-weight: 600; font-size: 19px;">Layer 3: Causal GQA</span>
+                <span style="font-family: var(--font-mono); color: var(--violet-glow);">4 Query Heads // 2 KV Heads (RoPE)</span>
+              </div>
+              <div id="l2" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: rgba(52, 211, 153, 0.12); border-left: 4px solid var(--emerald-glow); border-radius: 8px;">
+                <span style="font-weight: 600; font-size: 19px;">Sublayer Blocks</span>
+                <span style="font-family: var(--font-mono); color: var(--emerald-glow);">RMSNorm + SwiGLU FFN (mlp_dim=256)</span>
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 15px; color: var(--text-dim); margin-top: 6px;">
+                Full Model: 256 Vocab Bytes · 128 d_model · Autoregressive Causal Factorization
+              </div>
+            </div>
+
+            <!-- Right: State Update Mechanics -->
+            <div id="s2-mechanics" class="glass-card" style="padding: 34px; display: flex; flex-direction: column; gap: 20px;">
+              <div style="font-size: 18px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">
+                Recurrent Memory Update Loop
+              </div>
+              <div class="formula-box">
+                S<sub>t</sub> = α<sub>t</sub>·S<sub>t-1</sub> + β<sub>t</sub>·k<sub>t</sub> ⊗ (v<sub>t</sub> - k<sub>t</sub><sup>T</sup>S<sub>t-1</sub>)
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 17px; color: #cbd5e1;">
+                <div>• <strong style="color: var(--cyan-glow);">Decay Gate (α):</strong> Smoothly attenuates prior matrix associations</div>
+                <div>• <strong style="color: var(--emerald-glow);">Prediction (v̂ = k<sup>T</sup>S):</strong> Predicts current value from state</div>
+                <div>• <strong style="color: var(--rose-glow);">Delta Correction:</strong> Adds outer product only on error δ = v - v̂</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; color: var(--text-dim); font-family: var(--font-mono);">
+            Source Code Verified: chap-1/mini_qwen.py (Config, GatedDeltaNet, GQAAttention, MiniHybridLM)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 3: CENTRAL RESEARCH PROBLEM — INTERFERENCE (9.0s – 17.0s) -->
+      <!-- ============================================================== -->
+      <div id="scene3" class="scene clip" data-start="9.0" data-duration="8.0">
+        <img id="s3-bg" class="bg-layer" src="assets/vector_math.png" alt="Vector Math" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content">
+          <div class="top-bar">
+            <div id="s3-header" class="scene-title">
+              Chapter 2 Research: <span style="color: var(--rose-glow);">Overlapping-Key Interference</span>
+            </div>
+            <div class="pill pill-rose">Empirical Benchmark</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin: 18px 0;">
+            <!-- Real Matplotlib Plot with Dynamic Highlight -->
+            <div id="s3-plot-box" class="plot-wrapper" style="height: 560px;">
+              <img src="assets/fig_interference.png" alt="Memory Interference Curves" />
+              <div id="s3-ring" class="data-ring" style="top: 14%; left: 20%; width: 68%; height: 60%;"></div>
+            </div>
+
+            <!-- Findings Card -->
+            <div id="s3-content" class="glass-card" style="padding: 36px; display: flex; flex-direction: column; gap: 20px;">
+              <div>
+                <div style="font-size: 17px; color: var(--text-dim); text-transform: uppercase; font-weight: 600;">Overlapping Key Directions (2D)</div>
+                <div class="stat-number" style="color: var(--rose-glow); margin: 6px 0;">1.0126 L2 Error</div>
+                <div style="font-size: 18px; color: #cbd5e1; line-height: 1.45;">
+                  Writing non-orthogonal vector <span style="font-family: var(--font-mono); color: var(--cyan-glow);">k₃ = [1/√2, 1/√2]</span> corrupts earlier values stored at orthogonal keys <span style="font-family: var(--font-mono);">k₁=[1,0]</span> and <span style="font-family: var(--font-mono);">k₂=[0,1]</span>.
+                </div>
+              </div>
+
+              <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 16px;">
+                <div style="font-size: 17px; color: var(--emerald-glow); font-weight: 700; text-transform: uppercase;">Orthogonal Key Separation (3D)</div>
+                <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 800; color: var(--emerald-glow); margin: 4px 0;">
+                  0.0000 L2 Error (Exact Retrieval)
+                </div>
+                <div style="font-size: 16px; color: #cbd5e1; margin-top: 4px;">
+                  Zero error is achieved because keys are strictly orthogonal: k<sub>i</sub> · k<sub>j</sub> = 0.
+                </div>
+              </div>
+
+              <div style="background: rgba(251, 113, 133, 0.12); border: 1px solid rgba(251, 113, 133, 0.35); border-radius: 10px; padding: 12px 18px; font-size: 15px; color: #ffe4e6;">
+                <strong>Scientific Limit:</strong> Zero error is specific to idealized one-hot synthetic benchmarks, not a universal guarantee for dense learned representations.
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; color: var(--text-dim); font-family: var(--font-mono);">
+            Measured Results: chapter2_memory_benchmark.json (1 to 100 Association Steps)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 4: MEMORY CAPACITY & STORAGE SCALING (17.0s – 24.0s)     -->
+      <!-- ============================================================== -->
+      <div id="scene4" class="scene clip" data-start="17.0" data-duration="7.0">
+        <img id="s4-bg" class="bg-layer" src="assets/fig_storage.png" alt="Storage Scaling Plot" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content">
+          <div class="top-bar">
+            <div id="s4-header" class="scene-title">
+              Memory Capacity vs <span style="color: var(--amber-glow);">Physical Storage Scaling</span>
+            </div>
+            <div class="pill pill-amber">Capacity Trade-Off</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin: 18px 0;">
+            <!-- Real Matplotlib Storage Plot -->
+            <div id="s4-plot-box" class="plot-wrapper" style="height: 560px;">
+              <img src="assets/fig_storage.png" alt="Storage Benchmark Plot" />
+            </div>
+
+            <!-- Trade-off Analysis Card -->
+            <div id="s4-content" class="glass-card" style="padding: 36px; display: flex; flex-direction: column; gap: 20px;">
+              <div style="border-left: 4px solid var(--amber-glow); padding-left: 16px;">
+                <div style="font-size: 17px; color: var(--amber-glow); font-weight: 700; text-transform: uppercase;">Fixed Recurrent State</div>
+                <div class="stat-number" style="color: #f8fafc; font-size: 48px; margin: 4px 0;">36 Bytes (Constant)</div>
+                <div style="font-size: 16px; color: var(--text-dim);">
+                  Memory size never grows with sequence length, but fixed rank causes interference once capacity is saturated.
+                </div>
+              </div>
+
+              <div style="border-left: 4px solid var(--emerald-glow); padding-left: 16px;">
+                <div style="font-size: 17px; color: var(--emerald-glow); font-weight: 700; text-transform: uppercase;">Orthogonal & Slot Expansion</div>
+                <div class="stat-number" style="color: var(--emerald-glow); font-size: 48px; margin: 4px 0;">1,200 Bytes at 100 Keys</div>
+                <div style="font-size: 16px; color: var(--text-dim);">
+                  Eliminates interference by scaling linearly: supporting N independent associations requires dim(k) ≥ N.
+                </div>
+              </div>
+
+              <div style="border-left: 4px solid var(--cyan-glow); padding-left: 16px;">
+                <div style="font-size: 17px; color: var(--cyan-glow); font-weight: 700; text-transform: uppercase;">Variable-Length Values (Exp C)</div>
+                <div style="font-size: 16px; color: #cbd5e1; margin-top: 4px;">
+                  Testing variable dimensions (d=3, 5, 8): dynamic allocation uses <strong>64 Bytes</strong> versus <strong>120 Bytes</strong> for fixed padded structures.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; color: var(--text-dim); font-family: var(--font-mono);">
+            Empirical Data: chap-2/README.md (Analytical Storage Formula & Raw Array Payloads)
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 5: NOISY RETRIEVAL & CONFIDENCE GATING (24.0s – 30.0s)   -->
+      <!-- ============================================================== -->
+      <div id="scene5" class="scene clip" data-start="24.0" data-duration="6.0">
+        <img id="s5-bg" class="bg-layer" src="assets/fig_confidence.png" alt="Confidence Gating" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content">
+          <div class="top-bar">
+            <div id="s5-header" class="scene-title">
+              Noisy-Query Robustness & <span style="color: var(--cyan-glow);">Confidence Gating</span>
+            </div>
+            <div class="pill pill-cyan">Cosine Threshold τ = 0.80</div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin: 18px 0;">
+            <!-- Real Matplotlib Confidence Plot -->
+            <div id="s5-plot-box" class="plot-wrapper" style="height: 560px;">
+              <img src="assets/fig_confidence.png" alt="Confidence Gating Curve" />
+            </div>
+
+            <!-- Stats & Explanation Card -->
+            <div id="s5-content" class="glass-card" style="padding: 36px; display: flex; flex-direction: column; gap: 20px;">
+              <div style="font-size: 17px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">
+                Perturbed Query Benchmark (Gaussian Noise σ = 1.0)
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; padding: 20px;">
+                  <div style="font-size: 16px; color: var(--text-dim);">Accepted Accuracy:</div>
+                  <div class="stat-number" style="color: var(--cyan-glow); margin-top: 6px;">73.80%</div>
+                  <div style="font-size: 14px; color: #94a3b8; margin-top: 4px;">(+9.3% over 64.5% ungated)</div>
+                </div>
+
+                <div style="background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251, 191, 36, 0.35); border-radius: 12px; padding: 20px;">
+                  <div style="font-size: 16px; color: var(--text-dim);">Response Coverage:</div>
+                  <div class="stat-number" style="color: var(--amber-glow); margin-top: 6px;">45.17%</div>
+                  <div style="font-size: 14px; color: #94a3b8; margin-top: 4px;">(Rejects 54.83% ambiguous)</div>
+                </div>
+              </div>
+
+              <div style="font-size: 18px; line-height: 1.5; color: #cbd5e1;">
+                <strong>Scientific Meaning:</strong> Confidence gating filters out high-entropy retrievals under noise. Higher accuracy on accepted predictions comes at the deliberate cost of lower coverage.
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; color: var(--text-dim); font-family: var(--font-mono);">
+            Empirical Results: 600 Synthetic Gaussian Perturbed Trials per Noise Level
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- SCENE 6: RESEARCH TAKEAWAY & OPEN SCIENCE (30.0s – 34.0s)       -->
+      <!-- ============================================================== -->
+      <div id="scene6" class="scene clip" data-start="30.0" data-duration="4.0">
+        <img id="s6-bg" class="bg-layer" src="assets/data_landscape.png" alt="Data Landscape" />
+        <div class="bg-vignette"></div>
+        <div class="scene-content" style="justify-content: center; align-items: center; text-align: center;">
+          <div id="s6-content" style="display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 1200px;">
+            <div class="pill pill-violet" style="font-size: 16px; padding: 8px 24px;">Research Conclusion</div>
+            
+            <div style="font-family: var(--font-mono); font-size: 38px; font-weight: 800; color: #f1f5f9; letter-spacing: -0.01em;">
+              "Compact memory. Interference. Retrieval reliability."
+            </div>
+
+            <h1 style="font-size: 78px; font-weight: 900; letter-spacing: -0.04em; margin-top: 10px;">
+              FlowState <span style="color: var(--cyan-glow);">Δ</span>
+            </h1>
+
+            <div style="font-size: 24px; color: #e2e8f0; font-weight: 500;">
+              Independent Educational Research — PyTorch
+            </div>
+
+            <div style="font-family: var(--font-mono); font-size: 20px; color: var(--cyan-glow); margin-top: 12px; background: rgba(56, 189, 248, 0.12); padding: 10px 28px; border-radius: 9999px; border: 1px solid rgba(56, 189, 248, 0.35);">
+              github.com/prataykarali/Flowstate
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GSAP TIMELINE SCRIPT -->
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene 1: 0.0s -> 4.0s (Hook)
+      tl.set("#scene1", { opacity: 1, pointerEvents: "auto" }, 0)
+        .fromTo("#s1-bg", { scale: 1.12, x: -15 }, { scale: 1.0, x: 15, duration: 4.0, ease: "power1.out" }, 0)
+        .fromTo("#s1-tag", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5 }, 0.2)
+        .fromTo("#s1-title", { y: 30, opacity: 0, filter: "blur(8px)" }, { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.9, ease: "power4.out" }, 0.4)
+        .fromTo("#s1-sub", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, 0.9)
+        .to("#scene1", { opacity: 0, filter: "blur(5px)", duration: 0.3 }, 3.7);
+
+      // Scene 2: 4.0s -> 9.0s (Decoder Architecture)
+      tl.set("#scene2", { opacity: 1, pointerEvents: "auto" }, 4.0)
+        .fromTo("#s2-bg", { scale: 1.08, y: -10 }, { scale: 1.0, y: 10, duration: 5.0, ease: "power1.out" }, 4.0)
+        .fromTo("#s2-header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, 4.1)
+        .fromTo("#s2-blocks", { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 4.2)
+        .fromTo("#l0", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35 }, 4.4)
+        .fromTo("#l1", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35 }, 4.7)
+        .fromTo("#l2", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.35 }, 5.0)
+        .fromTo("#s2-mechanics", { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, 4.5)
+        .to("#scene2", { opacity: 0, filter: "blur(5px)", duration: 0.3 }, 8.7);
+
+      // Scene 3: 9.0s -> 17.0s (Overlapping Key Interference)
+      tl.set("#scene3", { opacity: 1, pointerEvents: "auto" }, 9.0)
+        .fromTo("#s3-bg", { scale: 1.08, rotate: 0 }, { scale: 1.0, rotate: 1, duration: 8.0, ease: "power1.out" }, 9.0)
+        .fromTo("#s3-header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, 9.1)
+        .fromTo("#s3-plot-box", { scale: 0.94, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.7, ease: "power3.out" }, 9.3)
+        .fromTo("#s3-content", { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 9.5)
+        .fromTo("#s3-ring", { scale: 0.75, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.6, ease: "back.out(1.6)" }, 10.8)
+        .to("#scene3", { opacity: 0, filter: "blur(5px)", duration: 0.3 }, 16.7);
+
+      // Scene 4: 17.0s -> 24.0s (Memory Capacity & Scaling)
+      tl.set("#scene4", { opacity: 1, pointerEvents: "auto" }, 17.0)
+        .fromTo("#s4-bg", { scale: 1.08 }, { scale: 1.0, duration: 7.0, ease: "power1.out" }, 17.0)
+        .fromTo("#s4-header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, 17.1)
+        .fromTo("#s4-plot-box", { scale: 0.94, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.7 }, 17.3)
+        .fromTo("#s4-content", { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7 }, 17.5)
+        .to("#scene4", { opacity: 0, filter: "blur(5px)", duration: 0.3 }, 23.7);
+
+      // Scene 5: 24.0s -> 30.0s (Noisy Retrieval & Confidence Gating)
+      tl.set("#scene5", { opacity: 1, pointerEvents: "auto" }, 24.0)
+        .fromTo("#s5-bg", { scale: 1.06 }, { scale: 1.0, duration: 6.0, ease: "power1.out" }, 24.0)
+        .fromTo("#s5-header", { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4 }, 24.1)
+        .fromTo("#s5-plot-box", { scale: 0.94, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.6 }, 24.3)
+        .fromTo("#s5-content", { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6 }, 24.5)
+        .to("#scene5", { opacity: 0, filter: "blur(5px)", duration: 0.3 }, 29.7);
+
+      // Scene 6: 30.0s -> 34.0s (Takeaway & Outro)
+      tl.set("#scene6", { opacity: 1, pointerEvents: "auto" }, 30.0)
+        .fromTo("#s6-bg", { scale: 1.06 }, { scale: 1.0, duration: 4.0, ease: "power1.out" }, 30.0)
+        .fromTo("#s6-content", { scale: 0.92, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.8, ease: "power3.out" }, 30.2)
+        .to("#scene6", { opacity: 0, duration: 0.4 }, 33.6);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "7f6364a8-cfcc-4c9d-8edd-cb7e44c50ffe",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/pratay-karali/Desktop/flowstate/.archify/dataflow-memory-flow-20261028-200700/candidate.json",
+  "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/recurrent-memory-flow.html",
+  "specification": {
+    "sha256": "8a94713f58c9fd0ae51011e88248cac7cba1d2f27143baed1be85dd18b638de1",
+    "bytes": 8458
+  },
+  "artifact": {
+    "sha256": "fa6411542f343dea4662908b25a8ea0e2f0f9ff19f9ad02c1aa568f8f7e0028d",
+    "bytes": 859994
+  }
+}

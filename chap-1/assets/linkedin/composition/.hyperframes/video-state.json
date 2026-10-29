@@ -1,0 +1,428 @@
+{
+  "version": 1,
+  "historyId": "b4774e26-1d0c-4173-832e-ae4f03522514",
+  "currentRevision": "1c012fb7-37cb-41a1-bf16-ed683dbd4549",
+  "pendingChanges": false,
+  "files": {
+    "AGENTS.md": {
+      "hash": "1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/1b/1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060"
+    },
+    "CLAUDE.md": {
+      "hash": "1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/1b/1b36171117cb7c18f4100a0db6a3782ff2e096115995733200445cc2e80a4060"
+    },
+    "hyperframes.json": {
+      "hash": "53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/53/53dbce1e19aa713cbb12ee0bc4d206143b45ab15e6ffbfcaa8f69572d4d24d50"
+    },
+    "index.html": {
+      "hash": "0f00e10c87bc7d45424f6b06c45909f15ebddf876af4c4a71601aba76dcaf42b",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/0f/0f00e10c87bc7d45424f6b06c45909f15ebddf876af4c4a71601aba76dcaf42b"
+    },
+    "meta.json": {
+      "hash": "c465ba85c96582e18d02290ee7972217b925037ed8480729ad3282b4d9c2593c",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c4/c465ba85c96582e18d02290ee7972217b925037ed8480729ad3282b4d9c2593c"
+    },
+    "package.json": {
+      "hash": "f8da92155dfacbb8cbfb6c0b4eaea105267e579232f3555d0757ec63f44ac0ee",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/f8/f8da92155dfacbb8cbfb6c0b4eaea105267e579232f3555d0757ec63f44ac0ee"
+    },
+    "assets/arch.png": {
+      "hash": "89957d631f385d847b9ba4dbceee49b6b483318330773de474e8a66627603585",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/89/89957d631f385d847b9ba4dbceee49b6b483318330773de474e8a66627603585"
+    },
+    "assets/fig_confidence.png": {
+      "hash": "d2623e7afdb30e236568723606f739677711e006414e3c275e55912c1bd632dc",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/d2/d2623e7afdb30e236568723606f739677711e006414e3c275e55912c1bd632dc"
+    },
+    "assets/fig_interference.png": {
+      "hash": "d55f7e271368642f9a9ce7548b5f0e94fe63e8ea15caba13c20d4f317df8b513",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/d5/d55f7e271368642f9a9ce7548b5f0e94fe63e8ea15caba13c20d4f317df8b513"
+    },
+    "assets/fig_storage.png": {
+      "hash": "55671ca89cd8511da8285768b3d7f7a4356270bbd1ff6dd9825db5f8a452b78e",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/55/55671ca89cd8511da8285768b3d7f7a4356270bbd1ff6dd9825db5f8a452b78e"
+    },
+    "assets/gqa.png": {
+      "hash": "ef709fda1b4e022c9f474f8733d90821a165910d7565fe1e41eff6cecadd09e1",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/ef/ef709fda1b4e022c9f474f8733d90821a165910d7565fe1e41eff6cecadd09e1"
+    },
+    "assets/rec.png": {
+      "hash": "a0c0121c5000f237fed0b9586a9f2983064efed0e788becad15d8b6767f93883",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a0/a0c0121c5000f237fed0b9586a9f2983064efed0e788becad15d8b6767f93883"
+    },
+    "assets/train.png": {
+      "hash": "32db107028f1fa4b00481a2951689d96f93025a5b4ecdf51e5d5c3219ee060b7",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/32/32db107028f1fa4b00481a2951689d96f93025a5b4ecdf51e5d5c3219ee060b7"
+    },
+    "assets/code_cinematic.jpg": {
+      "hash": "c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c1/c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866"
+    },
+    "assets/code_cinematic.png": {
+      "hash": "c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c1/c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866"
+    },
+    "assets/hardware_macro.jpg": {
+      "hash": "a396e9ecbf5541fa4f33eed4d6f3113694d30b354f2bc41445c200d78246ba03",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a3/a396e9ecbf5541fa4f33eed4d6f3113694d30b354f2bc41445c200d78246ba03"
+    },
+    "assets/music.mp3": {
+      "hash": "364a546834db4c0c2e3b3240eb6df03e98b7362230154b04c5c614442f6660d7",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/36/364a546834db4c0c2e3b3240eb6df03e98b7362230154b04c5c614442f6660d7"
+    },
+    "assets/neural_grid.jpg": {
+      "hash": "cb28721391594a9bc90965a54096cd07774e544961549ea0b78f017df881ac28",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/cb/cb28721391594a9bc90965a54096cd07774e544961549ea0b78f017df881ac28"
+    },
+    "assets/sfx_click.ogg": {
+      "hash": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/cc/ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9"
+    },
+    "assets/sfx_drop.ogg": {
+      "hash": "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/69/692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af"
+    },
+    "assets/sfx_switch.ogg": {
+      "hash": "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/3b/3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa"
+    },
+    "assets/vector_space.png": {
+      "hash": "646c66fb6c4c055191b604850a63337d3e75bf35ed23007a93ddd71fe54e5612",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/64/646c66fb6c4c055191b604850a63337d3e75bf35ed23007a93ddd71fe54e5612"
+    },
+    "assets/chip_macro_2.jpg": {
+      "hash": "2b82066963cc837d93649309c0db72ac51fefc570939fc8c942d4d248b334a62",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/2b/2b82066963cc837d93649309c0db72ac51fefc570939fc8c942d4d248b334a62"
+    },
+    "assets/data_landscape.png": {
+      "hash": "c4239ba264b34c3b52ea89bc982118ae93548d1171df29aa1bff54a498b2914f",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c4/c4239ba264b34c3b52ea89bc982118ae93548d1171df29aa1bff54a498b2914f"
+    },
+    "assets/model_flow.png": {
+      "hash": "1167800e4e22b0eda706a5d5ccef4c43f3462793b8b4037375f73ff5622ec048",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/11/1167800e4e22b0eda706a5d5ccef4c43f3462793b8b4037375f73ff5622ec048"
+    },
+    "assets/vector_math.png": {
+      "hash": "5d789676b452dd79f8ac89938a8b33910db1f484451792afd134b664d983a4b2",
+      "content": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/5d/5d789676b452dd79f8ac89938a8b33910db1f484451792afd134b664d983a4b2"
+    }
+  },
+  "revisions": {
+    "36563c85-23f7-49f6-bdec-19e4b31e147a": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1793199209548,
+      "endedAt": 1793199209583,
+      "files": {
+        "assets/arch.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/89/89957d631f385d847b9ba4dbceee49b6b483318330773de474e8a66627603585"
+        },
+        "assets/fig_confidence.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/d2/d2623e7afdb30e236568723606f739677711e006414e3c275e55912c1bd632dc"
+        },
+        "assets/fig_interference.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/d5/d55f7e271368642f9a9ce7548b5f0e94fe63e8ea15caba13c20d4f317df8b513"
+        },
+        "assets/fig_storage.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/55/55671ca89cd8511da8285768b3d7f7a4356270bbd1ff6dd9825db5f8a452b78e"
+        },
+        "assets/gqa.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/ef/ef709fda1b4e022c9f474f8733d90821a165910d7565fe1e41eff6cecadd09e1"
+        },
+        "assets/rec.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a0/a0c0121c5000f237fed0b9586a9f2983064efed0e788becad15d8b6767f93883"
+        },
+        "assets/train.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/32/32db107028f1fa4b00481a2951689d96f93025a5b4ecdf51e5d5c3219ee060b7"
+        },
+        "index.html": {
+          "before": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/6a/6a113838a27f17664b975753071997c5946b67f30c6d3d94c781d439c359f41a",
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c3/c3d68ad9d726156faf5347e9b7c188084a2e0fdf90bfab96bfd25a48ec5abf40"
+        }
+      }
+    },
+    "440caee6-5300-4d34-a2c7-39117c6f1c19": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1793200664188,
+      "endedAt": 1793200664238,
+      "files": {
+        "assets/code_cinematic.jpg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c1/c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866"
+        },
+        "assets/code_cinematic.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c1/c193137d137d5c2a32d0d14c384861be81225b269b33f00f7b85b97c74d2c866"
+        },
+        "assets/hardware_macro.jpg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a3/a396e9ecbf5541fa4f33eed4d6f3113694d30b354f2bc41445c200d78246ba03"
+        },
+        "assets/music.mp3": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/36/364a546834db4c0c2e3b3240eb6df03e98b7362230154b04c5c614442f6660d7"
+        },
+        "assets/neural_grid.jpg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/cb/cb28721391594a9bc90965a54096cd07774e544961549ea0b78f017df881ac28"
+        },
+        "assets/sfx_click.ogg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/cc/ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9"
+        },
+        "assets/sfx_drop.ogg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/69/692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af"
+        },
+        "assets/sfx_switch.ogg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/3b/3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa"
+        },
+        "assets/vector_space.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/64/646c66fb6c4c055191b604850a63337d3e75bf35ed23007a93ddd71fe54e5612"
+        },
+        "index.html": {
+          "before": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c3/c3d68ad9d726156faf5347e9b7c188084a2e0fdf90bfab96bfd25a48ec5abf40",
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a3/a3dc9b77dd48a8bdd2bca0c86e9f8958cf4866249b02ab2c0e131839cfb15bd9"
+        }
+      }
+    },
+    "a567294a-c9c6-40a6-8bb1-838165fe65d0": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1793200749058,
+      "endedAt": 1793200749059,
+      "files": {
+        "index.html": {
+          "before": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/a3/a3dc9b77dd48a8bdd2bca0c86e9f8958cf4866249b02ab2c0e131839cfb15bd9",
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/3f/3ffdb65cebc9ca3c35e45d18017deb74bfa5a3d2620f96d1f967bc707499b3c6"
+        }
+      }
+    },
+    "1c012fb7-37cb-41a1-bf16-ed683dbd4549": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1793202593411,
+      "endedAt": 1793202593437,
+      "files": {
+        "assets/chip_macro_2.jpg": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/2b/2b82066963cc837d93649309c0db72ac51fefc570939fc8c942d4d248b334a62"
+        },
+        "assets/data_landscape.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/c4/c4239ba264b34c3b52ea89bc982118ae93548d1171df29aa1bff54a498b2914f"
+        },
+        "assets/model_flow.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/11/1167800e4e22b0eda706a5d5ccef4c43f3462793b8b4037375f73ff5622ec048"
+        },
+        "assets/vector_math.png": {
+          "before": null,
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/5d/5d789676b452dd79f8ac89938a8b33910db1f484451792afd134b664d983a4b2"
+        },
+        "index.html": {
+          "before": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/3f/3ffdb65cebc9ca3c35e45d18017deb74bfa5a3d2620f96d1f967bc707499b3c6",
+          "after": "/home/pratay-karali/.cache/hyperframes/history/b4774e26-1d0c-4173-832e-ae4f03522514/blobs/0f/0f00e10c87bc7d45424f6b06c45909f15ebddf876af4c4a71601aba76dcaf42b"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": "1c012fb7-37cb-41a1-bf16-ed683dbd4549",
+      "id": "0e9c2ef6-3a9d-4251-a6ba-394a4a8d7310"
+    },
+    "revisions": {
+      "36563c85-23f7-49f6-bdec-19e4b31e147a": [
+        {
+          "id": "02ef8721-7aae-42af-bf49-40e47d637de5",
+          "scope": "project",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 10000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1793199219812,
+          "contentHash": "97a998e2649938763928e3751d438cbc683afeb7aa64aa6b5d1159d7f85b17d9",
+          "revision": "36563c85-23f7-49f6-bdec-19e4b31e147a",
+          "inputFingerprint": "4a34c841e4036e10a8b99258b6643261b629d5861e89cad7afc71b2339e421b3",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "bb721bbe-8eeb-46c2-a253-810496454078"
+        }
+      ],
+      "440caee6-5300-4d34-a2c7-39117c6f1c19": [
+        {
+          "id": "81e4d9df-48e0-4044-a359-0b62ce7a0ef1",
+          "scope": "project",
+          "metadata": {
+            "ok": false,
+            "browserSkipped": true,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 10000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1793200665684,
+          "contentHash": "e7fa03742bfcaaa60d2120321a10df88b4aa0f3d9d2e64513e92659e3cfad945",
+          "revision": "440caee6-5300-4d34-a2c7-39117c6f1c19",
+          "inputFingerprint": "ab8d1485f914351f61d035359a6c77707265305aa76ffcb0df6531c4f2b78df7",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision",
+          "status": "cleaned",
+          "cleanedAfterRender": "fc7bf9e1-1bc8-4475-9d56-e8cf1a649411"
+        }
+      ],
+      "a567294a-c9c6-40a6-8bb1-838165fe65d0": [
+        {
+          "id": "f5a6e59a-2dc9-409f-a9dd-b09b74d0f984",
+          "scope": "project",
+          "report": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/.hyperframes/artifacts/checks/f5a6e59a-2dc9-409f-a9dd-b09b74d0f984.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 10000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1793200771070,
+          "contentHash": "52b9aa1990acc9ef7ab905ef17ff0a8865b14ff487ac524d9fa654fdc9ecc64c",
+          "revision": "a567294a-c9c6-40a6-8bb1-838165fe65d0",
+          "inputFingerprint": "421972a60e02722eca0ab4b71786b9f03309be08fc745e8b94d92769733c179e",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ],
+      "1c012fb7-37cb-41a1-bf16-ed683dbd4549": [
+        {
+          "id": "0e9c2ef6-3a9d-4251-a6ba-394a4a8d7310",
+          "scope": "project",
+          "report": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/.hyperframes/artifacts/checks/0e9c2ef6-3a9d-4251-a6ba-394a4a8d7310.json",
+          "metadata": {
+            "ok": true,
+            "browserSkipped": false,
+            "options": {
+              "samples": 9,
+              "atTransitions": false,
+              "maxIssues": 80,
+              "collapseStatic": true,
+              "tolerance": 2,
+              "timeout": 10000,
+              "contrast": true,
+              "strict": false,
+              "snapshots": false,
+              "browserGpuMode": "auto"
+            }
+          },
+          "createdAt": 1793202636044,
+          "contentHash": "c91ab9618dfe1c9f42589e6db5481bf4595cb1bfee46ec8d3217a5cbcabce9ff",
+          "revision": "1c012fb7-37cb-41a1-bf16-ed683dbd4549",
+          "inputFingerprint": "b9b66d4cdeb920e67270d48810e435354de749b82f3b489fffa9d0311aaed27f",
+          "inputScope": "local-project-files",
+          "attribution": "recorded-revision"
+        }
+      ]
+    },
+    "unversioned": [
+      {
+        "id": "9e628bfd-ae66-422c-88f0-8984fbe12cc4",
+        "scope": "project",
+        "report": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/.hyperframes/artifacts/checks/9e628bfd-ae66-422c-88f0-8984fbe12cc4.json",
+        "metadata": {
+          "ok": true,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 10000,
+            "contrast": true,
+            "strict": false,
+            "snapshots": false,
+            "browserGpuMode": "auto"
+          }
+        },
+        "createdAt": 1793199134132,
+        "contentHash": "b519d8eeb9db8cfc3469d26082451a075e109f3a5888c09590f2d38bcafcdcb4",
+        "revision": null,
+        "inputFingerprint": "ab3ac41c038f36ea00537a249597afffff7f8184e8fc7657b8b777cd51cb1f5d",
+        "inputScope": "local-project-files",
+        "attribution": "unversioned"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "bb721bbe-8eeb-46c2-a253-810496454078",
+      "completedAt": 1793202800253,
+      "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-research-summary.mp4",
+      "status": "completed",
+      "revision": "1c012fb7-37cb-41a1-bf16-ed683dbd4549"
+    },
+    "retainedRevisions": [
+      "1c012fb7-37cb-41a1-bf16-ed683dbd4549",
+      "a567294a-c9c6-40a6-8bb1-838165fe65d0"
+    ]
+  },
+  "pendingArtifactCleanup": []
+}

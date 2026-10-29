@@ -1,0 +1,95 @@
+id,filename,category,difficulty,question,expected_answer,vision_model,text_model,mode,direct_answer,direct_exact,direct_contains,direct_valid,direct_latency_s,direct_ttft_s,direct_finish_reason,direct_reasoning_seen,direct_completion_tokens,ocr_text,ocr_phrase_hits,ocr_phrase_total,ocr_phrase_recall,ocr_found_phrases,ocr_latency_s,ocr_ttft_s,ocr_valid,ocr_finish_reason,ocr_completion_tokens,pipeline_answer,pipeline_exact,pipeline_contains,pipeline_valid,text_latency_s,text_ttft_s,pipeline_latency_s,text_finish_reason,text_completion_tokens
+01,01_event_poster.png,poster,easy,What is the entry code?,RBL-42,lfm3-vision,lfm3-text,both,RBL-42,True,True,True,38.616,38.335,stop,True,,"CAMPUS INNOVATION WEEK
+ROBOTICS
+OPEN LAB
+SATURDAY, 14 NOVEMBER 2026
+VENUE / HALL C-204
+ENTRY CODE: RBL-42",4,4,1.0,ROBOTICS OPEN LAB | 14 NOVEMBER 2026 | HALL C-204 | RBL-42,52.019,47.991,True,stop,,RBL-42,True,True,True,10.569,10.277,62.588,stop,
+02,02_cafe_receipt.png,receipt,medium,What is the grand total amount?,446.25,lfm3-vision,lfm3-text,both,446.25,True,True,True,36.458,36.229,stop,True,,"NORTH PIER CAFE
+ORDER 0048 | 29 OCT 2026
+Masala Sandwich
+2 x 95.00
+190.00
+Cold Coffee
+1 x 120.00
+120.00
+Lemon Tart
+1 x 85.00
+85.00
+Bottled Water
+1 x 30.00
+30.00
+SUBTOTAL
+425.00
+SERVICE TAX
+21.25
+GRAND TOTAL
+446.25
+THANK YOU - VISIT AGAIN",4,4,1.0,NORTH PIER CAFE | ORDER 0048 | SERVICE TAX | 446.25,60.427,51.869,True,stop,,446.25,True,True,True,18.145,17.929,78.572,stop,
+03,03_department_notice.png,notice,medium,"What is the project submission deadline, including time?","07 DEC 2026, 5:30 PM",lfm3-vision,lfm3-text,both,"07 DEC 2026, 5:30 PM",True,True,True,38.16,37.317,stop,True,,"DEPARTMENT NOTICE
+AI / ML PROJECT REVIEW
+Submission deadline:
+07 DEC 2026, 5:30 PM
+Room: Innovation Studio 3
+Upload: report.pdf + demo.mp4
+Coordinator: Dr. Sen",4,4,1.0,AI / ML PROJECT REVIEW | 07 DEC 2026 | 5:30 PM | Innovation Studio 3,46.701,43.131,True,stop,,"07 DEC 2026, 5:30 PM",True,True,True,14.359,13.511,61.06,stop,
+04,04_lab_schedule.png,table,hard,At what time is Robotics Lab scheduled?,14:00 - 15:30,lfm3-vision,lfm3-text,both,14:00 - 15:30,True,True,True,48.262,47.629,stop,True,,"WEEKLY LAB SCHEDULE
+Semester 5 / Engineering Block
+DAY TIME SESSION ROOM
+MON 09:30 - 11:00 Computer Networks B-103
+TUE 12:15 - 13:45 Data Mining C-207
+WED 14:00 - 15:30 Robotics Lab D-412
+THU 11:15 - 12:45 Signal Processing B-211
+FRI 15:45 - 17:00 Research Seminar A-105",4,4,1.0,WEEKLY LAB SCHEDULE | Robotics Lab | 14:00 - 15:30 | D-412,63.913,56.049,True,stop,,,False,False,False,22.037,,85.95,length,
+05,05_shipping_label.png,shipping label,medium,What is the full tracking ID?,AX-7049-2261,lfm3-vision,lfm3-text,both,AX-7049-2261,True,True,True,35.307,34.844,stop,True,,"ALPHA PARCEL / PRIORITY
+TRACKING ID
+AX-7049-2261
+FROM: EAST DOCK 07
+TO: RIVERSTONE CAMPUS
+ZONE: WB-03
+HANDLE WITH CARE",4,4,1.0,ALPHA PARCEL | AX-7049-2261 | RIVERSTONE CAMPUS | WB-03,51.292,46.878,True,stop,,AX-7049-2261,True,True,True,14.127,13.596,65.419,stop,
+06,06_terminal_logs.png,terminal screenshot,hard,What is the exact error code?,E_ALLOC_17,lfm3-vision,lfm3-text,both,E_ALLOC_17,True,True,True,36.973,36.594,stop,True,,"runtime.log - LOCAL AGENT
+> initializing local inference service ...
+[INFO] backend = cpu
+[INFO] binding = 127.0.0.1:8180
+[INFO] model = lfm3-vision
+[WARN] retrying tensor allocation
+[ERROR] code = E_ALLOC_17
+[INFO] recovered after memory cleanup
+> status: READY",4,4,1.0,backend = cpu | 127.0.0.1:8180 | E_ALLOC_17 | status: READY,51.497,45.043,True,stop,,E_ALLOC_17,True,True,True,14.531,14.134,66.028,stop,
+07,07_workshop_invite.png,stylized poster,medium,What is the registration code?,DS-218,lfm3-vision,lfm3-text,both,DS-218,True,True,True,38.443,38.141,stop,True,,"WORKSHOP / 2026
+DESIGN SYSTEMS
+Location: MAKER HUB 5
+Start: 10:45 AM
+Registration: DS-218",4,4,1.0,DESIGN SYSTEMS | MAKER HUB 5 | 10:45 AM | DS-218,53.427,50.477,True,stop,,DS-218,True,True,True,13.789,13.575,67.216,stop,
+08,08_train_ticket.png,transport ticket,medium,Which gate is printed on the ticket?,G-06,lfm3-vision,lfm3-text,both,G-06,True,True,True,39.175,38.936,stop,True,,"METROLINE / E-TICKET
+KOLKATA HOWRAH
+TRAIN: ML-209
+DATE: 18 NOV 2026
+DEPARTURE: 07:25
+GATE: G-06
+BOOKING REF: MLK-8652 / COACH: C2",4,4,1.0,METROLINE | 18 NOV 2026 | G-06 | MLK-8652,51.102,45.981,True,stop,,G-06,True,True,True,12.34,12.123,63.442,stop,
+09,09_low_contrast_note.png,low contrast,hard,What is the access key?,PLB-7602,lfm3-vision,lfm3-text,both,PLB-7602,True,True,True,39.306,38.931,stop,True,,"NETWORK CONFIGURATION NOTE
+
+SSID: PRISMLAB-TEST
+ACCESS KEY: PLB-7602
+MODE: OFFLINE ONLY
+VALID UNTIL: 02 DEC 2026
+
+Use on local demo devices only.",4,4,1.0,PRISMLAB-TEST | PLB-7602 | OFFLINE ONLY | 02 DEC 2026,51.565,47.092,True,stop,,PLB-7602,True,True,True,13.187,12.823,64.752,stop,
+10,10_research_brief.png,dense two-column document,hard,What is the reviewer tag?,RPT-06-DELTA,lfm3-vision,lfm3-text,both,RPT-06-DELTA,True,True,True,51.852,51.313,stop,True,,"EDGE SYSTEMS RESEARCH BRIEF
+Issue 08 | Autumn 2026 | Internal Demo
+EXPERIMENT SUMMARY
+Model: LFM3-VL-2B
+Run ID: BENCH-074
+Resolution: 640 x 480
+Total latency: 18.7 s
+Status: REVIEW REQUIRED
+FOLLOW-UP ACTIONS
+1. Check exact-string recall
+2. Repeat with new images
+3. Log CPU + memory load
+4. Compare text hand-off
+Reviewer tag:
+RPT-06-DELTA
+Demo data: not from production systems",4,4,1.0,BENCH-074 | 18.7 s | REVIEW REQUIRED | RPT-06-DELTA,72.896,62.488,True,stop,,RPT-06-DELTA,True,True,True,21.561,20.997,94.457,stop,

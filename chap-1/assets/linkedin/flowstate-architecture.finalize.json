@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-28T14:42:51.592Z",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+    "sha256": "23286c1cab9d7d3bdfe8ca3dcabb62a4642b68c6474da5f3097cf566d114618f",
+    "bytes": 8253
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+    "sha256": "23c2c7a9ace1c261992bd9febf3c9a688599e308772d1d864220ff3162e234c9",
+    "bytes": 861051
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "/home/pratay-karali/.nvm/versions/node/v22.23.1/bin/node",
+        "/home/pratay-karali/Desktop/flowstate/.agents/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+        "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/home/pratay-karali/Desktop/flowstate",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "287c0016-40b7-497c-8903-51b7ccff2df3",
+        "stage": "render",
+        "type": "architecture",
+        "input": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+        "output": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+        "error": "Architecture layout validation failed:\n- Label \"key interference\" has only 40px between \"exp_a_delta\" and \"exp_b_orthogonal\"; it needs at least 103px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.\n- Label \"multi-dim value\" has only 40px between \"exp_b_orthogonal\" and \"exp_c_variable\"; it needs at least 98px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.\n- Label \"noisy queries\" has only 40px between \"exp_c_variable\" and \"exp_d_confidence\"; it needs at least 89px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+        "diagnostics": [
+          {
+            "code": "composition/label-gap",
+            "severity": "error",
+            "message": "Label \"key interference\" has only 40px between \"exp_a_delta\" and \"exp_b_orthogonal\"; it needs at least 103px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "id": "exp_a_to_b",
+              "from": "exp_a_delta",
+              "to": "exp_b_orthogonal"
+            },
+            "evidence": {
+              "clearGapPx": 40,
+              "minimumGapPx": 103,
+              "labelWidthPx": 86.8,
+              "obstacles": [
+                "exp_a_delta",
+                "exp_b_orthogonal"
+              ]
+            },
+            "supportedFixes": [
+              "increase the clear gap between the connected nodes to at least 103px",
+              "reposition the connected nodes together while preserving the full relationship label"
+            ]
+          },
+          {
+            "code": "composition/label-gap",
+            "severity": "error",
+            "message": "Label \"multi-dim value\" has only 40px between \"exp_b_orthogonal\" and \"exp_c_variable\"; it needs at least 98px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "id": "exp_b_to_c",
+              "from": "exp_b_orthogonal",
+              "to": "exp_c_variable"
+            },
+            "evidence": {
+              "clearGapPx": 40,
+              "minimumGapPx": 98,
+              "labelWidthPx": 82,
+              "obstacles": [
+                "exp_b_orthogonal",
+                "exp_c_variable"
+              ]
+            },
+            "supportedFixes": [
+              "increase the clear gap between the connected nodes to at least 98px",
+              "reposition the connected nodes together while preserving the full relationship label"
+            ]
+          },
+          {
+            "code": "composition/label-gap",
+            "severity": "error",
+            "message": "Label \"noisy queries\" has only 40px between \"exp_c_variable\" and \"exp_d_confidence\"; it needs at least 89px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "id": "exp_c_to_d",
+              "from": "exp_c_variable",
+              "to": "exp_d_confidence"
+            },
+            "evidence": {
+              "clearGapPx": 40,
+              "minimumGapPx": 89,
+              "labelWidthPx": 72.4,
+              "obstacles": [
+                "exp_c_variable",
+                "exp_d_confidence"
+              ]
+            },
+            "supportedFixes": [
+              "increase the clear gap between the connected nodes to at least 89px",
+              "reposition the connected nodes together while preserving the full relationship label"
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"key interference\" has only 40px between \"exp_a_delta\" and \"exp_b_orthogonal\"; it needs at least 103px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_a_to_b",
+        "from": "exp_a_delta",
+        "to": "exp_b_orthogonal"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 103,
+        "labelWidthPx": 86.8,
+        "obstacles": [
+          "exp_a_delta",
+          "exp_b_orthogonal"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 103px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    },
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"multi-dim value\" has only 40px between \"exp_b_orthogonal\" and \"exp_c_variable\"; it needs at least 98px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_b_to_c",
+        "from": "exp_b_orthogonal",
+        "to": "exp_c_variable"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 98,
+        "labelWidthPx": 82,
+        "obstacles": [
+          "exp_b_orthogonal",
+          "exp_c_variable"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 98px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    },
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"noisy queries\" has only 40px between \"exp_c_variable\" and \"exp_d_confidence\"; it needs at least 89px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_c_to_d",
+        "from": "exp_c_variable",
+        "to": "exp_d_confidence"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 89,
+        "labelWidthPx": 72.4,
+        "obstacles": [
+          "exp_c_variable",
+          "exp_d_confidence"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 89px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-10-28T14:42:52.371Z",
+  "durationMs": 778,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

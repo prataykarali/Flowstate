@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "specification": {
+    "path": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+    "sha256": "23286c1cab9d7d3bdfe8ca3dcabb62a4642b68c6474da5f3097cf566d114618f",
+    "bytes": 8253
+  },
+  "artifact": {
+    "path": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.html",
+    "sha256": "23c2c7a9ace1c261992bd9febf3c9a688599e308772d1d864220ff3162e234c9",
+    "bytes": 861051
+  },
+  "gates": {
+    "validate": "fail",
+    "deliver": "not-run",
+    "check": "not-run",
+    "browser-check": "not-run"
+  },
+  "failedStage": "validate",
+  "diagnostics": [
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"key interference\" has only 40px between \"exp_a_delta\" and \"exp_b_orthogonal\"; it needs at least 103px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_a_to_b",
+        "from": "exp_a_delta",
+        "to": "exp_b_orthogonal"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 103,
+        "labelWidthPx": 86.8,
+        "obstacles": [
+          "exp_a_delta",
+          "exp_b_orthogonal"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 103px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    },
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"multi-dim value\" has only 40px between \"exp_b_orthogonal\" and \"exp_c_variable\"; it needs at least 98px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_b_to_c",
+        "from": "exp_b_orthogonal",
+        "to": "exp_c_variable"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 98,
+        "labelWidthPx": 82,
+        "obstacles": [
+          "exp_b_orthogonal",
+          "exp_c_variable"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 98px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    },
+    {
+      "code": "composition/label-gap",
+      "severity": "error",
+      "message": "Label \"noisy queries\" has only 40px between \"exp_c_variable\" and \"exp_d_confidence\"; it needs at least 89px to stay beside its route — increase that clear gap or place the connected nodes on another readable row, preserving the label.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "id": "exp_c_to_d",
+        "from": "exp_c_variable",
+        "to": "exp_d_confidence"
+      },
+      "evidence": {
+        "clearGapPx": 40,
+        "minimumGapPx": 89,
+        "labelWidthPx": 72.4,
+        "obstacles": [
+          "exp_c_variable",
+          "exp_d_confidence"
+        ]
+      },
+      "supportedFixes": [
+        "increase the clear gap between the connected nodes to at least 89px",
+        "reposition the connected nodes together while preserving the full relationship label"
+      ]
+    }
+  ],
+  "diagnosticSummary": {
+    "total": 3,
+    "shown": 3,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.finalize.json",
+    "summaryReceipt": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/flowstate-architecture.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-28T11:14:37.025Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 778,
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "nextAction": {
+    "action": "edit-in-place",
+    "candidate": "/home/pratay-karali/Desktop/flowstate/.archify/architecture-flowstate-20261028-200700/candidate.json",
+    "constraint": "Preserve unaffected semantics and geometry; apply each diagnostic's supportedFixes, or the fix its message names, and do not replace the whole candidate.",
+    "then": "finalize-once"
+  }
+}

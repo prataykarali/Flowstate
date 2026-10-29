@@ -1,0 +1,42 @@
+flowchart TB
+    U["User Input<br/>Text / Image / Audio / Video"]
+    P["Python Core<br/>pipeline.py"]
+    R["Model Registry<br/>registry.py"]
+    S{"Deterministic Router<br/>router.py"}
+    D["Model Dispatcher"]
+
+    subgraph MODELS["Six Specialized LFM3 Paths"]
+      direction LR
+      T["LFM3-1.7B<br/>Text / Tools"]
+      V["LFM3-VL-2B<br/>Vision / Video"]
+      A["LFM3-Audio-2B<br/>Speech / Audio"]
+      O["LFM3-Omni-2B<br/>Multimodal"]
+      J["d1-2B<br/>Visual Decisions"]
+      K["d1-Omni-2B<br/>Audio-Visual Decisions"]
+    end
+
+    OUT["Unified Response / Decision"]
+    B["Benchmarking + Test Logs"]
+
+    U --> P --> S --> D
+    R -.-> S
+    D --> T
+    D --> V
+    D -.-> A
+    D -.-> O
+    D -.-> J
+    D -.-> K
+    T --> OUT
+    V --> OUT
+    A -.-> OUT
+    O -.-> OUT
+    J -.-> OUT
+    K -.-> OUT
+    OUT --> B
+
+    classDef live fill:#163b31,color:#c8ffe7,stroke:#34d399,stroke-width:2px
+    classDef planned fill:#222b3d,color:#e2e8f0,stroke:#94a3b8
+    classDef core fill:#162a4d,color:#e0edff,stroke:#60a5fa,stroke-width:2px
+    class T,V live
+    class A,O,J,K planned
+    class P,R,S,D,OUT,B core

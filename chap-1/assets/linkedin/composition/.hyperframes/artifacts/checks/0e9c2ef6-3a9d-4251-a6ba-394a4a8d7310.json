@@ -1,0 +1,1328 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 8,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "duplicate_media_discovery_risk",
+        "severity": "warning",
+        "message": "Detected 2 matching img entries with the same source/start/duration.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Avoid duplicated media nodes that can be discovered twice during compilation."
+      },
+      {
+        "code": "composition_file_too_large",
+        "severity": "warning",
+        "message": "This HTML composition file has 353 lines. Smaller sub-compositions are easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Split coherent scenes or layers into separate .html files under compositions/, then mount them from the parent with data-composition-src so each file stays small enough to inspect, revise, and validate independently."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene1\"> is a timeline element that contains nested <img id=\"s1-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene1",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene1\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene2\"> is a timeline element that contains nested <img id=\"s2-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene2",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene2\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene3\"> is a timeline element that contains nested <img id=\"s3-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene3",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene3\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene4\"> is a timeline element that contains nested <img id=\"s4-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene4",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene4\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene5\"> is a timeline element that contains nested <img id=\"s5-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene5",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene5\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      },
+      {
+        "code": "nested_structure_needs_subcomposition",
+        "severity": "warning",
+        "message": "<div id=\"scene6\"> is a timeline element that contains nested <img id=\"s6-bg\">. The timeline shows one row per top-level element, and the root composition is built only from sub-compositions.",
+        "selector": "#scene6",
+        "dataAttributes": {},
+        "sourceFile": "/home/pratay-karali/Desktop/flowstate/chap-1/assets/linkedin/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Move <div id=\"scene6\"> and its contents into a sub-composition file and mount it with data-composition-src."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 6,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-0\" is 0.11s but its slot (data-duration) is 1.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.11s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-1\" is 0.62s but its slot (data-duration) is 1.00s — the slot is shortened to the media length when rendered. Set data-duration to ~0.62s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-2\" is 0.62s but its slot (data-duration) is 1.00s — the slot is shortened to the media length when rendered. Set data-duration to ~0.62s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-3\" is 0.10s but its slot (data-duration) is 1.00s — the slot is shortened to the media length when rendered. Set data-duration to ~0.10s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-4\" is 0.62s but its slot (data-duration) is 1.00s — the slot is shortened to the media length when rendered. Set data-duration to ~0.62s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-5\" is 0.11s but its slot (data-duration) is 1.50s — the slot is shortened to the media length when rendered. Set data-duration to ~0.11s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "34",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      }
+    ]
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 6,
+    "findings": [
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 1.889,
+        "selector": "#s1-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -67.63,
+          "top": -59.78,
+          "right": 2000.57,
+          "bottom": 1139.78,
+          "width": 2068.2,
+          "height": 1199.56
+        },
+        "containerSelector": "#scene1",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 67.63,
+          "right": 80.57,
+          "top": 59.78,
+          "bottom": 59.78
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s1-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -67.63,
+          "y": -59.78,
+          "width": 2068.2,
+          "height": 1199.56
+        },
+        "firstSeen": 1.889,
+        "lastSeen": 1.889,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          1.889
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 5.667,
+        "selector": "#s2-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -75.6,
+          "top": -59.54,
+          "right": 1995.6,
+          "bottom": 1141.76,
+          "width": 2071.2,
+          "height": 1201.3
+        },
+        "containerSelector": "#scene2",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 75.6,
+          "right": 75.6,
+          "top": 59.54,
+          "bottom": 61.76
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s2-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -75.6,
+          "y": -59.54,
+          "width": 2071.2,
+          "height": 1201.3
+        },
+        "firstSeen": 5.667,
+        "lastSeen": 5.667,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.667
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 9.444,
+        "selector": "#s3-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -112.74,
+          "top": -83.5,
+          "right": 2032.74,
+          "bottom": 1163.5,
+          "width": 2145.48,
+          "height": 1247
+        },
+        "containerSelector": "#scene3",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 112.74,
+          "right": 112.74,
+          "top": 83.5,
+          "bottom": 83.5
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s3-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -112.74,
+          "y": -83.5,
+          "width": 2145.48,
+          "height": 1247
+        },
+        "firstSeen": 9.444,
+        "lastSeen": 13.222,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          9.444,
+          13.222
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 17,
+        "selector": "#s4-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -120,
+          "top": -86.4,
+          "right": 2040,
+          "bottom": 1166.4,
+          "width": 2160,
+          "height": 1252.8
+        },
+        "containerSelector": "#scene4",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 120,
+          "right": 120,
+          "top": 86.4,
+          "bottom": 86.4
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s4-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -120,
+          "y": -86.4,
+          "width": 2160,
+          "height": 1252.8
+        },
+        "firstSeen": 17,
+        "lastSeen": 20.778,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          17,
+          20.778
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 24.556,
+        "selector": "#s5-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -89.8,
+          "top": -68.88,
+          "right": 2009.8,
+          "bottom": 1148.88,
+          "width": 2099.6,
+          "height": 1217.77
+        },
+        "containerSelector": "#scene5",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 89.8,
+          "right": 89.8,
+          "top": 68.88,
+          "bottom": 68.88
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s5-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -89.8,
+          "y": -68.88,
+          "width": 2099.6,
+          "height": 1217.77
+        },
+        "firstSeen": 24.556,
+        "lastSeen": 28.333,
+        "occurrences": 2,
+        "heldMs": 0,
+        "times": [
+          24.556,
+          28.333
+        ]
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 32.111,
+        "selector": "#s6-bg",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": -53.5,
+          "top": -47.83,
+          "right": 1973.5,
+          "bottom": 1127.83,
+          "width": 2027,
+          "height": 1175.66
+        },
+        "containerSelector": "#scene6",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "left": 53.5,
+          "right": 53.5,
+          "top": 47.83,
+          "bottom": 47.83
+        },
+        "dataAttributes": {
+          "data-hf-render-id": "s6-bg",
+          "data-hf-authored-opacity": ""
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": -53.5,
+          "y": -47.83,
+          "width": 2027,
+          "height": 1175.66
+        },
+        "firstSeen": 32.111,
+        "lastSeen": 32.111,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          32.111
+        ]
+      }
+    ],
+    "duration": 34,
+    "samples": [
+      1.889,
+      5.667,
+      9.444,
+      13.222,
+      17,
+      20.778,
+      24.556,
+      28.333,
+      32.111
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 6,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 3,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 3.98:1; WCAG AA requires 4.5:1.",
+        "text": "Perturbed Query Benchmark (Gaussian Noise σ = 1.0)",
+        "fg": "rgb(148,163,184)",
+        "bg": "rgb(63,65,71)",
+        "ratio": 3.98,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(161,174,192)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1057.678955078125,
+          "y": 422,
+          "width": 771,
+          "height": 23
+        },
+        "time": 24.556,
+        "times": [
+          24.556
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.77:1; WCAG AA requires 4.5:1.",
+        "text": "Accepted Accuracy:",
+        "fg": "rgb(148,163,184)",
+        "bg": "rgb(83,89,93)",
+        "ratio": 2.77,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(199,207,218)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1078.678955078125,
+          "y": 486,
+          "width": 333.5,
+          "height": 22
+        },
+        "time": 24.556,
+        "times": [
+          24.556
+        ]
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 2.77:1; WCAG AA requires 4.5:1.",
+        "text": "(+9.3% over 64.5% ungated)",
+        "fg": "rgb(148,163,184)",
+        "bg": "rgb(83,89,93)",
+        "ratio": 2.77,
+        "requiredRatio": 4.5,
+        "suggestedColor": "rgb(199,207,218)",
+        "large": false,
+        "selector": "div > div:nth-of-type(6) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1078.678955078125,
+          "y": 586,
+          "width": 333.5,
+          "height": 19
+        },
+        "time": 24.556,
+        "times": [
+          24.556
+        ]
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      1.889,
+      9.444,
+      17,
+      24.556,
+      32.111
+    ],
+    "checked": 28,
+    "passed": 25
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 4,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"An empirical investigation into recurrent state updating,...\" (15 words) is on screen 2.66 s (±0.01 s), under its 3.75 s floor: hold it about 0.5 s + 0.3 s a word (5.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "An empirical investigation into recurrent state updating, key interference, and bounded associative recall in PyTorch.",
+        "selector": "#s1-sub",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 330,
+          "y": 623.57,
+          "width": 875.8899999999999,
+          "height": 66.59000000000003
+        },
+        "time": 1.141,
+        "words": 15,
+        "seconds": 2.664,
+        "floorSeconds": 3.75
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"S = α·S + β·k ⊗ (v - kS) t t t-1 t t t t T t-1\" (18 words) is on screen 4.20 s (±0.01 s), under its 4.42 s floor: hold it about 0.5 s + 0.3 s a word (5.90 s here) before it leaves or changes; see references/motion.md.",
+        "text": "S = α·S + β·k ⊗ (v - kS) t t t-1 t t t t T t-1",
+        "selector": "div.formula-box",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1107.52,
+          "y": 507.05,
+          "width": 483.99,
+          "height": 40.24999999999994
+        },
+        "time": 4.602,
+        "words": 18,
+        "seconds": 4.203,
+        "floorSeconds": 4.425
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and 65 text elements stay under it for 0.5 s or more, the smallest \"i\" at 13 px: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "i",
+        "selector": "#s3-content > div:nth-of-type(2) > div:nth-of-type(3) > sub:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1484.21,
+          "y": 643.69,
+          "width": 3.46,
+          "height": 18
+        },
+        "time": 9.75,
+        "times": [
+          0.375,
+          1.25,
+          4,
+          4,
+          4.375,
+          4.375,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.625,
+          4.875,
+          4.875,
+          5.25,
+          5.25,
+          9,
+          9,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          17,
+          17,
+          17.75,
+          17.75,
+          17.75,
+          17.75,
+          17.75,
+          17.75,
+          17.75,
+          17.75,
+          24,
+          24,
+          24.75,
+          24.75,
+          24.75,
+          24.75,
+          24.75,
+          24.75,
+          24.75,
+          30.375,
+          30.375,
+          30.375
+        ],
+        "fontPx": 13.33,
+        "floorPx": 28,
+        "seconds": 7.125,
+        "elements": [
+          {
+            "selector": "#s3-content > div:nth-of-type(2) > div:nth-of-type(3) > sub:nth-of-type(1)",
+            "text": "i",
+            "fontPx": 13.33,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(2) > div:nth-of-type(3) > sub:nth-of-type(2)",
+            "text": "j",
+            "fontPx": 13.33,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s1-tag",
+            "text": "FlowState Δ // AI Research Investigation",
+            "fontPx": 14,
+            "time": 0.375,
+            "seconds": 3.5
+          },
+          {
+            "selector": "#scene2 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Chapter 1 Verified Implementation",
+            "fontPx": 14,
+            "time": 4,
+            "seconds": 4.875
+          },
+          {
+            "selector": "div.pill.pill-rose",
+            "text": "Empirical Benchmark",
+            "fontPx": 14,
+            "time": 9,
+            "seconds": 7.875
+          },
+          {
+            "selector": "div.pill.pill-amber",
+            "text": "Capacity Trade-Off",
+            "fontPx": 14,
+            "time": 17,
+            "seconds": 6.875
+          },
+          {
+            "selector": "#scene5 > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2)",
+            "text": "Cosine Threshold τ = 0.80",
+            "fontPx": 14,
+            "time": 24,
+            "seconds": 5.875
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "(+9.3% over 64.5% ungated)",
+            "fontPx": 14,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "(Rejects 54.83% ambiguous)",
+            "fontPx": 14,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(2) > strong:nth-of-type(1) > sup:nth-of-type(1)",
+            "text": "T",
+            "fontPx": 14.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#scene2 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Source Code Verified: chap-1/mini_qwen.py (Config, GatedDeltaNet, GQAAttention, MiniHybridLM)",
+            "fontPx": 15,
+            "time": 4,
+            "seconds": 4.875
+          },
+          {
+            "selector": "#s2-blocks > div:nth-of-type(5)",
+            "text": "Full Model: 256 Vocab Bytes · 128 d_model · Autoregressive Causal Factorization",
+            "fontPx": 15,
+            "time": 4.375,
+            "seconds": 4.5
+          },
+          {
+            "selector": "#scene3 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Measured Results: chapter2_memory_benchmark.json (1 to 100 Association Steps)",
+            "fontPx": 15,
+            "time": 9,
+            "seconds": 7.875
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(3)",
+            "text": "Zero error is specific to idealized one-hot synthetic benchmarks, not a universal guarantee for dense learned representations.",
+            "fontPx": 15,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(3) > strong:nth-of-type(1)",
+            "text": "Scientific Limit:",
+            "fontPx": 15,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#scene4 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Empirical Data: chap-2/README.md (Analytical Storage Formula & Raw Array Payloads)",
+            "fontPx": 15,
+            "time": 17,
+            "seconds": 6.875
+          },
+          {
+            "selector": "#scene5 > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Empirical Results: 600 Synthetic Gaussian Perturbed Trials per Noise Level",
+            "fontPx": 15,
+            "time": 24,
+            "seconds": 5.875
+          },
+          {
+            "selector": "#s6-content > div:nth-of-type(1)",
+            "text": "Research Conclusion",
+            "fontPx": 15.5,
+            "time": 30.375,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#l0 > span:nth-of-type(2)",
+            "text": "Recurrent State S (H, 32, 32)",
+            "fontPx": 16,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#l1 > span:nth-of-type(2)",
+            "text": "4 Query Heads // 2 KV Heads (RoPE)",
+            "fontPx": 16,
+            "time": 4.875,
+            "seconds": 4
+          },
+          {
+            "selector": "#l2 > span:nth-of-type(2)",
+            "text": "RMSNorm + SwiGLU FFN (mlp_dim=256)",
+            "fontPx": 16,
+            "time": 5.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Zero error is achieved because keys are strictly orthogonal: k · k = 0.",
+            "fontPx": 16,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Memory size never grows with sequence length, but fixed rank causes interference once capacity is saturated.",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(2) > div:nth-of-type(3)",
+            "text": "Eliminates interference by scaling linearly: supporting N independent associations requires dim(k) ≥ N.",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "Testing variable dimensions (d=3, 5, 8): dynamic allocation uses versus for fixed padded structures.",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(3) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "64 Bytes",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(3) > div:nth-of-type(2) > strong:nth-of-type(2)",
+            "text": "120 Bytes",
+            "fontPx": 16,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Accepted Accuracy:",
+            "fontPx": 16,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Response Coverage:",
+            "fontPx": 16,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "• Smoothly attenuates prior matrix associations",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(1) > strong:nth-of-type(1)",
+            "text": "Decay Gate (α):",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(2)",
+            "text": "• Predicts current value from state",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(2) > strong:nth-of-type(1)",
+            "text": "Prediction (v̂ = kS):",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(3)",
+            "text": "• Adds outer product only on error δ = v - v̂",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(3) > div:nth-of-type(3) > strong:nth-of-type(1)",
+            "text": "Delta Correction:",
+            "fontPx": 17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Overlapping Key Directions (2D)",
+            "fontPx": 17,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Orthogonal Key Separation (3D)",
+            "fontPx": 17,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(1) > div:nth-of-type(1)",
+            "text": "Fixed Recurrent State",
+            "fontPx": 17,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(2) > div:nth-of-type(1)",
+            "text": "Orthogonal & Slot Expansion",
+            "fontPx": 17,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s4-content > div:nth-of-type(3) > div:nth-of-type(1)",
+            "text": "Variable-Length Values (Exp C)",
+            "fontPx": 17,
+            "time": 17.75,
+            "seconds": 6.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(1)",
+            "text": "Perturbed Query Benchmark (Gaussian Noise σ = 1.0)",
+            "fontPx": 17,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s2-blocks > div:nth-of-type(1)",
+            "text": "4-Layer Hybrid Transformer-RNN Backbone",
+            "fontPx": 18,
+            "time": 4.375,
+            "seconds": 4.5
+          },
+          {
+            "selector": "#s2-mechanics > div:nth-of-type(1)",
+            "text": "Recurrent Memory Update Loop",
+            "fontPx": 18,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(1) > div:nth-of-type(3)",
+            "text": "Writing non-orthogonal vector corrupts earlier values stored at orthogonal keys and .",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(1)",
+            "text": "k₃ = [1/√2, 1/√2]",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(2)",
+            "text": "k₁=[1,0]",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s3-content > div:nth-of-type(1) > div:nth-of-type(3) > span:nth-of-type(3)",
+            "text": "k₂=[0,1]",
+            "fontPx": 18,
+            "time": 9.75,
+            "seconds": 7.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(3)",
+            "text": "Confidence gating filters out high-entropy retrievals under noise. Higher accuracy on accepted predictions comes at the deliberate cost of lower coverage.",
+            "fontPx": 18,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#s5-content > div:nth-of-type(3) > strong:nth-of-type(1)",
+            "text": "Scientific Meaning:",
+            "fontPx": 18,
+            "time": 24.75,
+            "seconds": 5.125
+          },
+          {
+            "selector": "#l0 > span:nth-of-type(1)",
+            "text": "Layers 0–2: GatedDeltaNet",
+            "fontPx": 19,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#l1 > span:nth-of-type(1)",
+            "text": "Layer 3: Causal GQA",
+            "fontPx": 19,
+            "time": 4.875,
+            "seconds": 4
+          },
+          {
+            "selector": "#l2 > span:nth-of-type(1)",
+            "text": "Sublayer Blocks",
+            "fontPx": 19,
+            "time": 5.25,
+            "seconds": 3.625
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(1)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(2)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(3)",
+            "text": "t-1",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(4)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(5)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(6)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(7)",
+            "text": "t",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sup:nth-of-type(1)",
+            "text": "T",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "div.formula-box > sub:nth-of-type(8)",
+            "text": "t-1",
+            "fontPx": 19.17,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s6-content > div:nth-of-type(4)",
+            "text": "github.com/prataykarali/Flowstate",
+            "fontPx": 19.37,
+            "time": 30.375,
+            "seconds": 3.375
+          },
+          {
+            "selector": "div.formula-box",
+            "text": "S = α·S + β·k ⊗ (v - kS)",
+            "fontPx": 23,
+            "time": 4.625,
+            "seconds": 4.25
+          },
+          {
+            "selector": "#s6-content > div:nth-of-type(3)",
+            "text": "Independent Educational Research — PyTorch",
+            "fontPx": 23.25,
+            "time": 30.375,
+            "seconds": 3.375
+          },
+          {
+            "selector": "#s1-sub",
+            "text": "An empirical investigation into recurrent state updating, key interference, and bounded associative recall in PyTorch.",
+            "fontPx": 24,
+            "time": 1.25,
+            "seconds": 2.625
+          }
+        ]
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Confidence gating filters out high-entropy retrievals und...\" (24 words) is on screen 5.10 s (±0.01 s), under its 5.77 s floor: hold it about 0.5 s + 0.3 s a word (7.70 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Confidence gating filters out high-entropy retrievals under noise. Higher accuracy on accepted predictions comes at the deliberate cost of lower coverage. Scientific Meaning:",
+        "selector": "#s5-content > div:nth-of-type(3)",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1036.94,
+          "y": 647,
+          "width": 745.56,
+          "height": 51
+        },
+        "time": 24.703,
+        "words": 24,
+        "seconds": 5.102,
+        "floorSeconds": 5.775
+      }
+    ],
+    "enabled": true,
+    "step": 0.125,
+    "samples": 272
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

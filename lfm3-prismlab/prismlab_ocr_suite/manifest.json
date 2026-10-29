@@ -1,0 +1,153 @@
+{
+  "title": "PrismLab controlled OCR challenge set",
+  "version": "1.0",
+  "origin": "Generated locally with Pillow; all content is fictional and synthetic",
+  "sample_count": 10,
+  "notes": [
+    "Each image includes exact-answer question and reference OCR phrases.",
+    "Phrase recall is a limited proxy for transcription quality, not full character error rate.",
+    "All examples are synthetic; evaluate on real photos later for generalization."
+  ],
+  "cases": [
+    {
+      "id": "01",
+      "filename": "01_event_poster.png",
+      "category": "poster",
+      "question": "What is the entry code?",
+      "expected_answer": "RBL-42",
+      "required_phrases": [
+        "ROBOTICS OPEN LAB",
+        "14 NOVEMBER 2026",
+        "HALL C-204",
+        "RBL-42"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "02",
+      "filename": "02_cafe_receipt.png",
+      "category": "receipt",
+      "question": "What is the grand total amount?",
+      "expected_answer": "446.25",
+      "required_phrases": [
+        "NORTH PIER CAFE",
+        "ORDER 0048",
+        "SERVICE TAX",
+        "446.25"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "03",
+      "filename": "03_department_notice.png",
+      "category": "notice",
+      "question": "What is the project submission deadline, including time?",
+      "expected_answer": "07 DEC 2026, 5:30 PM",
+      "required_phrases": [
+        "AI / ML PROJECT REVIEW",
+        "07 DEC 2026",
+        "5:30 PM",
+        "Innovation Studio 3"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "04",
+      "filename": "04_lab_schedule.png",
+      "category": "table",
+      "question": "At what time is Robotics Lab scheduled?",
+      "expected_answer": "14:00 - 15:30",
+      "required_phrases": [
+        "WEEKLY LAB SCHEDULE",
+        "Robotics Lab",
+        "14:00 - 15:30",
+        "D-412"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "05",
+      "filename": "05_shipping_label.png",
+      "category": "shipping label",
+      "question": "What is the full tracking ID?",
+      "expected_answer": "AX-7049-2261",
+      "required_phrases": [
+        "ALPHA PARCEL",
+        "AX-7049-2261",
+        "RIVERSTONE CAMPUS",
+        "WB-03"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "06",
+      "filename": "06_terminal_logs.png",
+      "category": "terminal screenshot",
+      "question": "What is the exact error code?",
+      "expected_answer": "E_ALLOC_17",
+      "required_phrases": [
+        "backend = cpu",
+        "127.0.0.1:8180",
+        "E_ALLOC_17",
+        "status: READY"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "07",
+      "filename": "07_workshop_invite.png",
+      "category": "stylized poster",
+      "question": "What is the registration code?",
+      "expected_answer": "DS-218",
+      "required_phrases": [
+        "DESIGN SYSTEMS",
+        "MAKER HUB 5",
+        "10:45 AM",
+        "DS-218"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "08",
+      "filename": "08_train_ticket.png",
+      "category": "transport ticket",
+      "question": "Which gate is printed on the ticket?",
+      "expected_answer": "G-06",
+      "required_phrases": [
+        "METROLINE",
+        "18 NOV 2026",
+        "G-06",
+        "MLK-8652"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "09",
+      "filename": "09_low_contrast_note.png",
+      "category": "low contrast",
+      "question": "What is the access key?",
+      "expected_answer": "PLB-7602",
+      "required_phrases": [
+        "PRISMLAB-TEST",
+        "PLB-7602",
+        "OFFLINE ONLY",
+        "02 DEC 2026"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "10",
+      "filename": "10_research_brief.png",
+      "category": "dense two-column document",
+      "question": "What is the reviewer tag?",
+      "expected_answer": "RPT-06-DELTA",
+      "required_phrases": [
+        "BENCH-074",
+        "18.7 s",
+        "REVIEW REQUIRED",
+        "RPT-06-DELTA"
+      ],
+      "difficulty": "hard"
+    }
+  ]
+}
