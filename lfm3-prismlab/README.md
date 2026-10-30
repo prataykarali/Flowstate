@@ -8,7 +8,20 @@ PrismLab operates with **zero cloud dependencies, zero inference costs, and dete
 
 ## 1. System Architecture
 
-PrismLab uses a deterministic capability-matching router (`prismlab/core/router.py`) rather than non-deterministic LLM-based agent dispatch. Requests are analyzed by task category and input modality subsets, then dispatched to the optimal specialized model pathway:
+PrismLab uses a deterministic capability-matching router (`prismlab/core/router.py`) rather than non-deterministic LLM-based agent dispatch. Requests are analyzed by task category and input modality subsets, then dispatched across specialized model pathways in the shared LFM pool:
+
+<p align="center">
+  <a href="visuals/PrismLabs_Architecture_Extended.html">
+    <img src="visuals/PrismLabs_Architecture_Extended.png" alt="PrismLab Extended Architecture Flow" width="100%">
+  </a>
+</p>
+
+<p align="center">
+  <em>Figure 1: PrismLab Extended Multi-Model Routing & Processing Architecture. Click image to open the <a href="visuals/PrismLabs_Architecture_Extended.html">interactive HTML view</a> or explore the <a href="visuals/PrismLabs_Architecture_Extended.ipynb">Jupyter source notebook</a>.</em>
+</p>
+
+<details>
+<summary><b>View Pure Mermaid Routing Topology</b></summary>
 
 ```mermaid
 flowchart TB
@@ -54,6 +67,7 @@ flowchart TB
     class A,O,J,K planned;
     class P,R,S,D,OUT,B core;
 ```
+</details>
 
 ---
 

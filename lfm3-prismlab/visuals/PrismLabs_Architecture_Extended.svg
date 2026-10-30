@@ -1,0 +1,305 @@
+<svg class="arch" viewBox="0 0 1380 1030" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PrismLabs architecture: user input, intent router, six shared models, document speech and visual workflows, processing outputs, unified workbench, and answers actions evaluation"><style>
+:root {color-scheme:dark; --mint:#52efd0; --blue:#67baff; --pink:#d6a0ff; --background:#070d19}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050913}
+body{display:grid;place-items:center;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+.arch{width:min(100vw,1590px);max-height:100vh;height:auto;display:block;aspect-ratio:1380/1030}
+.header{font-family:inherit;font-size:38px;font-weight:760;letter-spacing:-.8px;fill:#eff7ff}
+.section-label{font-size:15px;fill:#9bb3db;font-weight:720;letter-spacing:1.8px}
+.top-label{font-size:22px;fill:#f4f8ff;font-weight:710}
+.top-sub{font-size:14px;fill:#acc6e8}
+.model-label{font-size:20px;font-weight:730;fill:#f1f6ff;letter-spacing:-.5px}
+.model-role{font-size:12px;fill:#9db5df;font-weight:640;letter-spacing:1.5px}
+.pipeline-title{font-size:20.5px;font-weight:760;fill:#f3f7ff;letter-spacing:-.3px}
+.pipeline-sub{font-size:16px;fill:#aebfe3;font-weight:540}
+.final-label{font-size:23px;font-weight:760;fill:#f3f7ff}
+.final-sub{font-size:14px;fill:#b2c5e6;letter-spacing:.2px}
+.core rect.node-base{fill:#101f3b;stroke:#426b9c;stroke-width:1.6}
+.core.route rect.node-base{fill:#13264b;stroke:#55a9f5;stroke-width:2}
+.node-base{fill:#121d34;stroke:#476a95;stroke-width:1.6;filter:url(#softShadow)}
+.model .node-base{transition:stroke .35s, filter .35s, fill .35s}
+.model.on .node-base{stroke:#52efd0;fill:#122b39;filter:url(#mintGlow)}
+.model[data-model="d1"].on .node-base,.model[data-model="d1omni"].on .node-base{stroke:#d6a0ff;fill:#29213d;filter:url(#pinkGlow)}
+.model.on .icon-bubble circle{stroke:#51eec9;fill:#113c40}
+.model[data-model="d1"].on .icon-bubble circle,.model[data-model="d1omni"].on .icon-bubble circle{stroke:#d6a0ff;fill:#342447}
+.icon-bubble circle{fill:#20324e;stroke:#456e9f;stroke-width:1.2}
+.icon-bubble use{stroke:#d6e7ff;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.core .icon-bubble circle{fill:#16446a;stroke:#69b7ef}
+.pool-boundary{fill:url(#poolBG);stroke:#375c89;stroke-opacity:.75;stroke-width:1.4;stroke-dasharray:8 9}
+.mini-star{fill:#6ca9f4;opacity:.4}
+.pipe .node-base{fill:#12203a;stroke:#5075a6;stroke-width:1.8;transition:stroke .35s,fill .35s,filter .35s}
+.pipe.on .node-base{stroke:var(--accent);fill:var(--fill);filter:url(#focusGlow)}
+.pipe .pipe-icon-bg{fill:#213653;stroke:#567ab0;stroke-width:1.5}
+.pipe.on .pipe-icon-bg{fill:#19394b;stroke:var(--accent)}
+.pipe .pipe-icon{stroke:#d6e5ff;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pipe.on .pipe-icon{stroke:var(--accent)}
+.pipe{cursor:pointer;outline:none}
+.pipe:focus-visible .node-base{stroke:#f6f7ff;stroke-width:3}
+.pipe[data-flow="doc"]{--accent:#52efd0;--fill:#102d35}
+.pipe[data-flow="voice"]{--accent:#67baff;--fill:#112740}
+.pipe[data-flow="decision"]{--accent:#d6a0ff;--fill:#261d40}
+.link{fill:none;stroke-width:2.2;stroke-linecap:round;opacity:.16;transition:opacity .4s,filter .4s,stroke-width .4s;pointer-events:none}
+.link.source{stroke:#80b8f6;stroke-dasharray:5 9;animation:dash 1.4s linear infinite}
+.link.converge{stroke:#80b8f6;stroke-width:2.5;stroke-dasharray:7 10;animation:dash 1.4s linear infinite}
+.link.on{stroke:var(--accent);stroke-width:3.2;opacity:.88;filter:drop-shadow(0 0 6px var(--accent))}
+.link.mint{--accent:#52efd0}.link.blue{--accent:#67baff}.link.pink{--accent:#d6a0ff}
+.link.trunk{stroke:#67baff;opacity:.8;filter:drop-shadow(0 0 5px #67baff);stroke-dasharray:5 11;animation:dash 1.6s linear infinite}
+.signal{fill:var(--accent);opacity:.08;transition:opacity .35s;filter:drop-shadow(0 0 5px var(--accent))}
+.signal.on{opacity:1}
+.signal.mint{--accent:#52efd0}.signal.blue{--accent:#67baff}.signal.pink{--accent:#d6a0ff}
+.pipeline-group{filter:drop-shadow(0 5px 17px rgba(0,0,0,.12))}
+.final rect.node-base{fill:#122a45;stroke:#60aefa;stroke-width:1.8;filter:url(#blueGlow)}
+@keyframes dash{to{stroke-dashoffset:-28}}
+@media(prefers-reduced-motion:reduce){.link{animation:none}.signal{display:none}}
+
+/* Additional processing stage and three downstream destinations */
+.stage .node-base{fill:#101e37;stroke:#4a719d;stroke-width:1.7;transition:stroke .3s,fill .3s,filter .3s}
+.stage.on .node-base{stroke:var(--accent);filter:url(#focusGlow)}
+.stage .pipe-icon-bg{fill:#203450;stroke:#4c759e;stroke-width:1.4}
+.stage .pipe-icon{fill:none;stroke:#b8d1f4;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stage.on .pipe-icon{stroke:var(--accent)}
+.stage[data-flow="doc"]{--accent:#52efd0}
+.stage[data-flow="voice"]{--accent:#67baff}
+.stage[data-flow="decision"]{--accent:#d6a0ff}
+.stage-label{font-size:21px;font-weight:750;fill:#eaf5ff}
+.stage-hint{font-size:13px;fill:#9cb9de;letter-spacing:.3px}
+.output .node-base{fill:#13213c;stroke:#5584b5;stroke-width:1.8;filter:url(#softShadow);transition:stroke .3s,filter .3s}
+.output:hover .node-base{stroke:#82c9ff;filter:url(#blueGlow)}
+.output-icon{fill:#203451;stroke:#6a9fd2;stroke-width:1.4}
+.output use{fill:none;stroke:#d6e7ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.output-title{font-size:21px;font-weight:750;fill:#f0f7ff}
+.output-sub{font-size:13px;fill:#a9c6ec}
+.link.deliver{stroke:#69c6fa;opacity:.75;stroke-width:2.6;filter:drop-shadow(0 0 4px #67baff);stroke-dasharray:5 10;animation:dash 1.3s linear infinite}
+.link.stage-path{stroke-width:2.6}
+.stage-title{font-size:15px;letter-spacing:1.8px;font-weight:700;fill:#86a5cc}
+</style>
+<defs>
+  <radialGradient id="background" cx="48%" cy="6%" r="93%"><stop stop-color="#0f2344"/><stop offset=".54" stop-color="#08142b"/><stop offset="1" stop-color="#060b17"/></radialGradient>
+  <linearGradient id="poolBG" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#13243d"/><stop offset="1" stop-color="#0e1930"/></linearGradient>
+  <linearGradient id="nodeShine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ddf8ff"/><stop offset=".5" stop-color="transparent"/><stop offset="1" stop-color="#93cfff"/></linearGradient>
+  <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67baff"/><stop offset=".52" stop-color="#52efd0"/><stop offset="1" stop-color="#d6a0ff"/></linearGradient>
+  <filter id="softShadow" x="-25%" y="-30%" width="150%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#01050d" flood-opacity=".42"/></filter>
+  <filter id="mintGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#52efd0" flood-opacity=".3"/><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#000000" flood-opacity=".45"/></filter>
+  <filter id="pinkGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#d6a0ff" flood-opacity=".32"/></filter>
+  <filter id="blueGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#67baff" flood-opacity=".22"/></filter>
+  <filter id="focusGlow" x="-35%" y="-50%" width="170%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#67baff" flood-opacity=".2"/></filter>
+  <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#6ea7dd" opacity=".14"/></pattern>
+  <symbol id="ico-text" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="ico-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.2"/><path d="m3 17 5-5 4 4 3-3 6 5"/></symbol>
+  <symbol id="ico-audio" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></symbol>
+  <symbol id="ico-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+  <symbol id="ico-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ico-scan" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/><circle cx="12" cy="12" r="3"/><path d="M12 6v2M12 16v2M6 12h2M16 12h2"/></symbol>
+  <symbol id="ico-input" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h6"/></symbol>
+  <symbol id="ico-route" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v5a5 5 0 0 0 5 5h5M6 12h9a3 3 0 0 0 0-6h-3"/></symbol>
+  <symbol id="ico-document" viewBox="0 0 24 24"><rect x="4" y="3" width="13" height="18" rx="2"/><path d="M8 8h5M8 12h5M8 16h4M19 9h2M19 13h2"/></symbol>
+  <symbol id="ico-speech" viewBox="0 0 24 24"><path d="M3 11v2M7 7v10M11 4v16M15 8v8M19 6v12M23 11v2"/></symbol>
+  <symbol id="ico-decision" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="ico-unified" viewBox="0 0 24 24"><rect x="2" y="2" width="7" height="7" rx="2"/><rect x="15" y="2" width="7" height="7" rx="2"/><rect x="9" y="15" width="7" height="7" rx="2"/><path d="M5.5 9v3h7M18.5 9v3h-6M12.5 12v3"/></symbol>
+
+<symbol id="ico-context" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h10M7 12h10M7 16h6"/><path d="m16 16 1.5 1.5L21 14"/></symbol>
+<symbol id="ico-dialogue" viewBox="0 0 24 24"><path d="M3 4h18v13H9l-6 4V4Z"/><path d="M7 9h10M7 13h7"/></symbol>
+<symbol id="ico-signal" viewBox="0 0 24 24"><path d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
+<symbol id="ico-answer" viewBox="0 0 24 24"><path d="M4 4h16v13H9l-5 4V4Z"/><path d="M8 8h8M8 12h5"/></symbol>
+<symbol id="ico-action" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="ico-eval" viewBox="0 0 24 24"><path d="M4 20V11M10 20V7M16 20v-9M22 20V4"/><path d="M2 20h21"/></symbol>
+</defs>
+<rect width="1380" height="1030" fill="url(#background)"/>
+<rect width="1380" height="1030" fill="url(#dots)"/>
+<rect x="16" y="15" width="1348" height="1000" rx="31" fill="none" stroke="#40608d" stroke-opacity=".44" stroke-width="1.4"/>
+<g transform="translate(447,47)" stroke="url(#brand)" stroke-width="2.5" fill="none" stroke-linejoin="round">
+  <path d="M19 0 37 10.5v20.5L19 42 1 31V10.5Z"/><path d="M19 0v42M1 10.5l18 10 18-10.5M1 31l18-10 18 10"/>
+</g>
+<text x="707" y="78" class="header" text-anchor="middle">PrismLabs Architecture</text>
+<path d="M527 98h326" stroke="url(#brand)" stroke-opacity=".65" stroke-width="2.3" stroke-linecap="round"/>
+<!-- Trunks are behind the foreground -->
+<path class="link trunk" d="M690 179V208"/>
+<path class="link trunk" d="M690 270V334"/>
+<circle cx="690" cy="206" r="3.2" fill="#8ad3ff"/>
+<circle cx="690" cy="333" r="3.2" fill="#8ad3ff"/>
+
+<!-- user input -->
+<g class="core" transform="translate(556,119)">
+ <rect class="node-base" width="268" height="60" rx="19"/>
+ <g class="icon-bubble"><circle cx="39" cy="30" r="20"/><use href="#ico-input" x="27" y="18" width="24" height="24"/></g>
+ <text x="80" y="26" class="top-label">User input</text>
+ <text x="80" y="46" class="top-sub">Text · Image · Audio · Video</text>
+</g>
+<!-- router -->
+<g class="core route" transform="translate(560,208)">
+ <rect class="node-base" width="260" height="62" rx="19"/>
+ <g class="icon-bubble"><circle cx="40" cy="31" r="20"/><use href="#ico-route" x="28" y="19" width="24" height="24"/></g>
+ <text x="82" y="28" class="top-label">Intent router</text>
+ <text x="82" y="48" class="top-sub">Choose model paths</text>
+</g>
+<!-- Specialist pool -->
+<rect class="pool-boundary" x="70" y="305" width="1240" height="175" rx="24"/>
+<text x="101" y="334" class="section-label">SPECIALIST MODELS</text>
+<path d="M690 335H188 M690 335H1193" fill="none" stroke="#5487bb" stroke-width="2" stroke-opacity=".5"/>
+<path d="M188 335V355 M389 335V355 M590 335V355 M791 335V355 M992 335V355 M1193 335V355" fill="none" stroke="#528bbb" stroke-width="1.7" stroke-opacity=".65" stroke-dasharray="4 8"/>
+
+<!-- Animated edges under nodes -->
+<g class="edges">
+<path id="source-link-0" class="link source mint" data-flow="doc" data-source="text" d="M188 457 C188 487 248 498 248 535"/>
+<path id="source-link-1" class="link source mint" data-flow="doc" data-source="vision" d="M389 457 C389 487 313 500 313 535"/>
+<path id="source-link-2" class="link source blue" data-flow="voice" data-source="text" d="M188 457 C188 498 630 497 630 535"/>
+<path id="source-link-3" class="link source blue" data-flow="voice" data-source="audio" d="M590 457 C590 488 680 502 680 535"/>
+<path id="source-link-4" class="link source blue" data-flow="voice" data-source="omni" d="M791 457 C791 488 740 505 740 535"/>
+<path id="source-link-5" class="link source pink" data-flow="decision" data-source="vision" d="M389 457 C389 501 1020 492 1020 535"/>
+<path id="source-link-6" class="link source pink" data-flow="decision" data-source="omni" d="M791 457 C791 494 1060 502 1060 535"/>
+<path id="source-link-7" class="link source pink" data-flow="decision" data-source="d1" d="M992 457 C992 486 1100 507 1100 535"/>
+<path id="source-link-8" class="link source pink" data-flow="decision" data-source="d1omni" d="M1193 457 C1193 487 1145 506 1145 535"/>
+<path id="step-doc" class="link stage-path mint" data-flow="doc" d="M286 620 C286 640 286 650 286 680"/>
+<path id="step-voice" class="link stage-path blue" data-flow="voice" d="M690 620 C690 640 690 650 690 680"/>
+<path id="step-decision" class="link stage-path pink" data-flow="decision" d="M1094 620 C1094 640 1094 650 1094 680"/>
+<path id="merge-doc" class="link converge mint" data-flow="doc" d="M286 753 C286 784 620 779 620 811"/>
+<path id="merge-voice" class="link converge blue" data-flow="voice" d="M690 753 C690 779 690 785 690 811"/>
+<path id="merge-decision" class="link converge pink" data-flow="decision" d="M1094 753 C1094 784 760 779 760 811"/>
+<path id="out-answer" class="link deliver" d="M600 874 C600 909 315 897 315 939"/>
+<path id="out-action" class="link deliver" d="M690 874 C690 898 690 911 690 939"/>
+<path id="out-eval" class="link deliver" d="M780 874 C780 909 1065 897 1065 939"/>
+</g>
+
+ <g class="model node" data-model="text" transform="translate(99,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-text" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">LFM3-1.7B</text>
+      <text x="18" y="90" class="model-role">TEXT</text>
+    </g>
+<g class="model node" data-model="vision" transform="translate(300,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-image" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">LFM3-VL-2B</text>
+      <text x="18" y="90" class="model-role">VISION</text>
+    </g>
+<g class="model node" data-model="audio" transform="translate(501,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-audio" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">LFM3-Audio-2B</text>
+      <text x="18" y="90" class="model-role">AUDIO</text>
+    </g>
+<g class="model node" data-model="omni" transform="translate(702,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-layers" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">LFM3-Omni-2B</text>
+      <text x="18" y="90" class="model-role">OMNI</text>
+    </g>
+<g class="model node" data-model="d1" transform="translate(903,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-eye" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">d1-2B</text>
+      <text x="18" y="90" class="model-role">DECISION</text>
+    </g>
+<g class="model node" data-model="d1omni" transform="translate(1104,355)">
+      <rect class="node-base" x="0" y="0" width="178" height="102" rx="19"/>
+      <rect x="0.5" y="0.5" width="177" height="101" rx="18.5" fill="none" stroke="url(#nodeShine)" stroke-opacity=".09"/>
+      <g class="icon-bubble"><circle cx="32" cy="33" r="20"/><use href="#ico-scan" x="20" y="21" width="24" height="24"/></g>
+      <text x="18" y="73" class="model-label">d1-Omni-2B</text>
+      <text x="18" y="90" class="model-role">A/V DECISION</text>
+    </g>
+
+
+<!-- Three multi-model workflows -->
+<g class="pipeline-group">
+ <g class="pipe" data-flow="doc" tabindex="0" role="button" aria-label="Highlight document understanding route">
+  <rect class="node-base" x="105" y="535" width="362" height="85" rx="22"/>
+  <circle class="pipe-icon-bg" cx="151" cy="577" r="25"/>
+  <use class="pipe-icon" href="#ico-document" x="137" y="563" width="28" height="28"/>
+  <text x="195" y="572" class="pipeline-title">Document understanding</text>
+  <text x="195" y="596" class="pipeline-sub">Text + Vision</text>
+ </g>
+ <g class="pipe" data-flow="voice" tabindex="0" role="button" aria-label="Highlight speech interaction route">
+  <rect class="node-base" x="508" y="535" width="364" height="85" rx="22"/>
+  <circle class="pipe-icon-bg" cx="554" cy="577" r="25"/>
+  <use class="pipe-icon" href="#ico-speech" x="540" y="563" width="28" height="28"/>
+  <text x="598" y="572" class="pipeline-title">Speech interaction</text>
+  <text x="598" y="596" class="pipeline-sub">Audio + Text + Omni</text>
+ </g>
+ <g class="pipe" data-flow="decision" tabindex="0" role="button" aria-label="Highlight visual decision route">
+  <rect class="node-base" x="913" y="535" width="362" height="85" rx="22"/>
+  <circle class="pipe-icon-bg" cx="959" cy="577" r="25"/>
+  <use class="pipe-icon" href="#ico-decision" x="945" y="563" width="28" height="28"/>
+  <text x="1003" y="572" class="pipeline-title">Visual decisions</text>
+  <text x="1003" y="596" class="pipeline-sub">Vision · Omni · d1 · d1 Omni</text>
+ </g>
+</g>
+<!-- New post-workflow processing layer: artifacts, not additional models -->
+<text x="90" y="667" class="stage-title">PROCESSING</text>
+<g class="stage" data-flow="doc">
+ <rect class="node-base" x="143" y="680" width="286" height="73" rx="18"/>
+ <circle class="pipe-icon-bg" cx="183" cy="716.5" r="23"/>
+ <use class="pipe-icon" href="#ico-context" x="171" y="704.5" width="24" height="24"/>
+ <text x="217" y="710" class="stage-label">Extracted context</text>
+ <text x="217" y="731" class="stage-hint">OCR · facts · context</text>
+</g>
+<g class="stage" data-flow="voice">
+ <rect class="node-base" x="548" y="680" width="284" height="73" rx="18"/>
+ <circle class="pipe-icon-bg" cx="588" cy="716.5" r="23"/>
+ <use class="pipe-icon" href="#ico-dialogue" x="576" y="704.5" width="24" height="24"/>
+ <text x="622" y="710" class="stage-label">Dialogue context</text>
+ <text x="622" y="731" class="stage-hint">Speech · turn state</text>
+</g>
+<g class="stage" data-flow="decision">
+ <rect class="node-base" x="951" y="680" width="286" height="73" rx="18"/>
+ <circle class="pipe-icon-bg" cx="991" cy="716.5" r="23"/>
+ <use class="pipe-icon" href="#ico-signal" x="979" y="704.5" width="24" height="24"/>
+ <text x="1025" y="710" class="stage-label">Decision signals</text>
+ <text x="1025" y="731" class="stage-hint">Scores · choices</text>
+</g>
+
+<!-- Unified workbench -->
+<g class="final" transform="translate(484,811)">
+ <rect class="node-base" width="412" height="63" rx="20"/>
+ <g class="icon-bubble"><circle cx="42" cy="31.5" r="20"/><use href="#ico-unified" x="30" y="19.5" width="24" height="24"/></g>
+ <text x="85" y="27" class="final-label">Unified workbench</text>
+ <text x="85" y="47" class="final-sub">Compose · Orchestrate · Validate</text>
+</g>
+
+<!-- Three branches from the workbench -->
+<g class="output" transform="translate(185,939)">
+ <rect class="node-base" width="260" height="70" rx="20"/>
+ <circle class="output-icon" cx="40" cy="35" r="23"/>
+ <use href="#ico-answer" x="27" y="22" width="26" height="26"/>
+ <text x="77" y="30" class="output-title">Answers</text>
+ <text x="77" y="49" class="output-sub">Text · OCR · speech</text>
+</g>
+<g class="output" transform="translate(560,939)">
+ <rect class="node-base" width="260" height="70" rx="20"/>
+ <circle class="output-icon" cx="40" cy="35" r="23"/>
+ <use href="#ico-action" x="27" y="22" width="26" height="26"/>
+ <text x="77" y="30" class="output-title">Actions</text>
+ <text x="77" y="49" class="output-sub">Tools · decisions</text>
+</g>
+<g class="output" transform="translate(935,939)">
+ <rect class="node-base" width="260" height="70" rx="20"/>
+ <circle class="output-icon" cx="40" cy="35" r="23"/>
+ <use href="#ico-eval" x="27" y="22" width="26" height="26"/>
+ <text x="77" y="30" class="output-title">Evaluation</text>
+ <text x="77" y="49" class="output-sub">Quality · latency</text>
+</g>
+<g class="signals">
+<circle class="signal mint" data-flow="doc" r="3.8"><animateMotion dur="2.20s" begin="-0.00s" repeatCount="indefinite"><mpath href="#source-link-0"/></animateMotion></circle>
+<circle class="signal mint" data-flow="doc" r="3.8"><animateMotion dur="2.32s" begin="-0.28s" repeatCount="indefinite"><mpath href="#source-link-1"/></animateMotion></circle>
+<circle class="signal blue" data-flow="voice" r="3.8"><animateMotion dur="2.44s" begin="-0.56s" repeatCount="indefinite"><mpath href="#source-link-2"/></animateMotion></circle>
+<circle class="signal blue" data-flow="voice" r="3.8"><animateMotion dur="2.56s" begin="-0.84s" repeatCount="indefinite"><mpath href="#source-link-3"/></animateMotion></circle>
+<circle class="signal blue" data-flow="voice" r="3.8"><animateMotion dur="2.68s" begin="-1.12s" repeatCount="indefinite"><mpath href="#source-link-4"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="3.8"><animateMotion dur="2.80s" begin="-1.40s" repeatCount="indefinite"><mpath href="#source-link-5"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="3.8"><animateMotion dur="2.92s" begin="-1.68s" repeatCount="indefinite"><mpath href="#source-link-6"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="3.8"><animateMotion dur="3.04s" begin="-1.96s" repeatCount="indefinite"><mpath href="#source-link-7"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="3.8"><animateMotion dur="3.16s" begin="-2.24s" repeatCount="indefinite"><mpath href="#source-link-8"/></animateMotion></circle>
+<circle class="signal mint" data-flow="doc" r="4.2"><animateMotion dur="2.10s" begin="-0.00s" repeatCount="indefinite"><mpath href="#step-doc"/></animateMotion></circle>
+<circle class="signal blue" data-flow="voice" r="4.2"><animateMotion dur="2.28s" begin="-0.20s" repeatCount="indefinite"><mpath href="#step-voice"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="4.2"><animateMotion dur="2.46s" begin="-0.40s" repeatCount="indefinite"><mpath href="#step-decision"/></animateMotion></circle>
+<circle class="signal mint" data-flow="doc" r="4.2"><animateMotion dur="2.64s" begin="-0.60s" repeatCount="indefinite"><mpath href="#merge-doc"/></animateMotion></circle>
+<circle class="signal blue" data-flow="voice" r="4.2"><animateMotion dur="2.82s" begin="-0.80s" repeatCount="indefinite"><mpath href="#merge-voice"/></animateMotion></circle>
+<circle class="signal pink" data-flow="decision" r="4.2"><animateMotion dur="3.00s" begin="-1.00s" repeatCount="indefinite"><mpath href="#merge-decision"/></animateMotion></circle>
+<circle r="4" fill="#9dddff" filter="url(#blueGlow)"><animateMotion dur="2.20s" begin="-0.00s" repeatCount="indefinite"><mpath href="#out-answer"/></animateMotion></circle>
+<circle r="4" fill="#9dddff" filter="url(#blueGlow)"><animateMotion dur="2.42s" begin="-0.42s" repeatCount="indefinite"><mpath href="#out-action"/></animateMotion></circle>
+<circle r="4" fill="#9dddff" filter="url(#blueGlow)"><animateMotion dur="2.64s" begin="-0.84s" repeatCount="indefinite"><mpath href="#out-eval"/></animateMotion></circle>
+</g>
+</svg>
