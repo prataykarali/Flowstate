@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 780" width="100%" height="100%">
+  <defs>
+    <style>
+      .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 20px; fill: #0F172A; }
+      .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; fill: #475569; }
+      .section-hdr { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 14px; fill: #1E293B; }
+      .node-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-weight: 700; font-size: 13px; }
+      .node-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; fill: #334155; }
+      .node-port { font-family: monospace; font-size: 10px; font-weight: 600; fill: #0284C7; }
+      .edge-label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 600; fill: #64748B; }
+      .gate-lbl { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #B91C1C; }
+      .foot-txt { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; fill: #64748B; font-style: italic; }
+    </style>
+
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748B"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563EB"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#D97706"/>
+    </marker>
+
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="780" fill="#FFFFFF"/>
+  <rect x="20" y="20" width="1060" height="740" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+
+  <!-- Header -->
+  <text x="50" y="55" class="title">PrismLab P3: Audio Intelligence Architecture &amp; Execution Topologies</text>
+  <text x="50" y="75" class="subtitle">Direct Native Speech-to-Speech vs Modular Pipeline Processing Pathways (LFM3 Multimodal Suite)</text>
+
+  <!-- ==================== COMMON INPUT ==================== -->
+  <g transform="translate(50, 105)" filter="url(#shadow)">
+    <rect width="1000" height="60" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.2"/>
+    <rect x="15" y="14" width="32" height="32" rx="4" fill="#EEF2FF"/>
+    <text x="60" y="32" class="node-title" fill="#1E293B">Input Spoken Audio (16 kHz Mono PCM16 WAV)</text>
+    <text x="60" y="47" class="node-desc">Clean acoustic capture; validated via RMS amplitude gate (RMS ≥ 0.002 to suppress ambient hallucinations)</text>
+    <text x="880" y="38" class="node-port">data/audio/</text>
+  </g>
+
+  <!-- ==================== TRACK A: NATIVE S2S ==================== -->
+  <g transform="translate(50, 195)">
+    <rect width="1000" height="155" rx="8" fill="#FEF3C7" fill-opacity="0.25" stroke="#F59E0B" stroke-width="1.5"/>
+    <text x="20" y="26" class="section-hdr" fill="#B45309">Pathway A: Native Speech-to-Speech (LFM3-Audio-2B)</text>
+    <text x="20" y="42" class="node-desc">Single-pass acoustic encoder → joint cross-modal decoder → native vocoder streaming</text>
+
+    <!-- Native Node -->
+    <g transform="translate(260, 55)" filter="url(#shadow)">
+      <rect width="480" height="80" rx="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.8"/>
+      <text x="20" y="28" class="node-title" fill="#B45309">LFM3-Audio-2B (Native S2S Endpoint)</text>
+      <text x="20" y="46" class="node-desc">Quantized GGUF execution via llama-server; zero intermediate text serialization</text>
+      <text x="20" y="64" class="node-port">Port 8082 | /v1/chat/completions (input_audio + output_audio)</text>
+    </g>
+
+    <!-- Edges -->
+    <path d="M 120 -30 L 120 95 L 260 95" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+    <text x="130" y="90" class="edge-label" fill="#B45309">Raw PCM16 Stream</text>
+
+    <path d="M 740 95 L 870 95" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)"/>
+    <text x="760" y="90" class="edge-label" fill="#B45309">Native Speech (24 kHz)</text>
+
+    <!-- Latency Badge -->
+    <rect x="880" y="75" width="100" height="40" rx="4" fill="#D97706"/>
+    <text x="930" y="94" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="11px" fill="#FFFFFF">13.95s Median</text>
+    <text x="930" y="108" text-anchor="middle" font-family="sans-serif" font-size="9px" fill="#FEF3C7">Task Succ: 24/25</text>
+  </g>
+
+  <!-- ==================== TRACK B: MODULAR PIPELINES ==================== -->
+  <g transform="translate(50, 380)">
+    <rect width="1000" height="330" rx="8" fill="#F1F5F9" fill-opacity="0.4" stroke="#94A3B8" stroke-width="1.5"/>
+    <text x="20" y="26" class="section-hdr" fill="#0F172A">Pathway B: Cascaded Modular Architecture (V1 Baseline vs V2.1 Engineered)</text>
+    <text x="20" y="42" class="node-desc">Three-stage decoupled pipeline: Acoustic ASR → Context-Grounded Reasoning → Speech Synthesis</text>
+
+    <!-- Stage 1: ASR -->
+    <g transform="translate(30, 70)" filter="url(#shadow)">
+      <rect width="260" height="100" rx="6" fill="#FFFFFF" stroke="#3B82F6" stroke-width="1.5"/>
+      <text x="15" y="25" class="node-title" fill="#1E40AF">Stage 1: Speech-to-Text (ASR)</text>
+      <text x="15" y="44" class="node-desc">LFM3-Audio-2B in ASR prompt mode</text>
+      <text x="15" y="60" class="node-desc">Transcript extraction (whisper-style)</text>
+      <text x="15" y="80" class="node-port">Port 8082 | Median: 3.78s (n=24)</text>
+    </g>
+
+    <!-- Connecting Edge ASR -> LLM -->
+    <path d="M 290 120 L 360 120" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arrow-blue)"/>
+    <text x="300" y="113" class="edge-label">Transcript</text>
+
+    <!-- Stage 2: Reasoning (Split V1 vs V2.1) -->
+    <g transform="translate(360, 60)" filter="url(#shadow)">
+      <!-- V1 Reasoning Box -->
+      <rect width="280" height="105" rx="6" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.2"/>
+      <text x="12" y="22" class="node-title" fill="#1E40AF">Stage 2a: Modular V1 Reasoning</text>
+      <text x="12" y="38" class="node-desc">LFM3-1.7B (Text Server, Port 8080)</text>
+      <text x="12" y="54" class="node-desc">Loose grounding; max_tokens=128</text>
+      <text x="12" y="70" class="gate-lbl">FLAWS: 0/5 Spatial, tag leaks, XML</text>
+      <text x="12" y="92" class="node-port">Median: 3.91s | Task: 15/25</text>
+    </g>
+
+    <g transform="translate(360, 185)" filter="url(#shadow)">
+      <!-- V2.1 Reasoning Box -->
+      <rect width="280" height="120" rx="6" fill="#ECFDF5" stroke="#059669" stroke-width="1.8"/>
+      <text x="12" y="22" class="node-title" fill="#065F46">Stage 2b: Modular V2.1 Grounded</text>
+      <text x="12" y="38" class="node-desc">LFM3-1.7B with Reasoning Prompt V2</text>
+      <text x="12" y="54" class="node-desc">clean_voice_answer(): strips &lt;think&gt;</text>
+      <text x="12" y="70" class="node-desc">Guard: Hard limit 25 words or abort</text>
+      <text x="12" y="86" class="node-desc" fill="#047857" font-weight="600">Spatial: 5/5 | Cleaned Speech Output</text>
+      <text x="12" y="106" class="node-port">Median: 6.74s | Task: 22/25</text>
+    </g>
+
+    <!-- Branching edges -->
+    <path d="M 325 120 L 325 240 L 360 240" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+    <!-- Stage 3: TTS -->
+    <g transform="translate(710, 115)" filter="url(#shadow)">
+      <rect width="250" height="110" rx="6" fill="#FFFFFF" stroke="#64748B" stroke-width="1.5"/>
+      <text x="15" y="25" class="node-title" fill="#1E293B">Stage 3: Speech Synthesis (TTS)</text>
+      <text x="15" y="44" class="node-desc">LFM3-Audio TTS endpoint (female/42)</text>
+      <text x="15" y="60" class="node-desc">V1 TTS Median: 19.86s (unbounded text)</text>
+      <text x="15" y="76" class="node-desc" fill="#065F46" font-weight="600">V2.1 TTS Median: 7.91s (-60.2% time)</text>
+      <text x="15" y="98" class="node-port">Port 8082 | /tts</text>
+    </g>
+
+    <!-- Connecting Edges to TTS -->
+    <path d="M 640 110 L 710 145" fill="none" stroke="#2563EB" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrow-blue)"/>
+    <path d="M 640 245 L 680 245 L 680 185 L 710 185" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-green)"/>
+  </g>
+
+  <!-- Footnote -->
+  <text x="50" y="745" class="foot-txt">PrismLab P3 Audio Intelligence Research Workbench. Timed: V1 n=23 (27.70s), V2.1 n=24 (20.18s), Native n=23 (13.95s). Recovered G01, S01 excluded from latency.</text>
+</svg>

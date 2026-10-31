@@ -1,0 +1,69 @@
+# Environments
+.venv/
+.venv*/
+venv/
+ENV/
+env/
+
+# Python caches and artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# Machine learning model weights and checkpoints
+*.gguf
+*.bin
+*.pt
+*.pth
+*.onnx
+models/
+checkpoints/
+
+# Local data and live recorded audio
+data/audio/live/
+archive/
+
+# Editor and OS metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Temporary traces and logs
+*.tmp
+*.log
+
+# Curation: Exclude raw un-sanitized comparison logs, versioned runs, and per-case raw traces
+# (Preserves local raw evidence while keeping the release commit lightweight and clean)
+results/p3/comparison/
+results/p3/v2/
+results/p3/v21/
+results/p3/v21_final/
+results/p3/reliability/reports/
+results/p3/reliability/p36_final_three_way.csv
+results/p3/reliability/p36_25_case_results.csv
+results/p3/reliability/reliability_results.csv
+results/p3/reliability/recovered_outputs.csv
+results/p3/reliability/modular_retranscriptions.json
+results/p3/reliability/prompt_v2_ablation.json
+results/p3/reliability/s01_root_cause.json
+results/p3/reliability/*.wav
+results/p3/reliability/inputs/
+results/p3/tts/
+results/p3/qa_benchmark/
+results/p3/multilingual_asr.jsonl
+data/audio/mic_fixed.wav
+data/audio/speech.mp4
+data/audio/speech.wav
+data/audio/spoken_question.wav

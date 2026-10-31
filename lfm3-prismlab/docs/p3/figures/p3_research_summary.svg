@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" width="100%" height="100%">
+  <defs>
+    <style>
+      .hdr { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; font-size: 22px; fill: #0F172A; }
+      .subhdr { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; fill: #64748B; }
+      .card-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 700; font-size: 15px; }
+      .card-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 12px; fill: #334155; line-height: 1.5; }
+      .metric-val { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 800; font-size: 24px; }
+      .metric-lbl { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-weight: 600; font-size: 10px; fill: #64748B; text-transform: uppercase; }
+      .tag { font-family: monospace; font-size: 11px; font-weight: 600; }
+    </style>
+    <filter id="card-shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.05"/>
+    </filter>
+  </defs>
+
+  <rect width="1100" height="820" fill="#F8FAFC"/>
+
+  <!-- Header Banner -->
+  <rect x="40" y="30" width="1020" height="90" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2" filter="url(#card-shadow)"/>
+  <text x="70" y="68" class="hdr">PrismLab P3 Audio Intelligence: Research Findings &amp; Trade-off Matrix</text>
+  <text x="70" y="92" class="subhdr">Executive Synthesis of 75 Canonical Multimodal Evaluations Across Native vs Cascaded Modular Topologies</text>
+
+  <!-- Metric Quick-Cards -->
+  <g transform="translate(40, 135)">
+    <!-- Card 1: Native Latency -->
+    <rect x="0" y="0" width="240" height="90" rx="8" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="20" y="28" class="metric-lbl">Native S2S Latency</text>
+    <text x="20" y="60" class="metric-val" fill="#D97706">13.95 s</text>
+    <text x="20" y="78" class="card-body" fill="#92400E">Median end-to-end (n=23)</text>
+
+    <!-- Card 2: Modular V1 Latency -->
+    <rect x="260" y="0" width="240" height="90" rx="8" fill="#FFFFFF" stroke="#3B82F6" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="280" y="28" class="metric-lbl">Modular V1 Baseline</text>
+    <text x="280" y="60" class="metric-val" fill="#2563EB">27.70 s</text>
+    <text x="280" y="78" class="card-body" fill="#1E40AF">Median (n=23) | Task: 16/25</text>
+
+    <!-- Card 3: Modular V2.1 Latency -->
+    <rect x="520" y="0" width="240" height="90" rx="8" fill="#FFFFFF" stroke="#10B981" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="540" y="28" class="metric-lbl">Modular V2.1 Engineered</text>
+    <text x="540" y="60" class="metric-val" fill="#059669">20.18 s</text>
+    <text x="540" y="78" class="card-body" fill="#065F46">Median (n=24) | Task: 22/25</text>
+
+    <!-- Card 4: Native Task Success -->
+    <rect x="780" y="0" width="240" height="90" rx="8" fill="#FFFFFF" stroke="#8B5CF6" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <text x="800" y="28" class="metric-lbl">Native Accuracy Peak</text>
+    <text x="800" y="60" class="metric-val" fill="#7C3AED">96.0 %</text>
+    <text x="800" y="78" class="card-body" fill="#5B21B6">Strict Success: 24/25</text>
+  </g>
+
+  <!-- Detailed Three-Column Analysis -->
+  <g transform="translate(40, 245)">
+    <!-- Column 1: Native Speech-to-Speech -->
+    <g transform="translate(0, 0)" filter="url(#card-shadow)">
+      <rect width="325" height="420" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+      <rect width="325" height="45" rx="8" fill="#FEF3C7"/>
+      <text x="18" y="28" class="card-title" fill="#B45309">1. Native LFM3-Audio S2S</text>
+
+      <text x="18" y="70" class="card-title" fill="#1E293B" font-size="13px">Key Strengths</text>
+      <text x="18" y="92" class="card-body">• Fastest wall-clock execution (13.95s median, n=23)</text>
+      <text x="18" y="112" class="card-body">• Superior cross-modal spatial &amp; linguistic reasoning</text>
+      <text x="18" y="132" class="card-body">• Direct acoustic understanding eliminates ASR error</text>
+      <text x="18" y="152" class="card-body">• Concise spoken output by default (natural cadence)</text>
+
+      <text x="18" y="190" class="card-title" fill="#B91C1C" font-size="13px">Critical Limitations</text>
+      <text x="18" y="212" class="card-body">• Monolithic black box: no inspectable text trace</text>
+      <text x="18" y="232" class="card-body">• No granular control over tone, safety, or length</text>
+      <text x="18" y="252" class="card-body">• Cannot swap intermediate reasoning models</text>
+      <text x="18" y="272" class="card-body">• Language limitations: officially EN/ES/FR/DE</text>
+
+      <rect x="18" y="310" width="289" height="85" rx="6" fill="#FFFBEB" stroke="#FDE68A"/>
+      <text x="28" y="332" class="tag" fill="#92400E">RESEARCH VERDICT:</text>
+      <text x="28" y="352" class="card-body" font-size="11.5px">Strongest baseline on clean synthesized English,</text>
+      <text x="28" y="370" class="card-body" font-size="11.5px">but lacks operational inspection hooks.</text>
+    </g>
+
+    <!-- Column 2: Modular V1 Failure Analysis -->
+    <g transform="translate(347, 0)" filter="url(#card-shadow)">
+      <rect width="325" height="420" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+      <rect width="325" height="45" rx="8" fill="#DBEAFE"/>
+      <text x="18" y="28" class="card-title" fill="#1D4ED8">2. Modular V1 Breakdown</text>
+
+      <text x="18" y="70" class="card-title" fill="#1E293B" font-size="13px">Root Cause of Failures</text>
+      <text x="18" y="92" class="card-body">• 0/5 Spatial reasoning failure (S01-S05)</text>
+      <text x="18" y="112" class="card-body">• Prompt over-conservatism: "I don't have info"</text>
+      <text x="18" y="132" class="card-body">• Deliberation tags leak into speech (&lt;think&gt;)</text>
+      <text x="18" y="152" class="card-body">• Tool call XML emitted to TTS (F03 math case)</text>
+      <text x="18" y="172" class="card-body">• Unbounded text length bloats TTS time to 88s</text>
+
+      <text x="18" y="210" class="card-title" fill="#475569" font-size="13px">Observed Metrics</text>
+      <text x="18" y="232" class="card-body">• Median latency: 27.70 s (n=23 timed)</text>
+      <text x="18" y="252" class="card-body">• Semantic correctness: 68% (17/25)</text>
+      <text x="18" y="272" class="card-body">• Strict task success: 60% (15/25)</text>
+
+      <rect x="18" y="310" width="289" height="85" rx="6" fill="#EFF6FF" stroke="#BFDBFE"/>
+      <text x="28" y="332" class="tag" fill="#1E40AF">DIAGNOSIS:</text>
+      <text x="28" y="352" class="card-body" font-size="11.5px">Naive LLM text prompts fail speech-assistant</text>
+      <text x="28" y="370" class="card-body" font-size="11.5px">contracts without explicit grounding &amp; sanitization.</text>
+    </g>
+
+    <!-- Column 3: Modular V2.1 Engineering -->
+    <g transform="translate(695, 0)" filter="url(#card-shadow)">
+      <rect width="325" height="420" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.2"/>
+      <rect width="325" height="45" rx="8" fill="#D1FAE5"/>
+      <text x="18" y="28" class="card-title" fill="#047857">3. Modular V2.1 Solution</text>
+
+      <text x="18" y="70" class="card-title" fill="#1E293B" font-size="13px">Engineered Interventions</text>
+      <text x="18" y="92" class="card-body">• Grounded Prompt V2: 100% spatial recovery (5/5)</text>
+      <text x="18" y="112" class="card-body">• clean_voice_answer(): strips deliberation tags</text>
+      <text x="18" y="132" class="card-body">• TTS Latency reduced by 60.2% (19.86s → 7.91s)</text>
+      <text x="18" y="152" class="card-body">• Safe TTS gate: rejects &gt;25 words (G02 caught)</text>
+
+      <text x="18" y="190" class="card-title" fill="#047857" font-size="13px">Modular Advantages</text>
+      <text x="18" y="212" class="card-body">• Full auditable JSON trace per pipeline turn</text>
+      <text x="18" y="232" class="card-body">• Plug-and-play components (independent updates)</text>
+      <text x="18" y="252" class="card-body">• Strict safety guardrails prior to vocalization</text>
+
+      <rect x="18" y="310" width="289" height="85" rx="6" fill="#ECFDF5" stroke="#A7F3D0"/>
+      <text x="28" y="332" class="tag" fill="#065F46">OPERATIONAL VERDICT:</text>
+      <text x="28" y="352" class="card-body" font-size="11.5px">V2.1 achieves 88% task success with full trace</text>
+      <text x="28" y="370" class="card-body" font-size="11.5px">auditability, essential for production governance.</text>
+    </g>
+  </g>
+
+  <!-- Bottom Bar: Methodology & Scope Note -->
+  <rect x="40" y="685" width="1020" height="95" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="60" y="710" class="card-title" fill="#1E293B" font-size="12px">Methodological Scope &amp; Sample Size Audit:</text>
+  <text x="60" y="730" class="card-body" font-size="11px">1. Dataset: 25 distinct benchmark tasks across 5 categories. Total 75 evaluations: 23 ok + 2 rec (V1), 24 ok + 1 fail (V2.1), 23 ok + 2 rec (Native).</text>
+  <text x="60" y="747" class="card-body" font-size="11px">2. Timed Latency: V1 n=23 (median 27.70s), V2.1 n=24 (median 20.18s), Native n=23 (median 13.95s). Recovered cases G01/S01 lack timestamps.</text>
+  <text x="60" y="764" class="card-body" font-size="11px">3. Hardware &amp; Input: Quantized CPU execution via llama.cpp. Clean synthetic English speech (16 kHz mono). Does not reflect field noise.</text>
+</svg>

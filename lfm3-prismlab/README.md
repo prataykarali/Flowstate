@@ -79,7 +79,7 @@ PrismLab registers six model pathways. **To maintain research integrity, registe
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`text`** | `LiquidAI/LFM3-1.7B` | `{text}` | `{text}` | **P1 Complete** | **Active (Port 8080)** |
 | **`vision`** | `LiquidAI/LFM3-VL-2B` | `{text, image, video}` | `{text}` | **P2 Complete** | **Active (Port 8180)** |
-| **`audio`** | `LiquidAI/LFM3-Audio-2B` | `{text, audio}` | `{text, speech}` | **P3 Planned** | *Registered / Not Deployed* |
+| **`audio`** | `LiquidAI/LFM3-Audio-2B` | `{text, audio}` | `{text, speech}` | **P3 Complete** | **Active (Port 8082)** |
 | **`omni`** | `LiquidAI/LFM3-Omni-2B` | `{text, image, video, audio}` | `{text, speech}` | Subsequent | *Registered / Not Deployed* |
 | **`d1`** | `LiquidAI/d1-2B` | `{text, image, video}` | `{decision}` | Subsequent | *Registered / Not Deployed* |
 | **`d1_omni`** | `LiquidAI/d1-Omni-2B` | `{text, image, video, audio}` | `{decision}` | Subsequent | *Registered / Not Deployed* |
@@ -102,6 +102,13 @@ PrismLab registers six model pathways. **To maintain research integrity, registe
   - Sequential Pipeline (VL OCR $\to$ Text): **9 / 10 exact matches (90%)**, median latency **65.72 s**.
   - Pipeline Failure Analysis: Cascade failure on `04_lab_schedule.png` was caused by generation token exhaustion in the secondary text model, despite 100% visual OCR phrase recall.
   - Keyword-Conditioned Selection: **5 / 10 strict exact matches** (clarified: 50% strict score was due to retrieval omissions and formatting, not model factual error).
+
+### [Phase 3: Audio Intelligence & Multimodal Voice Architecture](docs/p3/README.md)
+- Benchmarked `LFM3-Audio-2B` native speech-to-speech against cascaded modular pipelines (ASR → LFM3-1.7B → TTS) across 25 multimodal benchmark cases (75 total evaluations).
+- **Latency Advantage:** Native S2S achieved **13.95 s median latency**, outperforming Modular V1 (27.70 s) by 49.6% and Modular V2.1 (20.18 s) by 30.9%.
+- **Task Success:** Native S2S achieved **24 / 25 (96.0%)** strict task success; Modular V2.1 achieved **22 / 25 (88.0%)** after prompt grounding and output sanitization recovered 100% spatial reasoning.
+- **Engineered Safeguards:** Modular V2.1 introduced deterministic regex thinking-tag stripping and word-limit safety gating, cutting speech synthesis latency by **60.2%** (19.86 s $\to$ 7.91 s).
+- Complete research report, failure breakdown, and SVG architectures: [`docs/p3/README.md`](docs/p3/README.md).
 
 ---
 
@@ -203,5 +210,6 @@ python benchmarks/plot_results.py
 
 - [P1: Core Routing & Local Text Inference Report](docs/p1/README.md)
 - [P2: Vision-Language & OCR Benchmark Report (Highest Priority)](docs/p2/README.md)
+- [P3: Audio Intelligence & Multimodal Voice Architecture Report](docs/p3/README.md)
 - [Synthetic OCR Evaluation Suite Specification](docs/benchmarks/ocr_suite.md)
 - [Architecture Visualizations & Manim Catalog](visuals/README.md)
