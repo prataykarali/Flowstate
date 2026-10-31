@@ -1,0 +1,41 @@
+Case,Condition,Expected,Task type,Omni output,Modular output,Omni pass,Modular pass,Omni latency,Modular latency
+H01,top_right_absent,unknown,Unanswerable,Orange,Orange,False,False,20.493,20.496
+H02,top_right_absent,unknown,Unanswerable,Orange,Yellow,False,False,20.447,22.086
+H03,top_right_present,green,Answerable,Green,Green,True,True,21.049,21.638
+H04,top_right_present,yellow,Answerable,Yellow,Yellow,True,True,21.565,21.57
+H05,top_right_present,purple,Answerable,Purple,Purple,True,True,20.171,21.689
+H06,top_right_present,blue,Answerable,Blue,Blue,True,True,21.252,20.991
+H07,top_right_present,red,Answerable,Red,Red,True,True,21.44,20.732
+H08,top_right_present,green,Answerable,Green,Green,True,True,20.92,21.308
+H09,below_red_absent,unknown,Unanswerable,Star,Star,False,False,20.684,20.86
+H10,below_red_present,diamond,Answerable,Diamond,Diamond,True,True,20.949,21.998
+H11,below_red_absent,unknown,Unanswerable,Star,Star,False,False,20.912,20.787
+H12,below_red_present,star,Answerable,Star,Star,True,True,21.36,22.085
+H13,below_red_present,square,Answerable,Triangle,Square,False,True,20.683,20.719
+H14,below_red_absent,unknown,Unanswerable,Diamond,Diamond,False,False,21.073,21.044
+H15,below_red_absent,unknown,Unanswerable,Circle,None,False,False,21.22,21.099
+H16,below_red_present,circle,Answerable,Circle,Circle,True,True,20.728,21.396
+H17,left_of_blue_absent,unknown,Unanswerable,Circle,None,False,False,20.425,20.715
+H18,left_of_blue_present,triangle,Answerable,Star,Triangle,False,True,20.445,21.327
+H19,left_of_blue_absent,unknown,Unanswerable,Blue square,Square,False,False,21.294,20.548
+H20,left_of_blue_present,square,Answerable,Triangle,Square,False,True,20.97,20.729
+H21,left_of_blue_present,triangle,Answerable,Triangle,Triangle,True,True,22.144,20.754
+H22,left_of_blue_present,star,Answerable,Star,Star,True,True,20.159,20.818
+H23,left_of_blue_absent,unknown,Unanswerable,Star shape,Star,False,False,20.974,21.541
+H24,left_of_blue_absent,unknown,Unanswerable,Square,Square,False,False,21.174,21.388
+H25,missing_diamond_present,green,Answerable,Green,Green,True,True,25.661,21.577
+H26,missing_diamond_present,red,Answerable,Red,Red,True,True,22.001,21.584
+H27,missing_diamond_absent,unknown,Unanswerable,UNKNOWN,UNKNOWN,True,True,21.158,22.045
+H28,missing_diamond_absent,unknown,Unanswerable,UNKNOWN,UNKNOWN,True,True,20.83,21.245
+H29,missing_diamond_absent,unknown,Unanswerable,UNKNOWN,UNKNOWN,True,True,20.038,21.063
+H30,missing_diamond_present,purple,Answerable,Purple,Purple,True,True,21.134,21.287
+H31,missing_diamond_absent,unknown,Unanswerable,UNKNOWN,UNKNOWN,True,True,20.557,20.848
+H32,missing_diamond_present,red,Answerable,Red,Red,True,True,20.784,21.057
+H33,top_left_present,star,Answerable,Star,Star,True,True,20.121,21.289
+H34,top_left_present,star,Answerable,Star,Star,True,True,20.919,21.954
+H35,top_left_present,square,Answerable,Square,Square,True,True,20.574,21.847
+H36,top_left_absent,unknown,Unanswerable,Triangle,Triangle,False,False,21.012,21.577
+H37,top_left_absent,unknown,Unanswerable,Triangle,Triangle,False,False,20.464,21.181
+H38,top_left_present,diamond,Answerable,Diamond,Diamond,True,True,21.061,21.95
+H39,top_left_present,square,Answerable,Square,Square,True,True,20.603,20.91
+H40,top_left_present,triangle,Answerable,Triangle,Triangle,True,True,20.407,21.375

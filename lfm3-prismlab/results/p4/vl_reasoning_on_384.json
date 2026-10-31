@@ -1,0 +1,53 @@
+[
+  {
+    "id": "B04",
+    "transcript": "What shape is directly below the red triangle?",
+    "max_tokens": 384,
+    "answer": "",
+    "finish_reason": "length",
+    "reasoning_chars": 1728,
+    "usage": {
+      "completion_tokens": 384,
+      "prompt_tokens": 357,
+      "total_tokens": 741,
+      "prompt_tokens_details": {
+        "cached_tokens": 37
+      }
+    },
+    "latency_s": 36.016
+  },
+  {
+    "id": "B06",
+    "transcript": "What shape is immediately to the left of the blue circle?",
+    "max_tokens": 384,
+    "answer": "",
+    "finish_reason": "length",
+    "reasoning_chars": 1660,
+    "usage": {
+      "completion_tokens": 384,
+      "prompt_tokens": 360,
+      "total_tokens": 744,
+      "prompt_tokens_details": {
+        "cached_tokens": 37
+      }
+    },
+    "latency_s": 36.058
+  },
+  {
+    "id": "B07",
+    "transcript": "What color is the diamond in the image?",
+    "max_tokens": 384,
+    "answer": "UNKNOWN",
+    "finish_reason": "stop",
+    "reasoning_chars": 686,
+    "usage": {
+      "completion_tokens": 159,
+      "prompt_tokens": 357,
+      "total_tokens": 516,
+      "prompt_tokens_details": {
+        "cached_tokens": 37
+      }
+    },
+    "latency_s": 20.634
+  }
+]

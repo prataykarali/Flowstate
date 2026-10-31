@@ -1,0 +1,26 @@
+[
+  {
+    "case_id": "S02_AUDIO",
+    "file": "S02_red_blue_beep_after.mp4",
+    "expected": "YES",
+    "actual": "Yes",
+    "strict_pass": true,
+    "ttft_s": 24.528,
+    "total_s": 24.605,
+    "error": null,
+    "model": "lfm3-omni",
+    "timestamp_utc": "2026-10-31T17:18:45.880610+00:00"
+  },
+  {
+    "case_id": "S02_SILENT",
+    "file": "S02_silent_control.mp4",
+    "expected": "NO",
+    "actual": "No",
+    "strict_pass": true,
+    "ttft_s": 21.215,
+    "total_s": 21.321,
+    "error": null,
+    "model": "lfm3-omni",
+    "timestamp_utc": "2026-10-31T17:19:07.205057+00:00"
+  }
+]

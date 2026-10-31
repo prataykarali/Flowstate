@@ -1,0 +1,37 @@
+[
+  {
+    "question": "top_right",
+    "expected": "Which color is the object in the top right?",
+    "transcription": "What shapes do you see? What shape is on the top right?",
+    "exact_match": false,
+    "latency_s": 5.051
+  },
+  {
+    "question": "below_red",
+    "expected": "What shape is directly below the red triangle?",
+    "transcription": "Which color is on the top right?",
+    "exact_match": false,
+    "latency_s": 3.774
+  },
+  {
+    "question": "left_of_blue",
+    "expected": "What shape is immediately to the left of the blue circle?",
+    "transcription": "What shape is immediately to the left of the blue circle?",
+    "exact_match": true,
+    "latency_s": 4.178
+  },
+  {
+    "question": "missing_diamond",
+    "expected": "What color is the diamond in the image?",
+    "transcription": "What color is the diamond in the image?",
+    "exact_match": true,
+    "latency_s": 3.542
+  },
+  {
+    "question": "top_left",
+    "expected": "What shape is in the top left?",
+    "transcription": "What shape is in the top left?",
+    "exact_match": true,
+    "latency_s": 3.746
+  }
+]

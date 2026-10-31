@@ -1,0 +1,26 @@
+[
+  {
+    "case": "S01_EARLY",
+    "expected": "EARLY",
+    "actual": "EARLY.",
+    "pass": false,
+    "ttft_s": 25.795,
+    "total_s": 26.096
+  },
+  {
+    "case": "S02_LATE",
+    "expected": "LATE",
+    "actual": "EARLY.",
+    "pass": false,
+    "ttft_s": 26.799,
+    "total_s": 27.072
+  },
+  {
+    "case": "S02_NONE",
+    "expected": "NONE",
+    "actual": "NONE.",
+    "pass": false,
+    "ttft_s": 27.307,
+    "total_s": 27.546
+  }
+]

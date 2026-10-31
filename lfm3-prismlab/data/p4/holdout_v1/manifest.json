@@ -1,0 +1,409 @@
+{
+  "dataset": "P4-D2 spatial holdout v1",
+  "created_utc": "2026-10-31T07:46:54.059632+00:00",
+  "status": "frozen_pending_human_visual_review",
+  "seed": 20261031,
+  "protocol": "Constructed before P4-D2 model inference; labels from geometry, inputs immutable.",
+  "cases": [
+    {
+      "id": "H01",
+      "condition": "top_right_absent",
+      "image": "data/p4/holdout_v1/H01.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "unknown",
+      "image_sha256": "158beb7316a20f48936b87cc0f4a8703a1dde3eb9514c6a28a0420c930fb24d2",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H02",
+      "condition": "top_right_absent",
+      "image": "data/p4/holdout_v1/H02.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "unknown",
+      "image_sha256": "dac30ccc391ed9941a74c2876e0c36c73a0ae1ddb27fb5d8e1ff6e7baa509511",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H03",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H03.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "green",
+      "image_sha256": "e5a32d48abcdb3387b6a287f0bcddd8f16ef8da945fd7eb1d5fb1c18879c88b7",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H04",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H04.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "yellow",
+      "image_sha256": "de7c86efb2add5a8dada81f2170b426c8f99e4e54ca9ba85de93d9b928212bd9",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H05",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H05.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "purple",
+      "image_sha256": "f75391930dbd4e03be494c0da95c07f77a2cfeda74cd9a957406f216e2b245c4",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H06",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H06.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "blue",
+      "image_sha256": "1652303d4da8baf3cc636f02497b6b01406939ef362821f2b4c0574b659537ad",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H07",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H07.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "red",
+      "image_sha256": "fc3e7f7d85e770bbb36655a5b6fea252658e50c1330941bc8d9a71ce5a622619",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H08",
+      "condition": "top_right_present",
+      "image": "data/p4/holdout_v1/H08.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "green",
+      "image_sha256": "4e1027039c281ede201271339aca8d8d52ecd4420d89a26d3baceb8ffc7401de",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204"
+    },
+    {
+      "id": "H09",
+      "condition": "below_red_absent",
+      "image": "data/p4/holdout_v1/H09.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "unknown",
+      "image_sha256": "8b7d1da88771f38776da4dfdadc1feece275f3c5da2b58f01516db92ecdedce2",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H10",
+      "condition": "below_red_present",
+      "image": "data/p4/holdout_v1/H10.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "diamond",
+      "image_sha256": "dbf2fb159a06c1b21e3addd1f69c0aaea1f844f43a03692bc91bde72a5ef7238",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H11",
+      "condition": "below_red_absent",
+      "image": "data/p4/holdout_v1/H11.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "unknown",
+      "image_sha256": "8ceb390cc1f0f034eee40269de339aecbbedeac5176c48b417401324c91336cb",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H12",
+      "condition": "below_red_present",
+      "image": "data/p4/holdout_v1/H12.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "star",
+      "image_sha256": "c9d395f7681c8da297fbd4c2fbd330dddf60e771927232ab2634dad040a73bdd",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H13",
+      "condition": "below_red_present",
+      "image": "data/p4/holdout_v1/H13.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "square",
+      "image_sha256": "a3d75c097ee2b64d0fb9df9712db82b319e978d1db37b778d1632ba72dbc8e44",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H14",
+      "condition": "below_red_absent",
+      "image": "data/p4/holdout_v1/H14.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "unknown",
+      "image_sha256": "58bcd1297841568c50bf401c6ba048303cf17b2e62cbf33bdb5d930c0b41fd33",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H15",
+      "condition": "below_red_absent",
+      "image": "data/p4/holdout_v1/H15.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "unknown",
+      "image_sha256": "de60415c761e97f5ab02c15866a965a2823eb1d8701875978d41c39bd6cd595b",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H16",
+      "condition": "below_red_present",
+      "image": "data/p4/holdout_v1/H16.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "circle",
+      "image_sha256": "469245fe4e9247a44ef8caa02d8384ee5658507db799c24589b7bb2ac8da530e",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd"
+    },
+    {
+      "id": "H17",
+      "condition": "left_of_blue_absent",
+      "image": "data/p4/holdout_v1/H17.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "unknown",
+      "image_sha256": "e96e730018e6002f386058cc110b52ecc51176841b879da83f4f46f5170abf05",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H18",
+      "condition": "left_of_blue_present",
+      "image": "data/p4/holdout_v1/H18.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "triangle",
+      "image_sha256": "a7a2f769948bcc9a4891cd8bc9420a5a3607d0ab059a511a94b675da5d562ef2",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H19",
+      "condition": "left_of_blue_absent",
+      "image": "data/p4/holdout_v1/H19.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "unknown",
+      "image_sha256": "3560fb13bc2dd8c7dbef8724b171ea4e2ee6260c59b9ce5284d25444159d0fdd",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H20",
+      "condition": "left_of_blue_present",
+      "image": "data/p4/holdout_v1/H20.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "square",
+      "image_sha256": "ed3161ccf3dff5fd0a9d9dbf1cea4a9248b729ee530a510c3ed69758bf46aabd",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H21",
+      "condition": "left_of_blue_present",
+      "image": "data/p4/holdout_v1/H21.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "triangle",
+      "image_sha256": "99ee483f9310269022592c8e96bc08f3272972dda4c2bd549be77643ddc92831",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H22",
+      "condition": "left_of_blue_present",
+      "image": "data/p4/holdout_v1/H22.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "star",
+      "image_sha256": "59bba5c60d58cced807e556d2b488599010b67c25dd5babb34f9f8bf447247e7",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H23",
+      "condition": "left_of_blue_absent",
+      "image": "data/p4/holdout_v1/H23.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "unknown",
+      "image_sha256": "0180df820e5d62b96d0e506b86380f5c7c2abdf5d59f99df725e8f715d1f4a6c",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H24",
+      "condition": "left_of_blue_absent",
+      "image": "data/p4/holdout_v1/H24.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "unknown",
+      "image_sha256": "e3a3d7f805ce0655baa3037e80564e416d165a5dbdb1ea4163f21995de321185",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1"
+    },
+    {
+      "id": "H25",
+      "condition": "missing_diamond_present",
+      "image": "data/p4/holdout_v1/H25.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "green",
+      "image_sha256": "bb3d65aa454ffd26031d0d48094c3f80ed1daa999fc2539d2c3dc6e48d3de0d0",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H26",
+      "condition": "missing_diamond_present",
+      "image": "data/p4/holdout_v1/H26.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "red",
+      "image_sha256": "593427789ae1aa76dd04b9ae94a60277cbdbb0b34df200fd5462fe3a303402aa",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H27",
+      "condition": "missing_diamond_absent",
+      "image": "data/p4/holdout_v1/H27.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "unknown",
+      "image_sha256": "7e096471e29dfa2a1070f6e1f4514437c390c8ca7bc1f50be22115cab7dfe1b2",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H28",
+      "condition": "missing_diamond_absent",
+      "image": "data/p4/holdout_v1/H28.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "unknown",
+      "image_sha256": "d49f085da46db2bd2c5e2556cfe2326eca4536210dc0dbcc5d06454f22ef8fcc",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H29",
+      "condition": "missing_diamond_absent",
+      "image": "data/p4/holdout_v1/H29.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "unknown",
+      "image_sha256": "2f051e5fb8d0b27fa860fbd29644a9cd94f38b5aa593cd2bdefb5334abc4f516",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H30",
+      "condition": "missing_diamond_present",
+      "image": "data/p4/holdout_v1/H30.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "purple",
+      "image_sha256": "82faa965a7eda5bd113b29717031a0e97a65894c4d0c630ac3ce529a87d44236",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H31",
+      "condition": "missing_diamond_absent",
+      "image": "data/p4/holdout_v1/H31.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "unknown",
+      "image_sha256": "4c979b1d0fed4702c4cf4887e45c1be0433eedb80049c82b94f652bedb8772ff",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H32",
+      "condition": "missing_diamond_present",
+      "image": "data/p4/holdout_v1/H32.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "red",
+      "image_sha256": "99b708cca14ebbeb66014c1fb6942c5e3c74c998fef323981187bebfa08405d2",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b"
+    },
+    {
+      "id": "H33",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H33.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "star",
+      "image_sha256": "5e3bba47788546e47b8378453f62f33c5a3d6a31430306c9961d44a4a637cfdc",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H34",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H34.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "star",
+      "image_sha256": "6a11d53997cb03a9bcc60d38bbc246ca43388c15fb78df43d04de09ea2ce031c",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H35",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H35.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "square",
+      "image_sha256": "a70f1550669fe4da88305abe7e58a89e9fda2ea145d2d938fa039be6c61263f8",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H36",
+      "condition": "top_left_absent",
+      "image": "data/p4/holdout_v1/H36.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "unknown",
+      "image_sha256": "a138455a0577ec56ad0f54eb66468bc9bdc65c06d95ce7f0b5c66142033a6910",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H37",
+      "condition": "top_left_absent",
+      "image": "data/p4/holdout_v1/H37.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "unknown",
+      "image_sha256": "b241c5d2d090b09520ff48723e4333c67fce2ad08941d91d7a5499287ba1bc2c",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H38",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H38.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "diamond",
+      "image_sha256": "d65107da9645db7cff2c827904a524e5693162c8896c9fea42c10d09efcb397d",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H39",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H39.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "square",
+      "image_sha256": "afde52254f3a2445040250cabcb0cb413e7219a5b569bd5d886ade9ae74a61d9",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    },
+    {
+      "id": "H40",
+      "condition": "top_left_present",
+      "image": "data/p4/holdout_v1/H40.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "triangle",
+      "image_sha256": "54f90af2249a075d9beeb52c28fc791ae318307a5abaf7db70a3ef7f44cd2f29",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6"
+    }
+  ]
+}

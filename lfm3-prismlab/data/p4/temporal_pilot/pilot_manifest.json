@@ -1,0 +1,129 @@
+{
+  "dataset": "P4E-pilot-v1",
+  "freeze_note": "Pilot only; review each clip and audio before score reporting",
+  "clips": [
+    {
+      "id": "S01",
+      "file": "S01_red_blue_beep_before.mp4",
+      "kind": "synthetic",
+      "question": "Did the beep happen before or after the square changes color?",
+      "expected": "BEFORE",
+      "event_order": "before",
+      "source_key": null,
+      "needs_human_review": false,
+      "sha256": "9bc499b6fabd9523e88d74dadc17c56823e3197ef0dffc8d6e3603c1617a9d12",
+      "duration_s": 4.0,
+      "streams": [
+        "audio",
+        "video"
+      ]
+    },
+    {
+      "id": "S02",
+      "file": "S02_red_blue_beep_after.mp4",
+      "kind": "synthetic",
+      "question": "Did the beep happen before or after the square changes color?",
+      "expected": "AFTER",
+      "event_order": "after",
+      "source_key": null,
+      "needs_human_review": false,
+      "sha256": "7110c6395312ae6bcc736a5fedfe7b6feb063926c84dcd1b9f3bb7a80d536517",
+      "duration_s": 4.0,
+      "streams": [
+        "audio",
+        "video"
+      ]
+    },
+    {
+      "id": "H01",
+      "file": "H01_cars_beep_before_marker.mp4",
+      "kind": "hybrid",
+      "question": "Did the beep happen before or after the corner marker changes color?",
+      "expected": "BEFORE",
+      "event_order": "before",
+      "source_key": "cars",
+      "needs_human_review": false,
+      "source_attribution": {
+        "filename": "Cars_Passing_by_at_Night.webm",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Cars_Passing_by_at_Night.webm",
+        "page": "https://commons.wikimedia.org/wiki/File:Cars_Passing_by_at_Night.webm",
+        "creator": "Maximilian Schönherr",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "sha256": "ff6ff08d18ccd45cdfcd77361487b68411f48dbb2750f89a6732e3dc4ab2aa63",
+      "duration_s": 6.0,
+      "streams": [
+        "audio",
+        "video"
+      ]
+    },
+    {
+      "id": "H02",
+      "file": "H02_cars_beep_after_marker.mp4",
+      "kind": "hybrid",
+      "question": "Did the beep happen before or after the corner marker changes color?",
+      "expected": "AFTER",
+      "event_order": "after",
+      "source_key": "cars",
+      "needs_human_review": false,
+      "source_attribution": {
+        "filename": "Cars_Passing_by_at_Night.webm",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Cars_Passing_by_at_Night.webm",
+        "page": "https://commons.wikimedia.org/wiki/File:Cars_Passing_by_at_Night.webm",
+        "creator": "Maximilian Schönherr",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "sha256": "d24d14e143b1b57dcff00d41a7211f813454f36ea9157d315825b14c7b1169ed",
+      "duration_s": 6.0,
+      "streams": [
+        "audio",
+        "video"
+      ]
+    },
+    {
+      "id": "R01",
+      "file": "R01_train_original_audio.mp4",
+      "kind": "real_natural",
+      "question": "What vehicle passes the station?",
+      "expected": "TRAIN",
+      "event_order": null,
+      "source_key": "train",
+      "needs_human_review": true,
+      "source_attribution": {
+        "filename": "China_Railway_High-speed_train_passing_through_station.webm",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/China_Railway_High-speed_train_passing_through_station.webm",
+        "page": "https://commons.wikimedia.org/wiki/File:China_Railway_High-speed_train_passing_through_station.webm",
+        "creator": "Anna Frodesiak",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "sha256": "84951a1ab19c8f8caa3f721dae696f77e79ecadc7b19faf83ed0b92192242ff6",
+      "duration_s": 7.017,
+      "streams": [
+        "audio",
+        "video"
+      ]
+    },
+    {
+      "id": "R02",
+      "file": "R02_bell_original_audio.mp4",
+      "kind": "real_natural",
+      "question": "What object is producing the ringing sound?",
+      "expected": "BELL",
+      "event_order": null,
+      "source_key": "bell",
+      "needs_human_review": true,
+      "source_attribution": {
+        "filename": "Bell_Ringing_in_Tower_of_Přibyslav_(video).webm",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Bell_Ringing_in_Tower_of_P%C5%99ibyslav_%28video%29.webm",
+        "page": "https://commons.wikimedia.org/wiki/File:Bell_Ringing_in_Tower_of_P%C5%99ibyslav_(video).webm",
+        "creator": "Vojtěch Dostál",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/"
+      },
+      "status": "pending asset generation"
+    }
+  ]
+}

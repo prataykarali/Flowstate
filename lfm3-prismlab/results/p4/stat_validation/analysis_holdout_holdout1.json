@@ -1,0 +1,91 @@
+{
+  "dataset": "P4-D2 spatial holdout v1",
+  "manifest_sha256": "b22ccc74794071ac56ac0153913685f88a1c24523a53eff7e7518ea960c153e6",
+  "independent_cases": 40,
+  "repeats_per_case": 1,
+  "trials_per_architecture": 40,
+  "native_strict_rate": 0.625,
+  "modular_strict_rate": 0.7,
+  "paired_accuracy_difference_modular_minus_native": 0.075,
+  "accuracy_diff_95pct_case_bootstrap_CI": [
+    0.0,
+    0.175
+  ],
+  "question_families": 5,
+  "accuracy_diff_95pct_question_block_bootstrap_CI": [
+    0.0,
+    0.175
+  ],
+  "native_median_latency_s": 20.9195,
+  "modular_median_latency_s": 21.288,
+  "native_p95_latency_s": 22.00815,
+  "modular_p95_latency_s": 22.047,
+  "paired_case_mean_latency_diff_s": 0.2813000000000002,
+  "latency_diff_95pct_case_bootstrap_CI_s": [
+    -0.03496687499999998,
+    0.5384256250000004
+  ],
+  "latency_diff_95pct_question_block_bootstrap_CI_s": [
+    -0.024074999999999937,
+    0.6043500000000004
+  ],
+  "paired_case_latency_sign_test_p": 0.0022214337732293643,
+  "case_level_majority_mcnemar_exact_p": 0.25,
+  "case_level_majority_discordance": {
+    "native_only": 0,
+    "modular_only": 3
+  },
+  "per_trial_outcome_pairs_DESCRIPTIVE_ONLY": {
+    "both_pass": 25,
+    "both_fail": 12,
+    "native_only": 0,
+    "modular_only": 3
+  },
+  "native_execution_errors": 0,
+  "modular_execution_errors": 0,
+  "native_missing_relation_strict": [
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "modular_missing_relation_strict": [
+    1,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    1,
+    0,
+    0
+  ],
+  "caveat": "Confidence intervals resample cases, not trials. On the previously observed 10-case dataset, these reflect case variability/repeatability, not out-of-sample generalization. Shared audio question templates and synthetically generated images induce dependency. Question-family block intervals are more conservative but include only five families. Server residency and phase order may confound latency differences."
+}

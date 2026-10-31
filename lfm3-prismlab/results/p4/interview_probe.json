@@ -1,0 +1,12 @@
+[
+  {
+    "test": "P4-A01",
+    "actual": "Hello, this is a software interview. Can you introduce yourself?",
+    "latency_s": 3.679
+  },
+  {
+    "test": "P4-AV01",
+    "actual": "Hello! I am LFM3-Omni-2.2B, a model built by Liquid AI that can take text, images, audio and video input and produce text and speech (audio) output.",
+    "latency_s": 9.129
+  }
+]

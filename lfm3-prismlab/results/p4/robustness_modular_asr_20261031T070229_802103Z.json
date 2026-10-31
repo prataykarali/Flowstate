@@ -1,0 +1,261 @@
+{
+  "experiment": "PrismLab P4-D modular audio-vision v1",
+  "stage": "asr",
+  "created_utc": "2026-10-31T07:02:29.802149+00:00",
+  "manifest_sha256": "0a3f835bd99a04e8d4b5d8a64fc11ee03c94ec25196660a021bcd891c2ba71aa",
+  "model": "lfm3-audio",
+  "server_url": "http://127.0.0.1:8082",
+  "system_prompt": "Perform ASR in English. Transcribe the speech; do not answer the question.",
+  "temperature": 0,
+  "max_tokens": 128,
+  "timing_type": "sequential_warm_model_http_inference_only",
+  "cases": [
+    {
+      "id": "D01",
+      "condition": "new_layout_color",
+      "image": "data/p4/robustness/dense.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "yellow",
+      "image_sha256": "902e2baf26be2c244b178e56f6df62e535233bc2c3bdd6adf32ee6baa2790799",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204",
+      "status": "ok",
+      "latency_s": 4.315,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 120,
+        "total_tokens": 131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What color is the object in the top right?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D02",
+      "condition": "new_layout_below",
+      "image": "data/p4/robustness/dense.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "circle",
+      "image_sha256": "902e2baf26be2c244b178e56f6df62e535233bc2c3bdd6adf32ee6baa2790799",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd",
+      "status": "ok",
+      "latency_s": 3.618,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 119,
+        "total_tokens": 129,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What shape is directly below the red triangle?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D03",
+      "condition": "new_layout_left",
+      "image": "data/p4/robustness/dense.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "triangle",
+      "image_sha256": "902e2baf26be2c244b178e56f6df62e535233bc2c3bdd6adf32ee6baa2790799",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1",
+      "status": "ok",
+      "latency_s": 3.915,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 119,
+        "total_tokens": 132,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What shape is immediately to the left of the blue circle?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D04",
+      "condition": "missing_below_relation",
+      "image": "data/p4/robustness/sparse.png",
+      "audio": "data/p4/spatial/below_red.wav",
+      "spoken_question": "What shape is directly below the red triangle?",
+      "expected": "unknown",
+      "image_sha256": "ed85d86407003cd4486915036038482220f415f485c8dc9f0dcf55c795b3146d",
+      "audio_sha256": "b6fb60ee672a4fce2a36e9686c776cdc90a04221a78609cd0eb6d25fb59087dd",
+      "status": "ok",
+      "latency_s": 3.549,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 119,
+        "total_tokens": 129,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What shape is directly below the red triangle?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D05",
+      "condition": "missing_left_relation",
+      "image": "data/p4/robustness/sparse.png",
+      "audio": "data/p4/spatial/left_of_blue.wav",
+      "spoken_question": "What shape is immediately to the left of the blue circle?",
+      "expected": "unknown",
+      "image_sha256": "ed85d86407003cd4486915036038482220f415f485c8dc9f0dcf55c795b3146d",
+      "audio_sha256": "8dc7c80aaa336a8c43eb1e14a195fd092ec61ca80ebec5b3e2b5c80b478e43e1",
+      "status": "ok",
+      "latency_s": 3.941,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 13,
+        "prompt_tokens": 119,
+        "total_tokens": 132,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What shape is immediately to the left of the blue circle?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D06",
+      "condition": "missing_object",
+      "image": "data/p4/robustness/sparse.png",
+      "audio": "data/p4/spatial/missing_diamond.wav",
+      "spoken_question": "What color is the diamond in the image?",
+      "expected": "unknown",
+      "image_sha256": "ed85d86407003cd4486915036038482220f415f485c8dc9f0dcf55c795b3146d",
+      "audio_sha256": "50e7056317ffb91681d33346fc365fd381496f26b56be7fdd751409651315a7b",
+      "status": "ok",
+      "latency_s": 4.026,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 10,
+        "prompt_tokens": 119,
+        "total_tokens": 129,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What color is the diamond in the image?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D07",
+      "condition": "image_blur",
+      "image": "data/p4/robustness/dense_blurred.png",
+      "audio": "data/p4/spatial/top_left.wav",
+      "spoken_question": "What shape is in the top left?",
+      "expected": "star",
+      "image_sha256": "f070d737e36a7503d72237462b128a80221a5a16a9ac04dbe1557a990d269d6c",
+      "audio_sha256": "ac855413f04c15e4be8a11b39de6d14fbcae30db5d6eded64a7dfb44740220d6",
+      "status": "ok",
+      "latency_s": 3.789,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 9,
+        "prompt_tokens": 119,
+        "total_tokens": 128,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What shape is in the top left?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D08",
+      "condition": "audio_noise",
+      "image": "data/p4/robustness/dense.png",
+      "audio": "data/p4/robustness/top_right_noisy.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "yellow",
+      "image_sha256": "902e2baf26be2c244b178e56f6df62e535233bc2c3bdd6adf32ee6baa2790799",
+      "audio_sha256": "c798a43909f05d8236613887219597b2879387acb305bd69fd7fa5d003c4a06b",
+      "audio_snr_db_measured": 15.035,
+      "status": "ok",
+      "latency_s": 4.217,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 120,
+        "total_tokens": 131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What color is the object in the top right?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D09",
+      "condition": "counterfactual_reference",
+      "image": "data/p4/robustness/counterfactual_a.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "green",
+      "image_sha256": "8e29eaf0567e3ea41b919023d62efa9ad5b508c68749abd0d6de9c95b7e63c8a",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204",
+      "status": "ok",
+      "latency_s": 3.953,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 120,
+        "total_tokens": 131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What color is the object in the top right?",
+      "transcript_exact_match": true
+    },
+    {
+      "id": "D10",
+      "condition": "counterfactual_changed",
+      "image": "data/p4/robustness/counterfactual_b.png",
+      "audio": "data/p4/spatial/top_right.wav",
+      "spoken_question": "What color is the object in the top right?",
+      "expected": "red",
+      "image_sha256": "4a67e13b9d23dcad46fc54aa2aa161bae46745ef58de13c2cdfb651d0bed7de4",
+      "audio_sha256": "deca5294223b568b5fe7b2664757e2fbe70fa1e0071203cc735227ce6d4f4204",
+      "status": "ok",
+      "latency_s": 4.009,
+      "finish_reason": "stop",
+      "reasoning_chars": 0,
+      "usage": {
+        "completion_tokens": 11,
+        "prompt_tokens": 120,
+        "total_tokens": 131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "transcript": "What color is the object in the top right?",
+      "transcript_exact_match": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "completed": 10,
+    "errors": 0,
+    "asr_exact_question_matches": 10
+  }
+}

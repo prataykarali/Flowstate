@@ -1,0 +1,13 @@
+{
+  "test_id": "P4-V01",
+  "model": "LFM3-Omni-2B",
+  "inputs": [
+    "image",
+    "text"
+  ],
+  "expected": "blue",
+  "actual": "Blue",
+  "pass": true,
+  "latency_seconds": 4.827,
+  "timing_type": "end_to_end_nonstreaming"
+}

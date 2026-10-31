@@ -1,0 +1,11 @@
+Case,Condition,Expected,Omni output,Omni strict,Omni s,ASR transcript,ASR exact,ASR s,VL output,Modular strict,VL s,Modular s,Omni status,VL status
+D01,new_layout_color,YELLOW,Yellow,True,23.114,What color is the object in the top right?,True,4.315,Yellow,True,19.939,24.254,ok,ok
+D02,new_layout_below,CIRCLE,Circle,True,21.192,What shape is directly below the red triangle?,True,3.618,Circle,True,17.478,21.096,ok,ok
+D03,new_layout_left,TRIANGLE,Triangle,True,20.058,What shape is immediately to the left of the blue circle?,True,3.915,Triangle,True,16.808,20.723,ok,ok
+D04,missing_below_relation,UNKNOWN,Square,False,21.309,What shape is directly below the red triangle?,True,3.549,Square,False,17.768,21.317,ok,ok
+D05,missing_left_relation,UNKNOWN,Star,False,19.938,What shape is immediately to the left of the blue circle?,True,3.941,STAR,False,17.602,21.543,ok,ok
+D06,missing_object,UNKNOWN,UNKNOWN,True,20.35,What color is the diamond in the image?,True,4.026,UNKNOWN,True,17.607,21.633,ok,ok
+D07,image_blur,STAR,Star,True,20.892,What shape is in the top left?,True,3.789,Star,True,17.949,21.738,ok,ok
+D08,audio_noise,YELLOW,Yellow,True,20.465,What color is the object in the top right?,True,4.217,Yellow,True,16.84,21.057,ok,ok
+D09,counterfactual_reference,GREEN,Green,True,21.551,What color is the object in the top right?,True,3.953,Green,True,17.398,21.351,ok,ok
+D10,counterfactual_changed,RED,Red,True,21.977,What color is the object in the top right?,True,4.009,Red,True,18.181,22.19,ok,ok

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "P4-F01",
+    "image": "original",
+    "audio": "rightmost",
+    "expected": "blue",
+    "actual": "Blue.",
+    "pass": true,
+    "latency_s": 6.958,
+    "image_sha256": "98341926d0114d7f49e3c8dabadd83091bc7e804ac27a0331e0854c47e6e22d8",
+    "audio_sha256": "fd5162c5aa8721cf3d3eb83b2ac117e9be5344650f4fdee067f83d3dc5d1bb8a"
+  },
+  {
+    "id": "P4-F02",
+    "image": "original",
+    "audio": "leftmost",
+    "expected": "red",
+    "actual": "Red.",
+    "pass": true,
+    "latency_s": 7.643,
+    "image_sha256": "98341926d0114d7f49e3c8dabadd83091bc7e804ac27a0331e0854c47e6e22d8",
+    "audio_sha256": "7ce2b9e6d1a55722c8b452d6ba23ac846d6c11d36fdd3589e5e9218ca7f3890e"
+  },
+  {
+    "id": "P4-F03",
+    "image": "reversed",
+    "audio": "rightmost",
+    "expected": "red",
+    "actual": "Red.",
+    "pass": true,
+    "latency_s": 8.653,
+    "image_sha256": "a986a3b781ccdeb9c3d1a2c245bd495b3b67676afb1dbef20c353418dcc6ce2c",
+    "audio_sha256": "fd5162c5aa8721cf3d3eb83b2ac117e9be5344650f4fdee067f83d3dc5d1bb8a"
+  },
+  {
+    "id": "P4-F04",
+    "image": "reversed",
+    "audio": "leftmost",
+    "expected": "blue",
+    "actual": "Blue.",
+    "pass": true,
+    "latency_s": 7.972,
+    "image_sha256": "a986a3b781ccdeb9c3d1a2c245bd495b3b67676afb1dbef20c353418dcc6ce2c",
+    "audio_sha256": "7ce2b9e6d1a55722c8b452d6ba23ac846d6c11d36fdd3589e5e9218ca7f3890e"
+  }
+]

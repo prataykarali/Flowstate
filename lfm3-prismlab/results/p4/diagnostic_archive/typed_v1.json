@@ -1,0 +1,74 @@
+[
+  {
+    "id": "B01",
+    "scene": "scene_a",
+    "question": "top_right",
+    "expected": "blue",
+    "actual": "Blue",
+    "strict_pass": true,
+    "latency_s": 12.475
+  },
+  {
+    "id": "B02",
+    "scene": "scene_b",
+    "question": "top_right",
+    "expected": "green",
+    "actual": "Green",
+    "strict_pass": true,
+    "latency_s": 13.557
+  },
+  {
+    "id": "B03",
+    "scene": "scene_a",
+    "question": "below_red",
+    "expected": "square",
+    "actual": "Green square",
+    "strict_pass": false,
+    "latency_s": 12.381
+  },
+  {
+    "id": "B04",
+    "scene": "scene_b",
+    "question": "below_red",
+    "expected": "unknown",
+    "actual": "None",
+    "strict_pass": false,
+    "latency_s": 11.544
+  },
+  {
+    "id": "B05",
+    "scene": "scene_a",
+    "question": "left_of_blue",
+    "expected": "triangle",
+    "actual": "Triangle",
+    "strict_pass": true,
+    "latency_s": 11.689
+  },
+  {
+    "id": "B06",
+    "scene": "scene_b",
+    "question": "left_of_blue",
+    "expected": "unknown",
+    "actual": "Star",
+    "strict_pass": false,
+    "latency_s": 11.609
+  },
+  {
+    "id": "B07",
+    "scene": "scene_a",
+    "question": "missing_diamond",
+    "expected": "unknown",
+    "actual": "Green",
+    "strict_pass": false,
+    "latency_s": 11.37
+  },
+  {
+    "id": "B08",
+    "scene": "scene_b",
+    "question": "top_left",
+    "expected": "star",
+    "actual": "Star",
+    "strict_pass": true,
+    "latency_s": 11.457
+  }
+]

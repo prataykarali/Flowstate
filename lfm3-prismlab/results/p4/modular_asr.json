@@ -1,0 +1,74 @@
+[
+  {
+    "id": "B01",
+    "scene": "scene_a",
+    "question": "top_right",
+    "expected_answer": "blue",
+    "transcript": "What color is the object in the top right?",
+    "asr_s": 4.054,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B02",
+    "scene": "scene_b",
+    "question": "top_right",
+    "expected_answer": "green",
+    "transcript": "What color is the object in the top right?",
+    "asr_s": 4.214,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B03",
+    "scene": "scene_a",
+    "question": "below_red",
+    "expected_answer": "square",
+    "transcript": "What shape is directly below the red triangle?",
+    "asr_s": 3.66,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B04",
+    "scene": "scene_b",
+    "question": "below_red",
+    "expected_answer": "unknown",
+    "transcript": "What shape is directly below the red triangle?",
+    "asr_s": 4.186,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B05",
+    "scene": "scene_a",
+    "question": "left_of_blue",
+    "expected_answer": "triangle",
+    "transcript": "What shape is immediately to the left of the blue circle?",
+    "asr_s": 3.851,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B06",
+    "scene": "scene_b",
+    "question": "left_of_blue",
+    "expected_answer": "unknown",
+    "transcript": "What shape is immediately to the left of the blue circle?",
+    "asr_s": 4.099,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B07",
+    "scene": "scene_a",
+    "question": "missing_diamond",
+    "expected_answer": "unknown",
+    "transcript": "What color is the diamond in the image?",
+    "asr_s": 3.637,
+    "asr_finish": "stop"
+  },
+  {
+    "id": "B08",
+    "scene": "scene_b",
+    "question": "top_left",
+    "expected_answer": "star",
+    "transcript": "What shape is in the top left?",
+    "asr_s": 3.511,
+    "asr_finish": "stop"
+  }
+]

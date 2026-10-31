@@ -1,0 +1,12 @@
+[
+  {
+    "test": "P4-A01",
+    "actual": "Which color is the right most rectangle?",
+    "latency_s": 3.183
+  },
+  {
+    "test": "P4-AV01",
+    "actual": "Blue.",
+    "latency_s": 6.337
+  }
+]

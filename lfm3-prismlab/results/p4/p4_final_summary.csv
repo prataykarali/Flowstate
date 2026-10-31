@@ -1,0 +1,6 @@
+Experiment,Correct,Total,Accuracy
+P4-D2 Native Omni,25,40,0.625
+P4-D2 Modular,28,40,0.7
+P4-E Audio presence,2,2,1.0
+P4-E Audio localization,2,3,0.6666666666666666
+P4-E Beep timing only,1,2,0.5

@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""PrismLab P4-E: build controlled audio/video clips and retrieve CC-licensed originals.
+
+Modes: --synthetic (no internet), --real (downloads three Commons source files),
+--all (both). Human review required for natural-event labels.
+"""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import math
+import shutil
+import subprocess
+import tempfile
+import urllib.request
+import wave
+from pathlib import Path
+from PIL import Image, ImageDraw
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / 'data/p4/temporal_pilot'
+RAW = OUT / 'sources'
+SOURCES = {
+  'cars': {
+    'filename': 'Cars_Passing_by_at_Night.webm',
+    'url': 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Cars_Passing_by_at_Night.webm',
+    'page': 'https://commons.wikimedia.org/wiki/File:Cars_Passing_by_at_Night.webm',
+    'creator': 'Maximilian Schönherr', 'license': 'CC BY-SA 4.0',
+    'license_url': 'https://creativecommons.org/licenses/by-sa/4.0/'
+  },
+  'train': {
+    'filename': 'China_Railway_High-speed_train_passing_through_station.webm',
+    'url': 'https://upload.wikimedia.org/wikipedia/commons/2/26/China_Railway_High-speed_train_passing_through_station.webm',
+    'page': 'https://commons.wikimedia.org/wiki/File:China_Railway_High-speed_train_passing_through_station.webm',
+    'creator': 'Anna Frodesiak', 'license': 'CC BY-SA 3.0',
+    'license_url': 'https://creativecommons.org/licenses/by-sa/3.0/'
+  },
+  'bell': {
+    'filename': 'Bell_Ringing_in_Tower_of_Přibyslav_(video).webm',
+    'url': 'https://upload.wikimedia.org/wikipedia/commons/d/dc/Bell_Ringing_in_Tower_of_P%C5%99ibyslav_%28video%29.webm',
+    'page': 'https://commons.wikimedia.org/wiki/File:Bell_Ringing_in_Tower_of_P%C5%99ibyslav_(video).webm',
+    'creator': 'Vojtěch Dostál', 'license': 'CC BY 3.0',
+    'license_url': 'https://creativecommons.org/licenses/by/3.0/'
+  }
+}
+
+def run(*args):
+    subprocess.run([str(x) for x in args], check=True, stdout=subprocess.DEVNULL)
+
+def sha(path):
+    h = hashlib.sha256()
+    with path.open('rb') as f:
+        for chunk in iter(lambda:f.read(1024*1024), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+def probe(path):
+    p = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration:stream=index,codec_type,codec_name', '-of','json',str(path)], capture_output=True,text=True,check=True)
+    data=json.loads(p.stdout)
+    streams={s['codec_type'] for s in data['streams']}
+    if not {'video','audio'} <= streams:
+        raise RuntimeError(f'{path} must contain both audio and video tracks; got {streams}')
+    return {'duration_s':round(float(data['format']['duration']),3), 'streams':sorted(streams)}
+
+def wave_beep(path: Path, center_s: float, length_s=4.0, freq=880, beep_s=0.18):
+    import array
+    import sys
+    rate=16000
+    samples=array.array('h')
+    start=center_s-beep_s/2
+    for n in range(int(length_s*rate)):
+        t=n/rate
+        if start <= t < start+beep_s:
+            u=(t-start)/beep_s
+            envelope=min(1.0,u/0.015,(1-u)/0.015)
+            val=int(7000*max(0.0,envelope)*math.sin(2*math.pi*freq*t))
+        else: val=0
+        samples.append(val)
+    if sys.byteorder!='little':samples.byteswap()
+    with wave.open(str(path),'wb') as f:
+        f.setnchannels(1);f.setsampwidth(2);f.setframerate(rate)
+        f.writeframes(samples.tobytes())
+
+def synthetic():
+    OUT.mkdir(parents=True,exist_ok=True)
+    with tempfile.TemporaryDirectory() as td:
+        temp=Path(td)
+        for i in range(8):
+            img=Image.new('RGB',(384,216),'#fafafa')
+            d=ImageDraw.Draw(img)
+            d.rectangle((139,54,245,162),fill='#df3030' if i<4 else '#2458df')
+            img.save(temp/f'frame_{i:02d}.png')
+        for key,t in [('S01',1.0),('S02',3.0)]:
+            wav=temp/(key+'.wav')
+            wave_beep(wav,t)
+            output=OUT/f'{key}_red_blue_beep_{"before" if t<2 else "after"}.mp4'
+            run('ffmpeg','-hide_banner','-loglevel','error','-y',
+                '-framerate','2','-i',temp/'frame_%02d.png','-i',wav,
+                '-map','0:v:0','-map','1:a:0','-c:v','libx264','-crf','22',
+                '-pix_fmt','yuv420p','-c:a','aac','-ar','16000','-movflags','+faststart',
+                '-t','4',output)
+            print('Created', output.name, probe(output))
+
+def download_source(key):
+    RAW.mkdir(parents=True,exist_ok=True)
+    src=SOURCES[key]
+    target=RAW/src['filename']
+    if target.exists() and target.stat().st_size>100_000:
+        print('Using cached source', target.name)
+        return target
+    print('Downloading',src['page'])
+    req=urllib.request.Request(src['url'],headers={'User-Agent':'PrismLabP4E/1.0 (education; research project)'})
+    tmp=target.with_suffix('.download')
+    try:
+        with urllib.request.urlopen(req,timeout=90) as response, tmp.open('wb') as f:
+            shutil.copyfileobj(response,f)
+        tmp.replace(target)
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        print(f'Unable to retrieve {key}. Download manually from: {src["page"]}')
+        raise
+    probe(target)
+    return target
+
+def transcode(src:Path, out:Path, start:float=0.,duration:float=6.):
+    run('ffmpeg','-hide_banner','-loglevel','error','-y','-ss',str(start),'-i',src,
+        '-t',str(duration),'-vf','scale=384:216:flags=lanczos',
+        '-map','0:v:0','-map','0:a:0', '-c:v','libx264','-crf','23','-pix_fmt','yuv420p',
+        '-c:a','aac','-b:a','64k','-ar','16000','-movflags','+faststart',out)
+    print('Created',out.name,probe(out))
+
+def hybrid(src:Path, out:Path, beep_time:float):
+    with tempfile.TemporaryDirectory() as td:
+        sound=Path(td)/'beep.wav'
+        wave_beep(sound,beep_time,length_s=6.0)
+        # Explicit color marker on real footage changes at t=3.0s.
+        vf=("scale=384:216:flags=lanczos,"
+            "drawbox=x=18:y=18:w=76:h=76:color=red:t=fill:enable='lt(t,3)',"
+            "drawbox=x=18:y=18:w=76:h=76:color=blue:t=fill:enable='gte(t,3)'")
+        run('ffmpeg','-hide_banner','-loglevel','error','-y','-ss','0','-i',src,'-i',sound,
+            '-t','6','-filter:v',vf,'-map','0:v:0','-map','1:a:0',
+            '-c:v','libx264','-crf','23','-pix_fmt','yuv420p','-c:a','aac','-ar','16000',
+            '-movflags','+faststart',out)
+        print('Created',out.name,probe(out))
+
+def real():
+    cars=download_source('cars')
+    train=download_source('train')
+    transcode(train,OUT/'R01_train_original_audio.mp4',duration=7)
+    hybrid(cars,OUT/'H01_cars_beep_before_marker.mp4',1.5)
+    hybrid(cars,OUT/'H02_cars_beep_after_marker.mp4',4.5)
+    print('R02 bell deferred due to HTTP 429')
+
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--mode',choices=['synthetic','real','all'],default='all')
+    args=parser.parse_args()
+    if not shutil.which('ffmpeg') or not shutil.which('ffprobe'):
+        parser.error('Install ffmpeg and ffprobe first')
+    if args.mode in ('synthetic','all'):synthetic()
+    if args.mode in ('real','all'):real()
+    clips=[
+       ('S01','S01_red_blue_beep_before.mp4','synthetic','before','Did the beep happen before or after the square changes color?','BEFORE',None),
+       ('S02','S02_red_blue_beep_after.mp4','synthetic','after','Did the beep happen before or after the square changes color?','AFTER',None),
+       ('H01','H01_cars_beep_before_marker.mp4','hybrid','before','Did the beep happen before or after the corner marker changes color?','BEFORE','cars'),
+       ('H02','H02_cars_beep_after_marker.mp4','hybrid','after','Did the beep happen before or after the corner marker changes color?','AFTER','cars'),
+       ('R01','R01_train_original_audio.mp4','real_natural',None,'What vehicle passes the station?','TRAIN','train'),
+       ('R02','R02_bell_original_audio.mp4','real_natural',None,'What object is producing the ringing sound?','BELL','bell')]
+    manifest=[]
+    for cid,filename,kind,order,question,expected,source in clips:
+        f=OUT/filename
+        d={'id':cid,'file':filename,'kind':kind,'question':question,'expected':expected,
+           'event_order':order,'source_key':source,'needs_human_review':kind=='real_natural'}
+        if source:d['source_attribution']=SOURCES[source]
+        if f.exists():d.update({'sha256':sha(f),**probe(f)})
+        else:d['status']='pending asset generation'
+        manifest.append(d)
+    (OUT/'pilot_manifest.json').write_text(json.dumps({'dataset':'P4E-pilot-v1',
+       'freeze_note':'Pilot only; review each clip and audio before score reporting',
+       'clips':manifest},indent=2,ensure_ascii=False))
+    (OUT/'SOURCE_ATTRIBUTION.md').write_text('# P4-E licensed real footage\n\n'+'\n'.join(
+       f'- **{k}** — {v["creator"]}; [{v["filename"]}]({v["page"]}); '+
+       f'[{v["license"]}]({v["license_url"]}). Cropped/re-encoded for pilot.\n'
+       for k,v in SOURCES.items())+'\nHybrid audio is replaced with original synthetic beep. '+
+       'Hybrid overlays are modifications subject to original ShareAlike license.\n')
+    print('Manifest:', OUT/'pilot_manifest.json')
+    print('Complete clips:',sum((OUT/c[1]).exists() for c in clips),'/6')
+
+if __name__=='__main__':main()
