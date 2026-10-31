@@ -1,0 +1,26 @@
+[
+  {
+    "case": "EPLUS_BEFORE",
+    "expected": "BEFORE",
+    "actual": "Before.",
+    "normalized": "BEFORE",
+    "strict_pass": false,
+    "semantic_pass": true,
+    "ttft_s": 34.094,
+    "total_s": 34.27,
+    "sha256": "3c609460966406653011db3941a8cfa7c4a6aaa663ad1c79e07c0a3c7e8fe411",
+    "error": null
+  },
+  {
+    "case": "EPLUS_AFTER",
+    "expected": "AFTER",
+    "actual": "After.",
+    "normalized": "AFTER",
+    "strict_pass": false,
+    "semantic_pass": true,
+    "ttft_s": 32.026,
+    "total_s": 32.213,
+    "sha256": "bc7e19d27aa24cca781ab1f1d0aaf022c83befd9e6edd753c8793b39691a5d12",
+    "error": null
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "case": "EPLUS_AFTER_MUTED",
+  "expected": "UNKNOWN",
+  "actual": "Before.",
+  "normalized": "BEFORE",
+  "semantic_pass": false,
+  "ttft_s": 33.152,
+  "total_s": 33.305,
+  "audio_peak": 0.0,
+  "visual_frames_identical": true,
+  "sha256": "79229f8afc59d4790425969c6538be99781c6783a5ec628e92da8af2a0732e84",
+  "error": null
+}
