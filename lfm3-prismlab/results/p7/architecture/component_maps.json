@@ -1,0 +1,209 @@
+{
+  "text": {
+    "name": "LFM3-1.7B",
+    "family": "lfm3",
+    "architecture": "Lfm3ForCausalLM",
+    "parts": [
+      {
+        "title": "Text backbone",
+        "config_path": "(top level)",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      }
+    ],
+    "decision_fields": []
+  },
+  "vision": {
+    "name": "LFM3-VL-2B",
+    "family": "lfm3_vl",
+    "architecture": "Lfm3VlForConditionalGeneration",
+    "parts": [
+      {
+        "title": "Vision encoder",
+        "config_path": "vision_config",
+        "layers": 14,
+        "counts": {
+          "conv": 8,
+          "full_attention": 6
+        }
+      },
+      {
+        "title": "Text backbone",
+        "config_path": "text_config",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      }
+    ],
+    "decision_fields": []
+  },
+  "audio": {
+    "name": "LFM3-Audio-2B",
+    "family": "lfm3_audio",
+    "architecture": "Lfm3AudioForConditionalGeneration",
+    "parts": [
+      {
+        "title": "Audio encoder",
+        "config_path": "encoder.lfm",
+        "layers": 17,
+        "counts": {
+          "conv": 10,
+          "full_attention": 7
+        }
+      },
+      {
+        "title": "Text backbone",
+        "config_path": "lfm",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      },
+      {
+        "title": "Depthformer",
+        "config_path": "depthformer",
+        "layers": 3,
+        "counts": {
+          "full_attention": 3
+        }
+      }
+    ],
+    "decision_fields": []
+  },
+  "omni": {
+    "name": "LFM3-Omni-2B",
+    "family": "lfm3_omni",
+    "architecture": "Lfm3OmniForConditionalGeneration",
+    "parts": [
+      {
+        "title": "Vision encoder",
+        "config_path": "vision_config",
+        "layers": 14,
+        "counts": {
+          "conv": 8,
+          "full_attention": 6
+        }
+      },
+      {
+        "title": "Audio encoder",
+        "config_path": "audio_encoder_config.text_config",
+        "layers": 17,
+        "counts": {
+          "conv": 10,
+          "full_attention": 7
+        }
+      },
+      {
+        "title": "Text backbone",
+        "config_path": "text_config",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      },
+      {
+        "title": "Depthformer",
+        "config_path": "depth_config",
+        "layers": 3,
+        "counts": {
+          "full_attention": 3
+        }
+      }
+    ],
+    "decision_fields": []
+  },
+  "d1": {
+    "name": "d1-2B",
+    "family": "lfm3_vl",
+    "architecture": "D1Model",
+    "parts": [
+      {
+        "title": "Vision encoder",
+        "config_path": "vision_config",
+        "layers": 14,
+        "counts": {
+          "conv": 8,
+          "full_attention": 6
+        }
+      },
+      {
+        "title": "Text backbone",
+        "config_path": "text_config",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      }
+    ],
+    "decision_fields": [
+      "d1_attention",
+      "d1_codes",
+      "d1_numbers",
+      "d1_set_size",
+      "d1_vision_max_pixels"
+    ]
+  },
+  "d1_omni": {
+    "name": "d1-Omni-2B",
+    "family": "lfm3_omni",
+    "architecture": "D1Model",
+    "parts": [
+      {
+        "title": "Vision encoder",
+        "config_path": "vision_config",
+        "layers": 14,
+        "counts": {
+          "conv": 8,
+          "full_attention": 6
+        }
+      },
+      {
+        "title": "Audio encoder",
+        "config_path": "audio_encoder_config.text_config",
+        "layers": 17,
+        "counts": {
+          "conv": 10,
+          "full_attention": 7
+        }
+      },
+      {
+        "title": "Text backbone",
+        "config_path": "text_config",
+        "layers": 24,
+        "counts": {
+          "conv": 13,
+          "full_attention": 6,
+          "sliding_attention": 5
+        }
+      },
+      {
+        "title": "Depthformer",
+        "config_path": "depth_config",
+        "layers": 3,
+        "counts": {
+          "full_attention": 3
+        }
+      }
+    ],
+    "decision_fields": [
+      "d1_attention",
+      "d1_codes",
+      "d1_numbers",
+      "d1_set_size",
+      "d1_vision_max_pixels"
+    ]
+  }
+}

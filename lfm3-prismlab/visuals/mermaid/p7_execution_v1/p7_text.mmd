@@ -1,0 +1,15 @@
+%% LFM3-1.7B | revision ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7
+%% High-level architecture, not exact tensor computation.
+flowchart TB
+T["Text tokens"] --> E["Token embeddings"] --> B["LFM3 decoder · 24 layers"]
+ B --> H["Causal LM head"] --> O["Generated text"]
+ B -.-> INV["13 Conv · 5 Sliding · 6 Global"]
+
+ classDef input fill:#101f3b,stroke:#67baff,color:#eff7ff,stroke-width:2px;
+ classDef core fill:#122b39,stroke:#52efd0,color:#eff7ff,stroke-width:2px;
+ classDef output fill:#29213d,stroke:#d6a0ff,color:#eff7ff,stroke-width:2px;
+ classDef note fill:#111a30,stroke:#54739f,color:#aebfe3,stroke-dasharray:4 4;
+  class T input
+  class O output
+  class INV note
+  class B,E,H core

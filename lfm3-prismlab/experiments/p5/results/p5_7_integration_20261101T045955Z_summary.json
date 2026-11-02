@@ -1,0 +1,28 @@
+{
+  "suite": "P5.7",
+  "timestamp_utc": "20261101T045955Z",
+  "threshold": 0.9,
+  "threshold_was_selected_post_hoc": true,
+  "total_cases": 9,
+  "successful_records": 9,
+  "request_errors": 0,
+  "model_requests": 6,
+  "blocked_without_model_call": 3,
+  "auto_recommendations": 5,
+  "review_decisions": 4,
+  "labeled_inferences": 6,
+  "labeled_accuracy": 0.8333333333333334,
+  "median_model_request_latency_s": 0.34794,
+  "review_required_auto_accepted": [],
+  "errors": [],
+  "caveats": [
+    "Small selected synthetic cases; reported accuracy is NOT a generalization estimate",
+    "No real user traffic, deployment-calibrated probabilities, or independently locked threshold",
+    "Text/vision and audio use different models/quantizations; cross-modal speed comparison is not controlled",
+    "Visual and audio input guards only check trivial missing/invalid evidence; not semantic validity",
+    "Some rejected requests are blocked by explicit input guards, not by model confidence",
+    "AUTO_RECOMMEND is only a label; the script NEVER executes external actions",
+    "TTFT, output generation tokens/sec are inapplicable to these non-generative decisions"
+  ],
+  "raw_path": "/home/pratay-karali/Desktop/flowstate/lfm3-prismlab/experiments/p5/results/p5_7_integration_20261101T045955Z.jsonl"
+}

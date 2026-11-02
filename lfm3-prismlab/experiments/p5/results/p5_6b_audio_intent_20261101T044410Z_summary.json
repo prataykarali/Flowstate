@@ -1,0 +1,36 @@
+{
+  "requested": 24,
+  "valid": 24,
+  "errors": 0,
+  "audio": {
+    "valid": 12,
+    "correct": 12,
+    "accuracy": 1.0,
+    "median_latency_s": 0.37398,
+    "p95_latency_s": 0.40743,
+    "incorrect_case_ids": []
+  },
+  "text_oracle": {
+    "valid": 12,
+    "correct": 12,
+    "accuracy": 1.0,
+    "median_latency_s": 0.32914,
+    "p95_latency_s": 0.59166,
+    "incorrect_case_ids": []
+  },
+  "fully_paired_cases": 12,
+  "prediction_disagreements": [],
+  "suite": "P5.6b",
+  "dataset_type": "eSpeak synthesized English commands",
+  "model": "d1-Omni-2B-GGUF:Q8_0 (expected; see each raw result for actual)",
+  "source_audio": "Generated locally by eSpeak and normalized via ffmpeg",
+  "label_policy": "Expected primary intent manually specified before generation",
+  "limitations": [
+    "Synthetic speech and small sample; not a real-microphone accuracy estimate",
+    "Text condition is exact transcript (oracle), NOT ASR -> d1",
+    "Generated WAV time and normalization excluded from request latency",
+    "Confidence scores have not been calibrated",
+    "No decoding: TTFT and output-token generation speed are inapplicable"
+  ],
+  "raw_path": "/home/pratay-karali/Desktop/flowstate/lfm3-prismlab/experiments/p5/results/p5_6b_audio_intent_20261101T044410Z.jsonl"
+}

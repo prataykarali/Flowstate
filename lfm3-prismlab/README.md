@@ -35,10 +35,10 @@ flowchart TB
       direction LR
       T["LFM3-1.7B<br/>Text / Reasoning<br/>(Deployed: P1)"]
       V["LFM3-VL-2B<br/>Vision / OCR<br/>(Deployed: P2)"]
-      A["LFM3-Audio-2B<br/>Speech / Audio<br/>(Planned: P3)"]
-      O["LFM3-Omni-2B<br/>Full Multimodal<br/>(Planned)"]
-      J["d1-2B<br/>Visual Decisions<br/>(Planned)"]
-      K["d1-Omni-2B<br/>Audio-Visual Decisions<br/>(Planned)"]
+      A["LFM3-Audio-2B<br/>Speech / Audio<br/>(P3/P6 validated)"]
+      O["LFM3-Omni-2B<br/>Full Multimodal<br/>(P6 validated)"]
+      J["d1-2B<br/>Visual Decisions<br/>(P6 validated)"]
+      K["d1-Omni-2B<br/>Audio-Visual Decisions<br/>(P6 validated)"]
     end
 
     OUT["Unified Output / Stream"]
@@ -61,10 +61,8 @@ flowchart TB
     OUT --> B
 
     classDef live fill:#163b31,color:#c8ffe7,stroke:#34d399,stroke-width:2px;
-    classDef planned fill:#222b3d,color:#e2e8f0,stroke:#94a3b8,stroke-dasharray: 4 4;
     classDef core fill:#162a4d,color:#e0edff,stroke:#60a5fa,stroke-width:2px;
-    class T,V live;
-    class A,O,J,K planned;
+    class T,V,A,O,J,K live;
     class P,R,S,D,OUT,B core;
 ```
 </details>
@@ -77,12 +75,12 @@ PrismLab registers six model pathways. **To maintain research integrity, registe
 
 | Model Key | Target Model | Inputs | Outputs | Phase Status | Live Deployment |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`text`** | `LiquidAI/LFM3-1.7B` | `{text}` | `{text}` | **P1 Complete** | **Active (Port 8080)** |
-| **`vision`** | `LiquidAI/LFM3-VL-2B` | `{text, image, video}` | `{text}` | **P2 Complete** | **Active (Port 8180)** |
-| **`audio`** | `LiquidAI/LFM3-Audio-2B` | `{text, audio}` | `{text, speech}` | **P3 Complete** | **Active (Port 8082)** |
-| **`omni`** | `LiquidAI/LFM3-Omni-2B` | `{text, image, video, audio}` | `{text, speech}` | Subsequent | *Registered / Not Deployed* |
-| **`d1`** | `LiquidAI/d1-2B` | `{text, image, video}` | `{decision}` | Subsequent | *Registered / Not Deployed* |
-| **`d1_omni`** | `LiquidAI/d1-Omni-2B` | `{text, image, video, audio}` | `{decision}` | Subsequent | *Registered / Not Deployed* |
+| **`text`** | `LiquidAI/LFM3-1.7B` | `{text}` | `{text}` | **P1/P6 complete** | Validated locally on demand |
+| **`vision`** | `LiquidAI/LFM3-VL-2B` | `{text, image, video}` | `{text}` | **P2/P6 complete** | Validated locally on demand |
+| **`audio`** | `LiquidAI/LFM3-Audio-2B` | `{text, audio}` | `{text, speech}` | **P3/P6 complete** | Validated locally on demand |
+| **`omni`** | `LiquidAI/LFM3-Omni-2B` | `{text, image, video, audio}` | `{text, speech}` | **P4/P6 complete** | Validated locally on demand |
+| **`d1`** | `LiquidAI/d1-2B` | `{text, image, video}` | `{decision}` | **P5/P6 complete** | Validated locally on demand |
+| **`d1_omni`** | `LiquidAI/d1-Omni-2B` | `{text, image, video, audio}` | `{decision}` | **P5/P6 complete** | Validated locally on demand |
 
 ---
 
@@ -213,3 +211,27 @@ python benchmarks/plot_results.py
 - [P3: Audio Intelligence & Multimodal Voice Architecture Report](docs/p3/README.md)
 - [Synthetic OCR Evaluation Suite Specification](docs/benchmarks/ocr_suite.md)
 - [Architecture Visualizations & Manim Catalog](visuals/README.md)
+
+---
+
+<!-- PRISMLAB_P7_RECONCILIATION_V2 -->
+## P7 — Architecture, research synthesis and reproducibility
+
+**Interactive architecture:** [Open six-model PrismLab explorer](visuals/PrismLabs_Architecture_Extended_P7_NAV_v2.html) · [P7 final research report](docs/p7/P7_FINAL_REPORT.md). The diagrams are source-grounded architectural overviews, not audited tensor-level computation graphs or live inference endpoints.
+
+**Current local validation status (supersedes older phase-planning labels above):**
+
+| Model | Local P6 inference | P7 architecture page |
+|---|---|---|
+| LFM3-1.7B | Validated locally | [Text](visuals/p7/models/text_v2.html) |
+| LFM3-VL-2B | Validated locally | [Vision](visuals/p7/models/vision_v2.html) |
+| LFM3-Audio-2B | Validated locally | [Audio](visuals/p7/models/audio_v2.html) |
+| LFM3-Omni-2B | Validated locally | [Omni](visuals/p7/models/omni_v2.html) |
+| d1-2B | Validated locally | [d1](visuals/p7/models/d1_v2.html) |
+| d1-Omni-2B | Validated locally | [d1-Omni](visuals/p7/models/d1_omni_v2.html) |
+
+Models run on demand on local hardware; these results **do not** imply continuously running servers, public deployment, or production-ready decision automation. The P6 test suite passed 90/90 integration checks, which are not model-answer accuracy measurements.
+
+**Research sequence:** [P4 multimodal holdout](docs/p4/P4_FINAL_REPORT.md) · [P5 decision pilot](docs/p5/README.md) · [P6 orchestration](docs/p6/README.md) · [P7 reproducible figures](docs/p7/figures/) · [P7 notebook](notebooks/PrismLab_P7_Final_Research_Synthesis_v1_1.ipynb).
+
+**Decision safety caveat:** In P5.7, one of five auto-recommended cases was incorrectly labeled (`X03`: technical → billing, confidence approximately 0.92). The 0.90 threshold was selected post hoc; reported probabilities are not calibrated for autonomous action. No external action was executed.

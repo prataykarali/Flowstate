@@ -1,0 +1,24 @@
+{"id": "B01", "text": "I was charged twice. Please refund the extra payment.", "route": "billing", "refund": true, "group": "clear"}
+{"id": "B02", "text": "Can you send me the invoice for last month?", "route": "billing", "refund": false, "group": "clear"}
+{"id": "B03", "text": "Reverse the duplicate transaction on my card.", "route": "billing", "refund": true, "group": "clear"}
+{"id": "B04", "text": "The tax amount on my invoice seems incorrect.", "route": "billing", "refund": false, "group": "clear"}
+{"id": "B05", "text": "I cancelled yesterday. Please refund this month's charge.", "route": "billing", "refund": true, "group": "clear"}
+{"id": "B06", "text": "My subscription renewed after cancellation. I need the payment reversed.", "route": "billing", "refund": true, "group": "edge"}
+{"id": "T01", "text": "The application crashes whenever I open it.", "route": "technical", "refund": false, "group": "clear"}
+{"id": "T02", "text": "I cannot sign in even with the correct password.", "route": "technical", "refund": false, "group": "clear"}
+{"id": "T03", "text": "My API requests keep timing out.", "route": "technical", "refund": false, "group": "clear"}
+{"id": "T04", "text": "The application is not syncing my data.", "route": "technical", "refund": false, "group": "clear"}
+{"id": "T05", "text": "Clicking the save button causes an error.", "route": "technical", "refund": false, "group": "clear"}
+{"id": "T06", "text": "The payment screen won't load but my card hasn't been charged.", "route": "technical", "refund": false, "group": "edge"}
+{"id": "S01", "text": "My parcel is three days late.", "route": "shipping", "refund": false, "group": "clear"}
+{"id": "S02", "text": "I need to correct my package delivery address.", "route": "shipping", "refund": false, "group": "clear"}
+{"id": "S03", "text": "The parcel arrived damaged. Please arrange a replacement.", "route": "shipping", "refund": false, "group": "clear"}
+{"id": "S04", "text": "One item was missing from the delivered package.", "route": "shipping", "refund": false, "group": "clear"}
+{"id": "S05", "text": "Tracking says delivered but nothing arrived.", "route": "shipping", "refund": false, "group": "clear"}
+{"id": "S06", "text": "I paid for overnight delivery but the box is still at the depot.", "route": "shipping", "refund": false, "group": "edge"}
+{"id": "O01", "text": "Can I book a product demonstration?", "route": "other", "refund": false, "group": "clear"}
+{"id": "O02", "text": "What is included in your premium subscription plan?", "route": "other", "refund": false, "group": "clear"}
+{"id": "O03", "text": "How can I change my preferred language?", "route": "other", "refund": false, "group": "clear"}
+{"id": "O04", "text": "Which languages does your service support?", "route": "other", "refund": false, "group": "clear"}
+{"id": "O05", "text": "I want to speak with someone about enterprise licensing.", "route": "other", "refund": false, "group": "clear"}
+{"id": "O06", "text": "Can you compare your basic and premium plans?", "route": "other", "refund": false, "group": "edge"}

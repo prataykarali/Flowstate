@@ -1,0 +1,15 @@
+flowchart TB
+  M["LFM3-Audio-2B<br/>Configuration evidence map"]
+  classDef root fill:#101f3b,stroke:#67baff,color:#f1f6ff;
+  classDef component fill:#122b39,stroke:#52efd0,color:#f1f6ff;
+  classDef decision fill:#29213d,stroke:#d6a0ff,color:#f1f6ff;
+  class M root
+  C0["Audio encoder<br/>17 layers: 10 conv / 0 sliding / 7 full"]
+  M -.->|declares| C0
+  class C0 component
+  C1["Text backbone<br/>24 layers: 13 conv / 5 sliding / 6 full"]
+  M -.->|declares| C1
+  class C1 component
+  C2["Depthformer<br/>3 layers: 0 conv / 0 sliding / 3 full"]
+  M -.->|declares| C2
+  class C2 component

@@ -1,0 +1,88 @@
+flowchart TB
+  INPUT["Input text"] --> TOK["Tokenization & embeddings"]
+  TOK --> L00
+  subgraph CORE["LFM3-1.7B — 24-layer tri-hybrid backbone"]
+    direction TB
+    L00["Layer 01 — Gated short convolution<br/>kernel 7"]
+    L01["Layer 02 — Gated short convolution<br/>kernel 7"]
+    L00 --> L01
+    L02["Layer 03 — Global attention<br/>partial RoPE"]
+    L01 --> L02
+    L03["Layer 04 — Gated short convolution<br/>kernel 7"]
+    L02 --> L03
+    L04["Layer 05 — Sliding-window attention<br/>window 256"]
+    L03 --> L04
+    L05["Layer 06 — Gated short convolution<br/>kernel 7"]
+    L04 --> L05
+    L06["Layer 07 — Global attention<br/>partial RoPE"]
+    L05 --> L06
+    L07["Layer 08 — Gated short convolution<br/>kernel 7"]
+    L06 --> L07
+    L08["Layer 09 — Sliding-window attention<br/>window 256"]
+    L07 --> L08
+    L09["Layer 10 — Gated short convolution<br/>kernel 7"]
+    L08 --> L09
+    L10["Layer 11 — Global attention<br/>partial RoPE"]
+    L09 --> L10
+    L11["Layer 12 — Gated short convolution<br/>kernel 7"]
+    L10 --> L11
+    L12["Layer 13 — Sliding-window attention<br/>window 256"]
+    L11 --> L12
+    L13["Layer 14 — Gated short convolution<br/>kernel 7"]
+    L12 --> L13
+    L14["Layer 15 — Global attention<br/>partial RoPE"]
+    L13 --> L14
+    L15["Layer 16 — Gated short convolution<br/>kernel 7"]
+    L14 --> L15
+    L16["Layer 17 — Sliding-window attention<br/>window 256"]
+    L15 --> L16
+    L17["Layer 18 — Gated short convolution<br/>kernel 7"]
+    L16 --> L17
+    L18["Layer 19 — Global attention<br/>partial RoPE"]
+    L17 --> L18
+    L19["Layer 20 — Gated short convolution<br/>kernel 7"]
+    L18 --> L19
+    L20["Layer 21 — Sliding-window attention<br/>window 256"]
+    L19 --> L20
+    L21["Layer 22 — Gated short convolution<br/>kernel 7"]
+    L20 --> L21
+    L22["Layer 23 — Global attention<br/>partial RoPE"]
+    L21 --> L22
+    L23["Layer 24 — Gated short convolution<br/>kernel 7"]
+    L22 --> L23
+  end
+  L23 --> LM["LM output head"] --> OUT["Generated text tokens"]
+  classDef conv fill:#102d35,color:#e9fff9,stroke:#52efd0,stroke-width:2px
+  classDef sliding fill:#112740,color:#eaf6ff,stroke:#67baff,stroke-width:2px
+  classDef global fill:#261d40,color:#faf1ff,stroke:#d6a0ff,stroke-width:2px
+  classDef core fill:#13264b,color:#f4f8ff,stroke:#67baff,stroke-width:2px
+  class L00 conv
+  class L01 conv
+  class L02 global
+  class L03 conv
+  class L04 sliding
+  class L05 conv
+  class L06 global
+  class L07 conv
+  class L08 sliding
+  class L09 conv
+  class L10 global
+  class L11 conv
+  class L12 sliding
+  class L13 conv
+  class L14 global
+  class L15 conv
+  class L16 sliding
+  class L17 conv
+  class L18 global
+  class L19 conv
+  class L20 sliding
+  class L21 conv
+  class L22 global
+  class L23 conv
+  class INPUT,TOK,LM,OUT core
+
+%% Schedule derived from LiquidAI reference configuration_lfm3.py default rule:
+%% full_attention when i%4==2, sliding_attention when i%4==0 and i>0, else conv.
+%% Source: https://huggingface.co/LiquidAI/LFM3-1.7B-Base/blob/main/configuration_lfm3.py
+%% Note: verify exact layer_types in the pinned checkpoint config.json before final release.

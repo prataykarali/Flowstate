@@ -1,0 +1,8 @@
+phase,category,example,source
+P2,Pipeline cascading / token budget,04_lab_schedule.png failed downstream text generation despite visual phrase recall,docs/p2/README.md
+P3,Instruction formatting,A correct semantic response can fail a solitary-token exact-output instruction,docs/p3/README.md
+P3,Guarded abort,Modular V2.1 G02 was intentionally halted under word-length safeguard,docs/p3/README.md
+P4,Unsupported spatial relation,Both approaches answered unanswerable spatial prompts too often; both 4/16 on that subset,docs/p4/P4_FINAL_REPORT.md
+P4,Temporal alignment,Four-case video pilot scored temporal ordering 2/4; AV timestamp handling not independently established,docs/p4/P4_FINAL_REPORT.md
+P5,Calibration / abstention,"Thresholds are exploratory, not production calibrated; do not authorize external actions",docs/p5/README.md
+P6,Integration / evidence,ASR error is not ruled out solely by a downstream evidence gate,docs/p6/README.md

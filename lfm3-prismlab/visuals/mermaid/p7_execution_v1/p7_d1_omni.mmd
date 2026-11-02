@@ -1,0 +1,17 @@
+%% d1-Omni-2B | revision 431f1d667de5afcc9b0c58b2d9c170a7b38b358b
+%% High-level architecture, not exact tensor computation.
+flowchart TB
+I["Image / video"] --> V["Vision encoder · 14 layers"] --> VP["Vision projector"] --> M["Multimodal state"]
+ A["Audio"] --> AE["Audio encoder · 17 layers"] --> AP["Audio projector"] --> M
+ T["State + named questions"] --> M
+ M --> B["LFM3-Omni backbone · 24 layers"]
+ B -.->|readout details under audit| S["SystemOne / D1Model interface"]
+ S --> D["Typed answers + probabilities"]
+
+ classDef input fill:#101f3b,stroke:#67baff,color:#eff7ff,stroke-width:2px;
+ classDef core fill:#122b39,stroke:#52efd0,color:#eff7ff,stroke-width:2px;
+ classDef output fill:#29213d,stroke:#d6a0ff,color:#eff7ff,stroke-width:2px;
+ classDef note fill:#111a30,stroke:#54739f,color:#aebfe3,stroke-dasharray:4 4;
+  class A,I,T input
+  class D output
+  class AE,AP,B,M,S,V,VP core

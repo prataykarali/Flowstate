@@ -1,0 +1,799 @@
+{
+  "text": {
+    "repo": "LiquidAI/LFM3-1.7B",
+    "revision": "ac2586a34f1a1c03329dbdcdefabd8b6478ddaa7",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_lfm3.py": {
+        "sha256": "e8cd5254ea99ce6bd731b57b10908c2e8b5010ce8315341f895a38484885eeab",
+        "classes": [
+          {
+            "name": "Lfm3RMSNorm",
+            "line": 52,
+            "methods": {
+              "__init__": 53,
+              "forward": 61,
+              "extra_repr": 68
+            }
+          },
+          {
+            "name": "Lfm3RotaryEmbedding",
+            "line": 72,
+            "methods": {
+              "__init__": 78,
+              "compute_default_rope_parameters": 94,
+              "forward": 115,
+              "compute_rope_parameters": 127
+            }
+          },
+          {
+            "name": "Lfm3MLP",
+            "line": 149,
+            "methods": {
+              "__init__": 150,
+              "forward": 156
+            }
+          },
+          {
+            "name": "Lfm3Attention",
+            "line": 213,
+            "methods": {
+              "__init__": 217,
+              "forward": 234
+            }
+          },
+          {
+            "name": "Lfm3ShortConv",
+            "line": 332,
+            "methods": {
+              "__init__": 336,
+              "forward": 361,
+              "_conv": 427,
+              "_segmented_conv": 432
+            }
+          },
+          {
+            "name": "Lfm3DecoderLayer",
+            "line": 445,
+            "methods": {
+              "__init__": 446,
+              "forward": 462
+            }
+          },
+          {
+            "name": "Lfm3PreTrainedModel",
+            "line": 534,
+            "methods": {
+              "_init_weights": 552,
+              "create_masks_for_generate": 561
+            }
+          },
+          {
+            "name": "Lfm3Model",
+            "line": 588,
+            "methods": {
+              "__init__": 592,
+              "forward": 611
+            }
+          },
+          {
+            "name": "Lfm3ForCausalLM",
+            "line": 803,
+            "methods": {
+              "__init__": 809,
+              "forward": 820,
+              "_prefill": 874
+            }
+          }
+        ]
+      }
+    }
+  },
+  "vision": {
+    "repo": "LiquidAI/LFM3-VL-2B",
+    "revision": "ba44bd51db20a2753f28c273a1571ccaa210d954",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_lfm3_vl.py": {
+        "sha256": "a41cbe7242f379808bcc005207ee0d7b1709528966c1e4da46baa7c41827ac79",
+        "classes": [
+          {
+            "name": "Lfm3VlRMSNorm",
+            "line": 55,
+            "methods": {
+              "__init__": 56,
+              "forward": 64,
+              "extra_repr": 71
+            }
+          },
+          {
+            "name": "Lfm3VlMLP",
+            "line": 75,
+            "methods": {
+              "__init__": 76,
+              "forward": 82
+            }
+          },
+          {
+            "name": "Lfm3VlVisionRotaryEmbedding",
+            "line": 86,
+            "methods": {
+              "__init__": 93,
+              "compute_axial_rope_parameters": 107,
+              "forward": 115,
+              "recomposition_frequencies": 128
+            }
+          },
+          {
+            "name": "Lfm3VlVisionAttention",
+            "line": 195,
+            "methods": {
+              "__init__": 198,
+              "forward": 215
+            }
+          },
+          {
+            "name": "Lfm3VlVisionConv2d",
+            "line": 308,
+            "methods": {
+              "__init__": 311,
+              "forward": 325
+            }
+          },
+          {
+            "name": "Lfm3VlVisionLayer",
+            "line": 354,
+            "methods": {
+              "__init__": 355,
+              "forward": 366
+            }
+          },
+          {
+            "name": "Lfm3VlPreTrainedModel",
+            "line": 422,
+            "methods": {
+              "create_masks_for_generate": 438
+            }
+          },
+          {
+            "name": "Lfm3VlVisionModel",
+            "line": 460,
+            "methods": {
+              "__init__": 469,
+              "forward": 485
+            }
+          },
+          {
+            "name": "Lfm3VlMultiModalProjector",
+            "line": 515,
+            "methods": {
+              "__init__": 518,
+              "forward": 532
+            }
+          },
+          {
+            "name": "Lfm3VlModelOutputWithPast",
+            "line": 546,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3VlCausalLMOutputWithPast",
+            "line": 571,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3VlModel",
+            "line": 590,
+            "methods": {
+              "__init__": 591,
+              "get_image_features": 603,
+              "get_placeholder_mask": 621,
+              "forward": 661,
+              "get_video_features": 754
+            }
+          },
+          {
+            "name": "Lfm3VlForConditionalGeneration",
+            "line": 823,
+            "methods": {
+              "__init__": 826,
+              "get_output_embeddings": 832,
+              "get_image_features": 836,
+              "forward": 852,
+              "_prefill": 944,
+              "get_video_features": 950
+            }
+          }
+        ]
+      }
+    }
+  },
+  "audio": {
+    "repo": "LiquidAI/LFM3-Audio-2B",
+    "revision": "0295e4130594c06800fd25451d97139ac2da1aff",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_lfm3_audio.py": {
+        "sha256": "8d7225d892b8b09edbe2285a8add883ce46e28c4027edc2b8c59b501eeadb9e0",
+        "classes": [
+          {
+            "name": "Lfm3AudioRMSNorm",
+            "line": 61,
+            "methods": {
+              "__init__": 62,
+              "forward": 67
+            }
+          },
+          {
+            "name": "Lfm3AudioDownsampler",
+            "line": 76,
+            "methods": {
+              "__init__": 79,
+              "forward": 91,
+              "output_lengths": 109
+            }
+          },
+          {
+            "name": "Lfm3AudioEncoderStreamingCache",
+            "line": 113,
+            "methods": {
+              "__init__": 116
+            }
+          },
+          {
+            "name": "Lfm3AudioEncoder",
+            "line": 130,
+            "methods": {
+              "__init__": 131,
+              "forward": 139,
+              "stream": 161
+            }
+          },
+          {
+            "name": "Lfm3AudioProjector",
+            "line": 217,
+            "methods": {
+              "__init__": 218,
+              "forward": 227
+            }
+          },
+          {
+            "name": "Lfm3AudioCodebookEmbedding",
+            "line": 231,
+            "methods": {
+              "__init__": 234,
+              "forward": 239,
+              "logits": 242
+            }
+          },
+          {
+            "name": "Lfm3AudioDepthDecoder",
+            "line": 246,
+            "methods": {
+              "__init__": 253,
+              "embed_codes": 265,
+              "forward": 270,
+              "trunk": 290
+            }
+          },
+          {
+            "name": "Lfm3AudioPreTrainedModel",
+            "line": 333,
+            "methods": {
+              "_init_weights": 350,
+              "create_masks_for_generate": 356
+            }
+          },
+          {
+            "name": "Lfm3AudioModelOutputWithPast",
+            "line": 373,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioCausalLMOutputWithPast",
+            "line": 393,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioGenerateOutput",
+            "line": 415,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioStreamingOutput",
+            "line": 437,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioLiveTranscriptionState",
+            "line": 455,
+            "methods": {
+              "__init__": 458
+            }
+          },
+          {
+            "name": "Lfm3AudioLiveTranscriptionOutput",
+            "line": 469,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioGenerationMode",
+            "line": 488,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3AudioModel",
+            "line": 495,
+            "methods": {
+              "__init__": 496,
+              "get_input_embeddings": 507,
+              "set_input_embeddings": 510,
+              "get_audio_features": 514,
+              "get_audio_features_stream": 546,
+              "get_audio_out_embeds": 556,
+              "get_placeholder_positions": 579,
+              "check_speech_placeholders": 587,
+              "get_placeholder_mask": 607,
+              "forward": 620
+            }
+          },
+          {
+            "name": "Lfm3AudioForConditionalGeneration",
+            "line": 692,
+            "methods": {
+              "__init__": 698,
+              "get_input_embeddings": 704,
+              "set_input_embeddings": 707,
+              "get_output_embeddings": 710,
+              "get_audio_features": 714,
+              "language_model": 724,
+              "_placeholder_token_ids": 728,
+              "depth_decoder": 734,
+              "forward": 739,
+              "audio_loss": 816,
+              "combined_loss": 852,
+              "_build_warpers": 872,
+              "_sample": 891,
+              "sample_audio_frame": 917,
+              "prefill_audio": 957,
+              "_live_forward": 1028,
+              "transcribe_live": 1044,
+              "generate": 1221,
+              "_end_streamers": 1347,
+              "_generate": 1358
+            }
+          }
+        ]
+      },
+      "modeling_liquid_codec.py": {
+        "sha256": "5ca87e1b6e0549b40dc90fad5ee9d55620e9defb78c67e19c5937208c8e14f74",
+        "classes": [
+          {
+            "name": "LiquidCodecEncoderOutput",
+            "line": 36,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecDecoderOutput",
+            "line": 47,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecOutput",
+            "line": 58,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecStreamingCache",
+            "line": 70,
+            "methods": {
+              "__init__": 73
+            }
+          },
+          {
+            "name": "LiquidCodecSTFT",
+            "line": 81,
+            "methods": {
+              "__init__": 82,
+              "forward": 90
+            }
+          },
+          {
+            "name": "LiquidCodecFrontEnd",
+            "line": 107,
+            "methods": {
+              "__init__": 108,
+              "forward": 118
+            }
+          },
+          {
+            "name": "LiquidCodecLfm",
+            "line": 124,
+            "methods": {
+              "__init__": 125,
+              "_rotary_in_float32": 134,
+              "forward": 137
+            }
+          },
+          {
+            "name": "LiquidCodecQuantizer",
+            "line": 141,
+            "methods": {
+              "__init__": 142,
+              "_bound": 160,
+              "encode": 166,
+              "decode": 182
+            }
+          },
+          {
+            "name": "LiquidCodecISTFT",
+            "line": 192,
+            "methods": {
+              "__init__": 193,
+              "forward": 200
+            }
+          },
+          {
+            "name": "LiquidCodecDecoder",
+            "line": 210,
+            "methods": {
+              "__init__": 211,
+              "forward": 218
+            }
+          },
+          {
+            "name": "LiquidCodecModel",
+            "line": 235,
+            "methods": {
+              "__init__": 244,
+              "_init_weights": 256,
+              "encode": 269,
+              "decode": 294,
+              "forward": 361
+            }
+          }
+        ]
+      }
+    }
+  },
+  "omni": {
+    "repo": "LiquidAI/LFM3-Omni-2B",
+    "revision": "5797d07c125503bd4f4c0e7f915ae2d3d703e8de",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_lfm3_omni.py": {
+        "sha256": "9872e64112f9e255fba43212771226772af521e93f99c1984ecba1049664c465",
+        "classes": [
+          {
+            "name": "Lfm3OmniModelOutputWithPast",
+            "line": 68,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniCausalLMOutputWithPast",
+            "line": 88,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniEncoderStreamingCache",
+            "line": 104,
+            "methods": {
+              "__init__": 107
+            }
+          },
+          {
+            "name": "Lfm3OmniGenerateOutput",
+            "line": 127,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniStreamingOutput",
+            "line": 149,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniLiveTranscriptionState",
+            "line": 167,
+            "methods": {
+              "__init__": 170
+            }
+          },
+          {
+            "name": "Lfm3OmniLiveTranscriptionOutput",
+            "line": 181,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniRMSNorm",
+            "line": 200,
+            "methods": {
+              "__init__": 201,
+              "forward": 206
+            }
+          },
+          {
+            "name": "Lfm3OmniCodebookEmbedding",
+            "line": 215,
+            "methods": {
+              "__init__": 218,
+              "forward": 223,
+              "logits": 226
+            }
+          },
+          {
+            "name": "Lfm3OmniDepthDecoder",
+            "line": 230,
+            "methods": {
+              "__init__": 237,
+              "embed_codes": 249,
+              "forward": 254,
+              "trunk": 274
+            }
+          },
+          {
+            "name": "Lfm3OmniPreTrainedModel",
+            "line": 317,
+            "methods": {
+              "_init_weights": 332,
+              "create_masks_for_generate": 338
+            }
+          },
+          {
+            "name": "Lfm3OmniMultiModalProjector",
+            "line": 349,
+            "methods": {
+              "__init__": 352,
+              "forward": 366
+            }
+          },
+          {
+            "name": "Lfm3OmniDownsampler",
+            "line": 374,
+            "methods": {
+              "__init__": 377,
+              "forward": 389,
+              "output_lengths": 407
+            }
+          },
+          {
+            "name": "Lfm3OmniEncoder",
+            "line": 411,
+            "methods": {
+              "__init__": 412,
+              "forward": 420,
+              "stream": 442
+            }
+          },
+          {
+            "name": "Lfm3OmniProjector",
+            "line": 498,
+            "methods": {
+              "__init__": 499,
+              "forward": 508
+            }
+          },
+          {
+            "name": "Lfm3OmniModel",
+            "line": 513,
+            "methods": {
+              "__init__": 514,
+              "get_input_embeddings": 527,
+              "set_input_embeddings": 530,
+              "get_audio_features": 534,
+              "get_audio_features_stream": 566,
+              "get_audio_out_embeds": 576,
+              "get_placeholder_positions": 599,
+              "check_speech_placeholders": 607,
+              "get_placeholder_mask": 627,
+              "forward": 640,
+              "get_image_features": 732,
+              "get_video_features": 746
+            }
+          },
+          {
+            "name": "Lfm3OmniGenerationMode",
+            "line": 759,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniForConditionalGeneration",
+            "line": 771,
+            "methods": {
+              "__init__": 824,
+              "get_input_embeddings": 830,
+              "set_input_embeddings": 833,
+              "get_output_embeddings": 836,
+              "get_audio_features": 840,
+              "language_model": 850,
+              "_placeholder_token_ids": 854,
+              "depth_decoder": 863,
+              "forward": 868,
+              "audio_loss": 962,
+              "combined_loss": 998,
+              "_build_warpers": 1018,
+              "_sample": 1037,
+              "sample_audio_frame": 1063,
+              "prefill_audio": 1103,
+              "_live_forward": 1174,
+              "transcribe_live": 1190,
+              "generate": 1320,
+              "_end_streamers": 1446,
+              "_generate": 1457,
+              "get_image_features": 1818,
+              "get_video_features": 1831
+            }
+          },
+          {
+            "name": "Lfm3OmniFeatureStreamingCache",
+            "line": 1845,
+            "methods": {}
+          },
+          {
+            "name": "Lfm3OmniFeatureExtractorKwargs",
+            "line": 1854,
+            "methods": {}
+          }
+        ]
+      },
+      "modeling_liquid_codec.py": {
+        "sha256": "5ca87e1b6e0549b40dc90fad5ee9d55620e9defb78c67e19c5937208c8e14f74",
+        "classes": [
+          {
+            "name": "LiquidCodecEncoderOutput",
+            "line": 36,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecDecoderOutput",
+            "line": 47,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecOutput",
+            "line": 58,
+            "methods": {}
+          },
+          {
+            "name": "LiquidCodecStreamingCache",
+            "line": 70,
+            "methods": {
+              "__init__": 73
+            }
+          },
+          {
+            "name": "LiquidCodecSTFT",
+            "line": 81,
+            "methods": {
+              "__init__": 82,
+              "forward": 90
+            }
+          },
+          {
+            "name": "LiquidCodecFrontEnd",
+            "line": 107,
+            "methods": {
+              "__init__": 108,
+              "forward": 118
+            }
+          },
+          {
+            "name": "LiquidCodecLfm",
+            "line": 124,
+            "methods": {
+              "__init__": 125,
+              "_rotary_in_float32": 134,
+              "forward": 137
+            }
+          },
+          {
+            "name": "LiquidCodecQuantizer",
+            "line": 141,
+            "methods": {
+              "__init__": 142,
+              "_bound": 160,
+              "encode": 166,
+              "decode": 182
+            }
+          },
+          {
+            "name": "LiquidCodecISTFT",
+            "line": 192,
+            "methods": {
+              "__init__": 193,
+              "forward": 200
+            }
+          },
+          {
+            "name": "LiquidCodecDecoder",
+            "line": 210,
+            "methods": {
+              "__init__": 211,
+              "forward": 218
+            }
+          },
+          {
+            "name": "LiquidCodecModel",
+            "line": 235,
+            "methods": {
+              "__init__": 244,
+              "_init_weights": 256,
+              "encode": 269,
+              "decode": 294,
+              "forward": 361
+            }
+          }
+        ]
+      }
+    }
+  },
+  "d1": {
+    "repo": "LiquidAI/d1-2B",
+    "revision": "10e7671d44e4b37700020b1eed3f594c5f2af0b4",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_d1.py": {
+        "sha256": "214d3477cef38e7831f2b4fb0250ace7fb1aeac5b02066fcfd5cc030c541fd72",
+        "classes": [
+          {
+            "name": "SystemOneModel",
+            "line": 20,
+            "methods": {
+              "from_pretrained": 27,
+              "d1_file": 35,
+              "_revision": 42,
+              "engine": 46,
+              "compile": 57,
+              "system_one": 61,
+              "system_one_batch": 70
+            }
+          }
+        ]
+      },
+      "modeling_d1_lfm3_vl.py": {
+        "sha256": "68d71f38188f07d11ad8af7cb557c8edc87536eb0db20870b7c5e6ae58fe5f30",
+        "classes": [
+          {
+            "name": "D1Model",
+            "line": 9,
+            "methods": {}
+          }
+        ]
+      }
+    }
+  },
+  "d1_omni": {
+    "repo": "LiquidAI/d1-Omni-2B",
+    "revision": "431f1d667de5afcc9b0c58b2d9c170a7b38b358b",
+    "config_matches_saved": true,
+    "sources": {
+      "modeling_d1.py": {
+        "sha256": "214d3477cef38e7831f2b4fb0250ace7fb1aeac5b02066fcfd5cc030c541fd72",
+        "classes": [
+          {
+            "name": "SystemOneModel",
+            "line": 20,
+            "methods": {
+              "from_pretrained": 27,
+              "d1_file": 35,
+              "_revision": 42,
+              "engine": 46,
+              "compile": 57,
+              "system_one": 61,
+              "system_one_batch": 70
+            }
+          }
+        ]
+      },
+      "modeling_d1_lfm3_omni.py": {
+        "sha256": "be09e4292373fec960d322474a1012f9e7cd62b395d6cce16622a85a894cae6b",
+        "classes": [
+          {
+            "name": "D1Model",
+            "line": 9,
+            "methods": {}
+          }
+        ]
+      }
+    }
+  }
+}

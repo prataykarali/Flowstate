@@ -1,0 +1,16 @@
+%% LFM3-Omni-2B | revision 5797d07c125503bd4f4c0e7f915ae2d3d703e8de
+%% High-level architecture, not exact tensor computation.
+flowchart TB
+I["Image / video"] --> V["Vision encoder · 14 layers"] --> VP["Vision projector"] --> M["Multimodal features"]
+ A["Audio · 16 kHz"] --> AE["Audio encoder · 17 layers"] --> AP["Audio projector"] --> M
+ T["Text tokens"] --> E["Token embeddings"] --> M
+ M --> B["LFM3 decoder · 24 layers"] --> H["Text output"]
+ B --> F["Depthformer · 3 layers"] --> C["LiquidCodec"] --> S["Speech · 24 kHz"]
+
+ classDef input fill:#101f3b,stroke:#67baff,color:#eff7ff,stroke-width:2px;
+ classDef core fill:#122b39,stroke:#52efd0,color:#eff7ff,stroke-width:2px;
+ classDef output fill:#29213d,stroke:#d6a0ff,color:#eff7ff,stroke-width:2px;
+ classDef note fill:#111a30,stroke:#54739f,color:#aebfe3,stroke-dasharray:4 4;
+  class A,I,T input
+  class H,S output
+  class AE,AP,B,C,E,F,M,V,VP core

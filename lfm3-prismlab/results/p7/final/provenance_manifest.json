@@ -1,0 +1,194 @@
+[
+  {
+    "path": "docs/p1/README.md",
+    "exists": true,
+    "sha256": "cf5c9613bbca78b60a10dfd71205d50e5a80f2cecf9edbc856517ebac45f6a2e",
+    "size_bytes": 5507
+  },
+  {
+    "path": "docs/p2/README.md",
+    "exists": true,
+    "sha256": "cf8a86ff1ccb12a490fbccc58984878c1680673042988239c3827e6a185591a2",
+    "size_bytes": 16062
+  },
+  {
+    "path": "docs/p3/README.md",
+    "exists": true,
+    "sha256": "3bb2ed206a90ead06c530a59399853334b045be51050272bfedc663e521c6aa2",
+    "size_bytes": 16438
+  },
+  {
+    "path": "docs/p4/P4_FINAL_REPORT.md",
+    "exists": true,
+    "sha256": "fd969dfa5dc0b8c860555fb0213c3d2af89e808b023e20f71a300e2c44a15229",
+    "size_bytes": 4731
+  },
+  {
+    "path": "docs/p5/README.md",
+    "exists": true,
+    "sha256": "d6783f3553cd26a1850125cfc58bea34d7014a21625b3f50d9cf30ca1825f769",
+    "size_bytes": 867
+  },
+  {
+    "path": "docs/p6/README.md",
+    "exists": true,
+    "sha256": "51719cb0e035ad7fd54974a31c6329613dfb3b7b403f4eb14223062e71f60613",
+    "size_bytes": 1812
+  },
+  {
+    "path": "results/p7/architecture/component_maps.json",
+    "exists": true,
+    "sha256": "8f94e6f18f4982088caeb9f3364ded12cfa4207ef05feb0bd3f0eb118166046c",
+    "size_bytes": 4459
+  },
+  {
+    "path": "results/p7/architecture/p7_2_source_trace.json",
+    "exists": true,
+    "sha256": "1f08c204e145f5e972b998ecb8b5a69222dc2eda9bb43edd679f346ec487d410",
+    "size_bytes": 21015
+  },
+  {
+    "path": "docs/p7/P7_2_WIRING_TRACE.md",
+    "exists": true,
+    "sha256": "268905f09824708427920fcc4db4eb56b056c1c4e2b6d16150a97c4614a2e0ca",
+    "size_bytes": 13693
+  },
+  {
+    "path": "visuals/PrismLabs_Architecture_Extended_P7_NAV_v2.html",
+    "exists": true,
+    "sha256": "937bb74d7c9025a08a9ae42655d915cb1cf49c18504d98e487331d823fff18f8",
+    "size_bytes": 26876
+  },
+  {
+    "path": "results/p7/architecture/text_config.json",
+    "exists": true,
+    "sha256": "8c6ae8b8f6d88c87cfb98cf4b5e34e943d0ee07e24215c4121b3159a46e1399d",
+    "size_bytes": 1454
+  },
+  {
+    "path": "results/p7/architecture/vision_config.json",
+    "exists": true,
+    "sha256": "18a02e8b5963e38c98683e2c948705ea45220d75f017e9b4bdd9cf54692e6dc3",
+    "size_bytes": 2905
+  },
+  {
+    "path": "results/p7/architecture/audio_config.json",
+    "exists": true,
+    "sha256": "1eb2a8349a1ec9eda2ed8e8bb1a8788007ae2ae9baa38a7d959743c5379d30d8",
+    "size_bytes": 6243
+  },
+  {
+    "path": "results/p7/architecture/omni_config.json",
+    "exists": true,
+    "sha256": "17e3792551ef56b37e85bbd1e6e968f70dc5b4b14c96f1339d0be85e0ba46875",
+    "size_bytes": 5912
+  },
+  {
+    "path": "results/p7/architecture/d1_config.json",
+    "exists": true,
+    "sha256": "ffdc4c996152d23dbe8a2659a8c6aabe2992aa3fa3a41601dd0fca8771d6f332",
+    "size_bytes": 2903
+  },
+  {
+    "path": "results/p7/architecture/d1_omni_config.json",
+    "exists": true,
+    "sha256": "cebf53b6bb8835cefe9b415d9619c23398ab8326d6385ee80f98fef0caad7169",
+    "size_bytes": 5802
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_text.mmd",
+    "exists": true,
+    "sha256": "f71ebb4a0e4e10a2106db96dfa504386a5a36c21c46a9a51f00c3c727dfb5bba",
+    "size_bytes": 690
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_vision.mmd",
+    "exists": true,
+    "sha256": "0c29f9cf86c119cb14b1444c551f8c18f9c585b3985d8cf7f939704b81aff3d8",
+    "size_bytes": 780
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_audio.mmd",
+    "exists": true,
+    "sha256": "3e93b46d1d44deb7fc2ccb216ce7862754a406dce01244e8ff4017a97a4ecaf3",
+    "size_bytes": 848
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_omni.mmd",
+    "exists": true,
+    "sha256": "f253df799ef43bd982a455f1e1d50f9b5435bc78009880c5f4f3b2deaab13845",
+    "size_bytes": 915
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_d1.mmd",
+    "exists": true,
+    "sha256": "09b29bcaa17721ef93a306551a3cc552913e1c4e33276260819f524e70ed91a0",
+    "size_bytes": 798
+  },
+  {
+    "path": "visuals/mermaid/p7_execution_v1/p7_d1_omni.mmd",
+    "exists": true,
+    "sha256": "7204b9e84620da553d60205b81319a072c380e282e67fdfdeec5897822bc6669",
+    "size_bytes": 896
+  },
+  {
+    "path": "visuals/p7/models/text_v2.html",
+    "exists": true,
+    "sha256": "dac4aa25857ab5b623b204939415a6fb66ad45204c221512707ede60ea289cfe",
+    "size_bytes": 29638
+  },
+  {
+    "path": "visuals/p7/models/vision_v2.html",
+    "exists": true,
+    "sha256": "0784c06ab91e6075ed925c7d0cbabb24a5c7eddc2779bdc375524361213934e8",
+    "size_bytes": 34400
+  },
+  {
+    "path": "visuals/p7/models/audio_v2.html",
+    "exists": true,
+    "sha256": "41b49204e87c8916b07bf7e125785248b481546fced2e8e46eb236c5c557bd2b",
+    "size_bytes": 36776
+  },
+  {
+    "path": "visuals/p7/models/omni_v2.html",
+    "exists": true,
+    "sha256": "e714b6bbf7bfbb5e2f6d5a088f1b86e40224dcd2d81d8e622624b0311fe0806a",
+    "size_bytes": 39261
+  },
+  {
+    "path": "visuals/p7/models/d1_v2.html",
+    "exists": true,
+    "sha256": "da0d65eab6bc0f2c05958787888ac23fa6b0ae24e5d372709684bcc2df123537",
+    "size_bytes": 32331
+  },
+  {
+    "path": "visuals/p7/models/d1_omni_v2.html",
+    "exists": true,
+    "sha256": "9cb998c162eee02b45d4777268c9086d48f41870d7ec1defc701e38b2841f055",
+    "size_bytes": 36059
+  },
+  {
+    "path": "experiments/p5/results/p5_2_20261101T035440Z_summary.json",
+    "exists": true,
+    "sha256": "d5ebf353ec5c5dbe7bec142648517442fdc7d5a60be09239365d3e8b32581b33",
+    "size_bytes": 1002
+  },
+  {
+    "path": "experiments/p5/results/p5_3_20261101T035635Z_summary.json",
+    "exists": true,
+    "sha256": "ebf1b29811a2567aa733d1c1b30b33abb1f0147c25daf7d73dc8be0a45607d52",
+    "size_bytes": 1199
+  },
+  {
+    "path": "experiments/p5/results/p5_6b_audio_intent_20261101T044410Z_summary.json",
+    "exists": true,
+    "sha256": "4a3946aed012dc854159a7710d9b02f185e35438240439a8cbd965fce2507596",
+    "size_bytes": 1270
+  },
+  {
+    "path": "experiments/p5/results/p5_7_integration_20261101T045955Z_summary.json",
+    "exists": true,
+    "sha256": "89a21bf208e05588ae1e137ed57c22ae4d8ee64521773866744f5b830d8b3d36",
+    "size_bytes": 1298
+  }
+]

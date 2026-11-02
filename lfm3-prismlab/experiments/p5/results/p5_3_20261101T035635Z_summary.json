@@ -1,0 +1,58 @@
+{
+  "model": "LiquidAI/d1-2B-GGUF:Q4_K_M",
+  "total_cases": 24,
+  "successful_cases": 24,
+  "errors": 0,
+  "routing_accuracy": 0.8333333333333334,
+  "refund_accuracy": 0.9166666666666666,
+  "routing_brier": 0.24448332792432154,
+  "latency_p50_s": 0.41145,
+  "latency_p95_s": 0.4743,
+  "thresholds": {
+    "0.8": {
+      "accepted": 16,
+      "coverage": 0.6666666666666666,
+      "accuracy": 0.9375
+    },
+    "0.9": {
+      "accepted": 11,
+      "coverage": 0.4583333333333333,
+      "accuracy": 1.0
+    },
+    "0.95": {
+      "accepted": 6,
+      "coverage": 0.25,
+      "accuracy": 1.0
+    }
+  },
+  "routing_failures": [
+    {
+      "id": "T07",
+      "expected": "technical",
+      "predicted": "billing",
+      "confidence": 0.7425272521701923
+    },
+    {
+      "id": "T08",
+      "expected": "technical",
+      "predicted": "billing",
+      "confidence": 0.7483774663464219
+    },
+    {
+      "id": "O10",
+      "expected": "other",
+      "predicted": "billing",
+      "confidence": 0.8254410694116308
+    },
+    {
+      "id": "O12",
+      "expected": "other",
+      "predicted": "technical",
+      "confidence": 0.7112210665537347
+    }
+  ],
+  "refund_failures": [
+    "T09",
+    "O10"
+  ]
+}

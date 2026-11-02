@@ -1,0 +1,7 @@
+phase,label,success,total,median_s,timed_n,source,task
+P2,Direct VL,10,10,38.53,,docs/p2/README.md,10 synthetic image QA/OCR cases
+P2,VL OCR → Text,9,10,65.72,,docs/p2/README.md,10 synthetic image QA/OCR cases
+P3,Native S2S,24,25,13.95,23,docs/p3/README.md,25 English audio QA/voice tasks
+P3,Modular V2.1,22,25,20.18,24,docs/p3/README.md,25 English audio QA/voice tasks
+P4,Native Omni,25,40,20.919,,docs/p4/P4_FINAL_REPORT.md,40 paired spatial/AV holdout cases
+P4,Modular ASR → VL,28,40,21.288,,docs/p4/P4_FINAL_REPORT.md,40 paired spatial/AV holdout cases

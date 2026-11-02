@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>d1-2B | PrismLab</title>
+<style>
+:root {color-scheme:dark; --mint:#52efd0; --blue:#67baff; --pink:#d6a0ff; --background:#070d19}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050913}
+body{display:grid;place-items:center;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+.arch{width:min(100vw,1590px);max-height:100vh;height:auto;display:block;aspect-ratio:1380/1030}
+.header{font-family:inherit;font-size:38px;font-weight:760;letter-spacing:-.8px;fill:#eff7ff}
+.section-label{font-size:15px;fill:#9bb3db;font-weight:720;letter-spacing:1.8px}
+.top-label{font-size:22px;fill:#f4f8ff;font-weight:710}
+.top-sub{font-size:14px;fill:#acc6e8}
+.model-label{font-size:20px;font-weight:730;fill:#f1f6ff;letter-spacing:-.5px}
+.model-role{font-size:12px;fill:#9db5df;font-weight:640;letter-spacing:1.5px}
+.pipeline-title{font-size:20.5px;font-weight:760;fill:#f3f7ff;letter-spacing:-.3px}
+.pipeline-sub{font-size:16px;fill:#aebfe3;font-weight:540}
+.final-label{font-size:23px;font-weight:760;fill:#f3f7ff}
+.final-sub{font-size:14px;fill:#b2c5e6;letter-spacing:.2px}
+.core rect.node-base{fill:#101f3b;stroke:#426b9c;stroke-width:1.6}
+.core.route rect.node-base{fill:#13264b;stroke:#55a9f5;stroke-width:2}
+.node-base{fill:#121d34;stroke:#476a95;stroke-width:1.6;filter:url(#softShadow)}
+.model .node-base{transition:stroke .35s, filter .35s, fill .35s}
+.model.on .node-base{stroke:#52efd0;fill:#122b39;filter:url(#mintGlow)}
+.model[data-model="d1"].on .node-base,.model[data-model="d1omni"].on .node-base{stroke:#d6a0ff;fill:#29213d;filter:url(#pinkGlow)}
+.model.on .icon-bubble circle{stroke:#51eec9;fill:#113c40}
+.model[data-model="d1"].on .icon-bubble circle,.model[data-model="d1omni"].on .icon-bubble circle{stroke:#d6a0ff;fill:#342447}
+.icon-bubble circle{fill:#20324e;stroke:#456e9f;stroke-width:1.2}
+.icon-bubble use{stroke:#d6e7ff;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.core .icon-bubble circle{fill:#16446a;stroke:#69b7ef}
+.pool-boundary{fill:url(#poolBG);stroke:#375c89;stroke-opacity:.75;stroke-width:1.4;stroke-dasharray:8 9}
+.mini-star{fill:#6ca9f4;opacity:.4}
+.pipe .node-base{fill:#12203a;stroke:#5075a6;stroke-width:1.8;transition:stroke .35s,fill .35s,filter .35s}
+.pipe.on .node-base{stroke:var(--accent);fill:var(--fill);filter:url(#focusGlow)}
+.pipe .pipe-icon-bg{fill:#213653;stroke:#567ab0;stroke-width:1.5}
+.pipe.on .pipe-icon-bg{fill:#19394b;stroke:var(--accent)}
+.pipe .pipe-icon{stroke:#d6e5ff;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pipe.on .pipe-icon{stroke:var(--accent)}
+.pipe{cursor:pointer;outline:none}
+.pipe:focus-visible .node-base{stroke:#f6f7ff;stroke-width:3}
+.pipe[data-flow="doc"]{--accent:#52efd0;--fill:#102d35}
+.pipe[data-flow="voice"]{--accent:#67baff;--fill:#112740}
+.pipe[data-flow="decision"]{--accent:#d6a0ff;--fill:#261d40}
+.link{fill:none;stroke-width:2.2;stroke-linecap:round;opacity:.16;transition:opacity .4s,filter .4s,stroke-width .4s;pointer-events:none}
+.link.source{stroke:#80b8f6;stroke-dasharray:5 9;animation:dash 1.4s linear infinite}
+.link.converge{stroke:#80b8f6;stroke-width:2.5;stroke-dasharray:7 10;animation:dash 1.4s linear infinite}
+.link.on{stroke:var(--accent);stroke-width:3.2;opacity:.88;filter:drop-shadow(0 0 6px var(--accent))}
+.link.mint{--accent:#52efd0}.link.blue{--accent:#67baff}.link.pink{--accent:#d6a0ff}
+.link.trunk{stroke:#67baff;opacity:.8;filter:drop-shadow(0 0 5px #67baff);stroke-dasharray:5 11;animation:dash 1.6s linear infinite}
+.signal{fill:var(--accent);opacity:.08;transition:opacity .35s;filter:drop-shadow(0 0 5px var(--accent))}
+.signal.on{opacity:1}
+.signal.mint{--accent:#52efd0}.signal.blue{--accent:#67baff}.signal.pink{--accent:#d6a0ff}
+.pipeline-group{filter:drop-shadow(0 5px 17px rgba(0,0,0,.12))}
+.final rect.node-base{fill:#122a45;stroke:#60aefa;stroke-width:1.8;filter:url(#blueGlow)}
+@keyframes dash{to{stroke-dashoffset:-28}}
+@media(prefers-reduced-motion:reduce){.link{animation:none}.signal{display:none}}
+
+/* Additional processing stage and three downstream destinations */
+.stage .node-base{fill:#101e37;stroke:#4a719d;stroke-width:1.7;transition:stroke .3s,fill .3s,filter .3s}
+.stage.on .node-base{stroke:var(--accent);filter:url(#focusGlow)}
+.stage .pipe-icon-bg{fill:#203450;stroke:#4c759e;stroke-width:1.4}
+.stage .pipe-icon{fill:none;stroke:#b8d1f4;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stage.on .pipe-icon{stroke:var(--accent)}
+.stage[data-flow="doc"]{--accent:#52efd0}
+.stage[data-flow="voice"]{--accent:#67baff}
+.stage[data-flow="decision"]{--accent:#d6a0ff}
+.stage-label{font-size:21px;font-weight:750;fill:#eaf5ff}
+.stage-hint{font-size:13px;fill:#9cb9de;letter-spacing:.3px}
+.output .node-base{fill:#13213c;stroke:#5584b5;stroke-width:1.8;filter:url(#softShadow);transition:stroke .3s,filter .3s}
+.output:hover .node-base{stroke:#82c9ff;filter:url(#blueGlow)}
+.output-icon{fill:#203451;stroke:#6a9fd2;stroke-width:1.4}
+.output use{fill:none;stroke:#d6e7ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.output-title{font-size:21px;font-weight:750;fill:#f0f7ff}
+.output-sub{font-size:13px;fill:#a9c6ec}
+.link.deliver{stroke:#69c6fa;opacity:.75;stroke-width:2.6;filter:drop-shadow(0 0 4px #67baff);stroke-dasharray:5 10;animation:dash 1.3s linear infinite}
+.link.stage-path{stroke-width:2.6}
+.stage-title{font-size:15px;letter-spacing:1.8px;font-weight:700;fill:#86a5cc}
+
+
+html,body {
+  height:auto; min-height:100%; overflow:auto; display:block
+}
+body { background:#050913; color:#eff7ff }
+.p7-nav {
+  position:sticky; top:0; z-index:9;
+  display:flex; flex-wrap:wrap; gap:10px;
+  padding:14px; background:#070d19;
+  border-bottom:1px solid #40608d
+}
+.p7-nav a {
+  font:600 13px Inter,system-ui,sans-serif;
+  color:#9db5df; padding:9px;
+  border:1px solid #375c89;
+  border-radius:11px; text-decoration:none
+}
+.p7-nav a[aria-current] {
+  color:#eff7ff; border-color:#52efd0
+}
+.p7-svg { width:min(100%,1380px); height:auto; display:block; margin:auto }
+.p7-title { font:760 38px Inter,system-ui,sans-serif; fill:#eff7ff }
+.p7-note { font:14px Inter,system-ui,sans-serif; fill:#9db5df }
+.p7-name { font-size:17px }
+.p7-node { cursor:pointer }
+.p7-node:hover .node-base,
+.p7-node.on .node-base,
+.p7-node:focus-visible .node-base {
+  stroke:#52efd0; filter:url(#mintGlow)
+}
+.p7-status {
+  text-align:center; color:#9db5df;
+  font:14px Inter,system-ui,sans-serif; padding:15px
+}
+.p7-status a { color:#52efd0 }
+@media(prefers-reduced-motion:reduce) {
+  animateMotion { display:none }
+}
+</style>
+<style id="P7_ENHANCEMENT_V2">
+/* Additive: the original PrismLab hero stylesheet and SVG definitions remain intact. */
+:root { --p7-mint:#52efd0; --p7-blue:#67baff; --p7-pink:#d6a0ff; }
+.p7-labbar { width:min(100%,1380px); margin:0 auto; padding:13px 18px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:9px;
+  background:linear-gradient(115deg,#0d1a33,#14223c 55%,#130f2b);
+  border:1px solid #37547b; border-top:0; border-radius:0 0 18px 18px;
+  box-shadow:0 15px 35px #02061260; font-family:Inter,system-ui,sans-serif; }
+.p7-lab-title { color:#edf7ff; font-size:12px; font-weight:800;
+  letter-spacing:1.45px; margin-right:auto; }
+.p7-lab-title small { display:block; margin-top:3px; font-size:11px;
+  letter-spacing:0; font-weight:500; color:#9db5df; }
+.p7-button { color:#bcd3ef; background:#172743; border:1px solid #3d6090;
+  border-radius:12px; padding:9px 12px; font-size:12px; font-weight:700;
+  cursor:pointer; transition:background .2s, border-color .2s, transform .2s; }
+.p7-button:hover { background:#213a59; border-color:#67baff; transform:translateY(-1px) }
+.p7-button[aria-pressed="true"] { color:#edfdff; background:#16413f; border-color:#52efd0 }
+.p7-button.p7-play { border-color:#52efd0; color:#bdfced }
+.p7-button:focus-visible, .p7-node:focus-visible { outline:2px solid #eff7ff; outline-offset:3px }
+.p7-legend { width:min(100%,1380px); display:flex; margin:12px auto 0;
+  flex-wrap:wrap; justify-content:center; gap:12px 20px; color:#aebfe3;
+  font:12px Inter,system-ui,sans-serif; padding:0 12px }
+.p7-legend i { display:inline-block; width:20px; height:3px; margin:0 6px 3px 0;
+  vertical-align:middle; background:var(--ink); border-radius:5px }
+.p7-legend i.dashed { background:repeating-linear-gradient(90deg,#d6a0ff 0 5px,transparent 5px 9px) }
+.p7-node .node-base { stroke:var(--p7-accent,#476a95); stroke-width:2.2;
+  fill:#111e37; transition:stroke-width .22s,filter .22s,fill .22s,opacity .22s }
+.p7-node:hover .node-base { stroke-width:3.2; fill:#172944; filter:url(#mintGlow) }
+.p7-node.p7-selected .node-base,.p7-node.p7-trace-current .node-base {
+  stroke-width:3.6; fill:#19334b; filter:url(#mintGlow) }
+.p7-node.p7-muted { opacity:.20; transition:opacity .3s }
+.p7-edge { stroke:var(--p7-edge,#67baff) !important; stroke-width:3.0;
+  stroke-dasharray:8 10; opacity:.76; animation:p7-dash 7s linear infinite;
+  transition:opacity .25s,stroke-width .25s; }
+.p7-edge.p7-uncertain {stroke-dasharray:3 10;opacity:.6}
+.p7-edge.p7-muted {opacity:.09}
+.p7-edge.p7-lit {opacity:1;stroke-width:4.6;filter:url(#softShadow)}
+.p7-particle {opacity:.85;transition:opacity .25s}
+.p7-particle.p7-muted {opacity:.05}
+@keyframes p7-dash { to { stroke-dashoffset:-72 } }
+.p7-inspector-v2 { position:fixed; right:18px; top:110px; z-index:55;
+  width:min(420px,calc(100vw - 36px)); max-height:calc(100vh - 145px);
+  overflow:auto; color:#eff7ff; border:1px solid #486c97; border-radius:23px;
+  background:linear-gradient(145deg,#152943 0%,#0b172c 65%,#17142f);
+  box-shadow:0 18px 65px #01050de6; padding:22px;
+  font-family:Inter,system-ui,sans-serif; }
+.p7-inspector-v2[hidden]{display:none}
+.p7-inspector-v2 .p7-x {float:right; padding:4px 12px; border:1px solid #53749e;
+  border-radius:9px; background:#172844; color:#eff7ff; font-size:23px; cursor:pointer}
+.p7-inspector-v2 h2{font-size:22px; margin:9px 32px 10px 0}
+.p7-inspector-v2 p {line-height:1.65;font-size:13px;color:#b7c9e6}
+.p7-inspector-v2 .p7-kicker {font-size:11px;letter-spacing:2px;color:#52efd0;font-weight:800}
+.p7-inspector-v2 .p7-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.p7-inspector-v2 .p7-tags span{font-size:11px;padding:5px 9px;background:#172e4b;
+  border:1px solid #3d628e;border-radius:7px;color:#c5d6ef}
+.p7-inspector-v2 .p7-connections{background:#0a162b;border:1px solid #345174;
+  border-radius:13px;padding:12px 14px;font-size:12px;line-height:1.75;color:#aec8e7}
+.p7-inspector-v2 .p7-source{margin-top:16px;font-size:12px;color:#7fc9ff;overflow-wrap:anywhere}
+.p7-status { margin:0 auto 35px; max-width:1380px }
+@media (max-width:680px) {
+  .p7-labbar {border-radius:0; padding:10px; gap:7px}
+  .p7-lab-title{width:100%}
+  .p7-inspector-v2{right:8px;left:8px;top:auto;bottom:10px;width:auto;max-height:55vh}
+}
+@media(prefers-reduced-motion:reduce) {
+  .p7-edge {animation:none}
+  .p7-node,.p7-button{transition:none}
+  .p7-particle {display:none}
+}
+</style>
+</head>
+<body>
+<nav class="p7-nav">
+<a href="../../PrismLabs_Architecture_Extended_P7_NAV_v2.html">← Main</a>
+<a href="text_v2.html" >LFM3-1.7B</a><a href="vision_v2.html" >LFM3-VL-2B</a><a href="audio_v2.html" >LFM3-Audio-2B</a><a href="omni_v2.html" >LFM3-Omni-2B</a><a href="d1_v2.html" aria-current=page>d1-2B</a><a href="d1_omni_v2.html" >d1-Omni-2B</a>
+</nav>
+<div class="p7-labbar" id="p7-studio-controls"><div class="p7-lab-title">P7 · ARCHITECTURE STUDIO<small>14 vision encoder layers · 24 text backbone layers · source-pinned</small></div><button type="button" class="p7-button p7-focus" data-focus="all" aria-pressed="false">All</button><button type="button" class="p7-button p7-focus" data-focus="vision" aria-pressed="false">Vision</button><button type="button" class="p7-button p7-focus" data-focus="text" aria-pressed="false">Text</button><button type="button" class="p7-button p7-focus" data-focus="decision" aria-pressed="false">Decision</button><button type="button" class="p7-button p7-play" id="p7-trace">▶ Play trace</button></div><div class="p7-legend" aria-label="Legend"><span><i style="--ink:#52efd0"></i>Vision</span><span><i style="--ink:#57d6ee"></i>Audio</span><span><i style="--ink:#67baff"></i>Language</span><span><i style="--ink:#d6a0ff"></i>Decision</span><span><i class="dashed"></i>Readout under audit</span></div>
+<svg class="p7-svg" viewBox="0 0 1380 1199"
+ xmlns="http://www.w3.org/2000/svg" role="img"
+ aria-label="d1-2B architecture overview">
+<defs>
+  <radialGradient id="background" cx="48%" cy="6%" r="93%"><stop stop-color="#0f2344"/><stop offset=".54" stop-color="#08142b"/><stop offset="1" stop-color="#060b17"/></radialGradient>
+  <linearGradient id="poolBG" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#13243d"/><stop offset="1" stop-color="#0e1930"/></linearGradient>
+  <linearGradient id="nodeShine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ddf8ff"/><stop offset=".5" stop-color="transparent"/><stop offset="1" stop-color="#93cfff"/></linearGradient>
+  <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67baff"/><stop offset=".52" stop-color="#52efd0"/><stop offset="1" stop-color="#d6a0ff"/></linearGradient>
+  <filter id="softShadow" x="-25%" y="-30%" width="150%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#01050d" flood-opacity=".42"/></filter>
+  <filter id="mintGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#52efd0" flood-opacity=".3"/><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#000000" flood-opacity=".45"/></filter>
+  <filter id="pinkGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#d6a0ff" flood-opacity=".32"/></filter>
+  <filter id="blueGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#67baff" flood-opacity=".22"/></filter>
+  <filter id="focusGlow" x="-35%" y="-50%" width="170%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#67baff" flood-opacity=".2"/></filter>
+  <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#6ea7dd" opacity=".14"/></pattern>
+  <symbol id="ico-text" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="ico-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.2"/><path d="m3 17 5-5 4 4 3-3 6 5"/></symbol>
+  <symbol id="ico-audio" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></symbol>
+  <symbol id="ico-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+  <symbol id="ico-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ico-scan" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/><circle cx="12" cy="12" r="3"/><path d="M12 6v2M12 16v2M6 12h2M16 12h2"/></symbol>
+  <symbol id="ico-input" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h6"/></symbol>
+  <symbol id="ico-route" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v5a5 5 0 0 0 5 5h5M6 12h9a3 3 0 0 0 0-6h-3"/></symbol>
+  <symbol id="ico-document" viewBox="0 0 24 24"><rect x="4" y="3" width="13" height="18" rx="2"/><path d="M8 8h5M8 12h5M8 16h4M19 9h2M19 13h2"/></symbol>
+  <symbol id="ico-speech" viewBox="0 0 24 24"><path d="M3 11v2M7 7v10M11 4v16M15 8v8M19 6v12M23 11v2"/></symbol>
+  <symbol id="ico-decision" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="ico-unified" viewBox="0 0 24 24"><rect x="2" y="2" width="7" height="7" rx="2"/><rect x="15" y="2" width="7" height="7" rx="2"/><rect x="9" y="15" width="7" height="7" rx="2"/><path d="M5.5 9v3h7M18.5 9v3h-6M12.5 12v3"/></symbol>
+
+<symbol id="ico-context" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h10M7 12h10M7 16h6"/><path d="m16 16 1.5 1.5L21 14"/></symbol>
+<symbol id="ico-dialogue" viewBox="0 0 24 24"><path d="M3 4h18v13H9l-6 4V4Z"/><path d="M7 9h10M7 13h7"/></symbol>
+<symbol id="ico-signal" viewBox="0 0 24 24"><path d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
+<symbol id="ico-answer" viewBox="0 0 24 24"><path d="M4 4h16v13H9l-5 4V4Z"/><path d="M8 8h8M8 12h5"/></symbol>
+<symbol id="ico-action" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="ico-eval" viewBox="0 0 24 24"><path d="M4 20V11M10 20V7M16 20v-9M22 20V4"/><path d="M2 20h21"/></symbol>
+</defs>
+<rect width="1380" height="1199" fill="url(#background)"/>
+<rect width="1380" height="1199" fill="url(#dots)"/>
+<rect x="16" y="15" width="1348" height="1169"
+ rx="31" fill="none" stroke="#40608d" stroke-opacity=".44"/>
+<text class="p7-title" x="690" y="72" text-anchor="middle">
+d1-2B</text>
+<text class="p7-note" x="690" y="103" text-anchor="middle">
+Configuration-backed architecture overview · Not a tensor-level execution trace
+</text>
+<g><path id="e0" class="p7-edge" data-from="I" data-to="V" style="--p7-edge:#52efd0" d="M544.0 282.0 C544.0 332.0 690.0 274.0 690.0 324.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e1" class="p7-edge" data-from="V" data-to="P" style="--p7-edge:#52efd0" d="M690.0 416.0 C690.0 466.0 690.0 408.0 690.0 458.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e2" class="p7-edge" data-from="P" data-to="M" style="--p7-edge:#52efd0" d="M690.0 550.0 C690.0 600.0 690.0 542.0 690.0 592.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e3" class="p7-edge" data-from="T" data-to="M" style="--p7-edge:#67baff" d="M836.0 282.0 C836.0 332.0 690.0 542.0 690.0 592.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e4" class="p7-edge" data-from="M" data-to="B" style="--p7-edge:#a8c7ff" d="M690.0 684.0 C690.0 734.0 690.0 676.0 690.0 726.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e5" class="p7-edge p7-uncertain" data-from="B" data-to="S" style="--p7-edge:#d6a0ff" d="M690.0 818.0 C690.0 868.0 690.0 810.0 690.0 860.0" fill="none" stroke="#d6a0ff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/><path id="e6" class="p7-edge" data-from="S" data-to="D" style="--p7-edge:#d6a0ff" d="M690.0 952.0 C690.0 1002.0 690.0 944.0 690.0 994.0" fill="none" stroke="#67baff" stroke-width="2.7" stroke-dasharray="5 10" opacity=".75"/></g>
+<g><circle class="p7-particle" data-edge="e0" r="4" fill="#52efd0" filter="url(#mintGlow)"><animateMotion dur="2.40s" repeatCount="indefinite"><mpath href="#e0"/></animateMotion></circle><circle class="p7-particle" data-edge="e1" r="4" fill="#52efd0" filter="url(#mintGlow)"><animateMotion dur="2.50s" repeatCount="indefinite"><mpath href="#e1"/></animateMotion></circle><circle class="p7-particle" data-edge="e2" r="4" fill="#52efd0" filter="url(#mintGlow)"><animateMotion dur="2.60s" repeatCount="indefinite"><mpath href="#e2"/></animateMotion></circle><circle class="p7-particle" data-edge="e3" r="4" fill="#67baff" filter="url(#mintGlow)"><animateMotion dur="2.70s" repeatCount="indefinite"><mpath href="#e3"/></animateMotion></circle><circle class="p7-particle" data-edge="e4" r="4" fill="#a8c7ff" filter="url(#mintGlow)"><animateMotion dur="2.80s" repeatCount="indefinite"><mpath href="#e4"/></animateMotion></circle><circle class="p7-particle" data-edge="e6" r="4" fill="#d6a0ff" filter="url(#mintGlow)"><animateMotion dur="3.00s" repeatCount="indefinite"><mpath href="#e6"/></animateMotion></circle></g>
+<g><g class="model p7-node" data-key="I" data-modality="vision" style="--p7-accent:#52efd0" role="button" tabindex="0" data-info="Image / video" transform="translate(415.0,190.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-image" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">Image / video</tspan></text></g><g class="model p7-node" data-key="V" data-modality="vision" style="--p7-accent:#52efd0" role="button" tabindex="0" data-info="Vision encoder · 14 layers" transform="translate(561.0,324.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-image" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">Vision encoder · 14 layers</tspan></text></g><g class="model p7-node" data-key="P" data-modality="vision" style="--p7-accent:#52efd0" role="button" tabindex="0" data-info="Vision projector" transform="translate(561.0,458.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-image" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">Vision projector</tspan></text></g><g class="model p7-node" data-key="M" data-modality="shared" style="--p7-accent:#a8c7ff" role="button" tabindex="0" data-info="Multimodal state" transform="translate(561.0,592.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-layers" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">Multimodal state</tspan></text></g><g class="model p7-node" data-key="T" data-modality="text" style="--p7-accent:#67baff" role="button" tabindex="0" data-info="State + named questions" transform="translate(707.0,190.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-layers" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">State + named questions</tspan></text></g><g class="model p7-node" data-key="B" data-modality="text" style="--p7-accent:#67baff" role="button" tabindex="0" data-info="LFM3-VL backbone · 24 layers" transform="translate(561.0,726.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-layers" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">LFM3-VL backbone · 24</tspan><tspan x="75" dy="21">layers</tspan></text></g><g class="model p7-node" data-key="S" data-modality="decision" style="--p7-accent:#d6a0ff" role="button" tabindex="0" data-info="SystemOne / D1Model interface" transform="translate(561.0,860.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-decision" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">SystemOne / D1Model</tspan><tspan x="75" dy="21">interface</tspan></text></g><g class="model p7-node" data-key="D" data-modality="output" style="--p7-accent:#ffc983" role="button" tabindex="0" data-info="Typed answers + probabilities" transform="translate(561.0,994.0)"><rect class="node-base" width="258" height="92" rx="19"/><g class="icon-bubble"><circle cx="35" cy="45" r="21"/><use href="#ico-decision" x="23" y="33" width="24" height="24"/></g><text x="75" y="38" class="model-label p7-name"><tspan x="75" dy="0">Typed answers +</tspan><tspan x="75" dy="21">probabilities</tspan></text></g></g>
+</svg>
+<div class="p7-status"><span id="p7-upgrade-status" role="status">Click a component to inspect its evidence</span> · 
+Click a component to inspect · <span id="info">d1-2B</span>
+· <a href="../../mermaid/p7_execution_v1/p7_d1.mmd">Mermaid source</a>
+</div>
+<script>
+document.querySelectorAll('.p7-node').forEach(n => {
+  function pick() {
+    document.querySelectorAll('.p7-node')
+      .forEach(x => x.classList.remove('on'));
+    n.classList.add('on');
+    document.getElementById('info').textContent = n.dataset.info;
+  }
+  n.addEventListener('click', pick);
+  n.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      pick();
+    }
+  });
+});
+</script>
+<aside id="p7-inspector-v2" class="p7-inspector-v2" hidden aria-label="Model component inspector">
+<button id="p7-close-detail" type="button" class="p7-x" aria-label="Close inspector">×</button>
+<div class="p7-kicker">P7 · COMPONENT EVIDENCE</div>
+<h2 id="p7-detail-title"></h2>
+<div class="p7-tags" id="p7-detail-tags"></div>
+<p id="p7-detail-description"></p>
+<div class="p7-connections" id="p7-detail-links"></div>
+<a class="p7-source" id="p7-detail-source" target="_blank" rel="noopener noreferrer"></a>
+<p>Links show the simplified overview. The underlying implementation may contain additional operations.</p>
+</aside>
+<script id="p7_enhancement_v2_script">
+(()=>{
+'use strict';
+const m={"name": "d1-2B", "repo": "LiquidAI/d1-2B", "revision": "10e7671d44e4b37700020b1eed3f594c5f2af0b4", "modelArchitecture": "D1Model", "labels": {"I": "Image / video", "V": "Vision encoder · 14 layers", "P": "Vision projector", "M": "Multimodal state", "T": "State + named questions", "B": "LFM3-VL backbone · 24 layers", "S": "SystemOne / D1Model interface", "D": "Typed answers + probabilities"}, "edges": [["I", "V", false], ["V", "P", false], ["P", "M", false], ["T", "M", false], ["M", "B", false], ["B", "S", true], ["S", "D", false]], "roles": {"I": "vision", "V": "vision", "P": "vision", "T": "text", "M": "shared", "B": "text", "S": "decision", "D": "output"}, "order": ["I", "T", "V", "P", "M", "B", "S", "D"], "descriptions": {"I": "Source-grounded architectural overview node. Internal tensor-level operations are not fully depicted on this page.", "V": "Fourteen configured vision layers; 8 convolution and 6 full-attention operators. The vision hidden width is 1024.", "P": "Projects visual encoder features to the representation expected by the language backbone.", "M": "Conceptual multimodal state feeding the language backbone; this diagram does not show every tensor operation.", "T": "Source-grounded architectural overview node. Internal tensor-level operations are not fully depicted on this page.", "B": "The vision-language variant uses the shared LFM3 24-layer text backbone; the d1 wrapper handles the typed decision interface separately.", "S": "The d1 model inherits both a SystemOne decision wrapper and its VL/Omni backbone. The precise scoring/readout remains under source investigation.", "D": "SystemOne exposes typed decisions and associated scores. These scores are not established as calibrated action confidence by the configuration audit."}, "evidence": {"I": "Config / implementation overview", "V": "Config / implementation overview", "P": "Config / implementation overview", "M": "Config / implementation overview", "T": "Config / implementation overview", "B": "Config / implementation overview", "S": "Interface under audit", "D": "Interface under audit"}, "parts": [{"title": "Vision encoder", "config_path": "vision_config", "layers": 14, "counts": {"conv": 8, "full_attention": 6}}, {"title": "Text backbone", "config_path": "text_config", "layers": 24, "counts": {"conv": 13, "full_attention": 6, "sliding_attention": 5}}]};
+const nodes=[...document.querySelectorAll('.p7-node[data-key]')];
+const byKey=Object.fromEntries(nodes.map(el=>[el.dataset.key,el]));
+const pathByIndex=i=>document.getElementById('e'+i);
+const allButtons=[...document.querySelectorAll('.p7-focus')];
+let focus='all', interval=null, lastSelected=null;
+const details=document.getElementById('p7-inspector-v2');
+const status=document.getElementById('p7-upgrade-status');
+
+function rolesMatch(key,filter){
+ const role=m.roles[key];
+ return filter==='all'||role===filter||role==='shared'||role==='output';
+}
+function setMuted(node,muted){node.classList.toggle('p7-muted',muted)}
+function updateFocus(kind){
+ focus=kind;
+ allButtons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.focus===kind)));
+ nodes.forEach(el=>setMuted(el,!rolesMatch(el.dataset.key,kind)));
+ m.edges.forEach((e,i)=>{
+   const visible=rolesMatch(e[0],kind)&&rolesMatch(e[1],kind);
+   const p=pathByIndex(i);if(p)p.classList.toggle('p7-muted',!visible);
+   const dot=document.querySelector(`.p7-particle[data-edge="e${i}"]`);
+   if(dot)dot.classList.toggle('p7-muted',!visible);
+ });
+ status.textContent=kind==='all'?'All architectural pathways visible':
+   kind[0].toUpperCase()+kind.slice(1)+' pathway emphasized';
+}
+function stopTrace(){
+ if(interval!==null)clearInterval(interval);
+ interval=null;
+ document.querySelector('#p7-trace').textContent='▶ Play trace';
+ nodes.forEach(n=>n.classList.remove('p7-trace-current'));
+ m.edges.forEach((e,i)=>pathByIndex(i)?.classList.remove('p7-lit'));
+}
+function trace(){
+ if(interval!==null){stopTrace();return}
+ updateFocus('all');
+ details.hidden=true;
+ let n=0;
+ document.querySelector('#p7-trace').textContent='■ Stop trace';
+ function tick(){
+   nodes.forEach(el=>el.classList.remove('p7-trace-current'));
+   const key=m.order[n];
+   if(key in byKey){byKey[key].classList.add('p7-trace-current')}
+   m.edges.forEach((edge,i)=>{
+     const done=m.order.indexOf(edge[0])<=n && m.order.indexOf(edge[1])<=n;
+     pathByIndex(i)?.classList.toggle('p7-lit',done);
+   });
+   status.textContent='Trace '+(n+1)+'/'+m.order.length+' · '+m.labels[key];
+   n++;
+   if(n>=m.order.length){stopTrace();status.textContent='Trace completed';}
+ }
+ tick();
+ if(n<m.order.length)interval=setInterval(tick,680);
+}
+function openDetails(key){
+ stopTrace();
+ lastSelected=key;
+ nodes.forEach(el=>el.classList.toggle('p7-selected',el.dataset.key===key));
+ const info=m.labels[key], role=m.roles[key], related=m.edges.filter(e=>e[0]===key||e[1]===key);
+ const upstream=related.filter(e=>e[1]===key).map(e=>m.labels[e[0]]);
+ const downstream=related.filter(e=>e[0]===key).map(e=>m.labels[e[1]]);
+ const title=document.getElementById('p7-detail-title'); title.textContent=info;
+ const description=document.getElementById('p7-detail-description');
+ description.textContent=m.descriptions[key]||'Architecture component represented in the pinned model configuration or source overview.';
+ const tags=document.getElementById('p7-detail-tags');tags.replaceChildren();
+ for(const s of [role.toUpperCase(),m.evidence[key],m.modelArchitecture]){
+   const span=document.createElement('span');span.textContent=s;tags.appendChild(span);
+ }
+ const list=document.getElementById('p7-detail-links');list.replaceChildren();
+ for(const [label,values] of [['Inputs',upstream],['Outputs',downstream]]){
+   const p=document.createElement('div');
+   p.textContent=label+': '+(values.length?values.join(' · '):'None in overview');
+   list.appendChild(p);
+ }
+ const source=document.getElementById('p7-detail-source');
+ source.href='https://huggingface.co/'+m.repo+'/tree/'+m.revision;
+ source.textContent='Official source · '+m.revision.slice(0,12);
+ details.hidden=false;
+ status.textContent='Inspecting: '+info;
+}
+
+nodes.forEach(el=>{
+ const key=el.dataset.key;
+ el.addEventListener('click',()=>openDetails(key));
+ el.addEventListener('keydown',e=>{
+   if(e.key==='Enter'||e.key===' '){e.preventDefault();openDetails(key)}
+ });
+});
+allButtons.forEach(b=>b.addEventListener('click',()=>updateFocus(b.dataset.focus)));
+document.getElementById('p7-trace').addEventListener('click',trace);
+document.getElementById('p7-close-detail').addEventListener('click',()=>{
+ details.hidden=true;nodes.forEach(n=>n.classList.remove('p7-selected'));
+ status.textContent='Click a component to inspect its evidence';
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!details.hidden)document.getElementById('p7-close-detail').click();
+});
+updateFocus('all');
+})();
+</script>
+<script id="p7_svg_auto_fit_v1">
+(()=>{
+  'use strict';
+  const ns='http://www.w3.org/2000/svg';
+  const maxWidth=171;
+  for(const node of document.querySelectorAll('svg .p7-node[data-info]')){
+    const label=node.querySelector('text.model-label');
+    if(!label)continue;
+    const raw=node.dataset.info.trim();
+    if(!raw)continue;
+    const x=Number(label.getAttribute('x')||75);
+    const originalSize=Number.parseFloat(getComputedStyle(label).fontSize)||17;
+    const words=raw.split(/\s+/);
+    const measure=s=>{
+      const span=document.createElementNS(ns,'tspan');
+      span.textContent=s;label.appendChild(span);
+      const width=span.getComputedTextLength();span.remove();return width;
+    };
+    let lines=[];
+    for(let font=originalSize;font>=13;font--){
+      label.style.fontSize=font+'px';
+      lines=[];let current='';
+      for(const word of words){
+        const trial=current?current+' '+word:word;
+        if(current && measure(trial)>maxWidth){lines.push(current);current=word;}
+        else current=trial;
+      }
+      if(current)lines.push(current);
+      if(lines.length<=3 && lines.every(line=>measure(line)<=maxWidth+1))break;
+    }
+    label.replaceChildren();
+    const lh=18.5;
+    const y0=lines.length===1?54:lines.length===2?43:32;
+    lines.forEach((line,i)=>{
+      const span=document.createElementNS(ns,'tspan');
+      span.textContent=line;
+      span.setAttribute('x',String(x));
+      span.setAttribute('y',String(y0+lh*i));
+      label.appendChild(span);
+    });
+  }
+})();
+</script>
+</body>
+</html>

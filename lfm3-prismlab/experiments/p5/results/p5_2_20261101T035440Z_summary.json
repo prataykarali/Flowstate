@@ -1,0 +1,43 @@
+{
+  "model": "LiquidAI/d1-2B-GGUF:Q4_K_M",
+  "dataset_sha256": "390db69883d9f6a6829b1c42543b61e0fda9e55124f192c6feca0df265bad72e",
+  "cases": 24,
+  "successful": 24,
+  "errors": 0,
+  "route_accuracy": 0.9583333333333334,
+  "refund_accuracy": 1.0,
+  "route_brier": 0.06652938384554916,
+  "refund_brier": 0.001283536086458934,
+  "latency_p50_s": 0.41285,
+  "latency_p95_s": 0.5034,
+  "thresholds": {
+    "0.5": {
+      "accepted": 24,
+      "coverage": 1.0,
+      "selective_accuracy": 0.9583333333333334
+    },
+    "0.7": {
+      "accepted": 24,
+      "coverage": 1.0,
+      "selective_accuracy": 0.9583333333333334
+    },
+    "0.8": {
+      "accepted": 24,
+      "coverage": 1.0,
+      "selective_accuracy": 0.9583333333333334
+    },
+    "0.9": {
+      "accepted": 22,
+      "coverage": 0.9166666666666666,
+      "selective_accuracy": 1.0
+    },
+    "0.95": {
+      "accepted": 20,
+      "coverage": 0.8333333333333334,
+      "selective_accuracy": 1.0
+    }
+  },
+  "failed_route_ids": [
+    "T06"
+  ]
+}

@@ -1,0 +1,16 @@
+%% LFM3-Audio-2B | revision 0295e4130594c06800fd25451d97139ac2da1aff
+%% High-level architecture, not exact tensor computation.
+flowchart TB
+A["Audio · 16 kHz"] --> D["Downsampler"] --> V["17-layer causal audio encoder"]
+ V --> P["Audio projector"] --> M["Audio feature insertion"]
+ T["Text tokens"] --> E["Token embeddings"] --> M
+ M --> B["LFM3 decoder · 24 layers"] --> H["Text output"]
+ B --> F["Depthformer · 3 layers"] --> C["LiquidCodec"] --> S["Speech · 24 kHz"]
+
+ classDef input fill:#101f3b,stroke:#67baff,color:#eff7ff,stroke-width:2px;
+ classDef core fill:#122b39,stroke:#52efd0,color:#eff7ff,stroke-width:2px;
+ classDef output fill:#29213d,stroke:#d6a0ff,color:#eff7ff,stroke-width:2px;
+ classDef note fill:#111a30,stroke:#54739f,color:#aebfe3,stroke-dasharray:4 4;
+  class A,T input
+  class H,S output
+  class B,C,D,E,F,M,P,V core

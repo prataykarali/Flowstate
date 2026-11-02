@@ -1,0 +1,16 @@
+%% d1-2B | revision 10e7671d44e4b37700020b1eed3f594c5f2af0b4
+%% High-level architecture, not exact tensor computation.
+flowchart TB
+I["Image / video"] --> V["Vision encoder · 14 layers"] --> P["Vision projector"] --> M["Multimodal state"]
+ T["State + named questions"] --> M
+ M --> B["LFM3-VL backbone · 24 layers"]
+ B -.->|readout details under audit| S["SystemOne / D1Model interface"]
+ S --> D["Typed answers + probabilities"]
+
+ classDef input fill:#101f3b,stroke:#67baff,color:#eff7ff,stroke-width:2px;
+ classDef core fill:#122b39,stroke:#52efd0,color:#eff7ff,stroke-width:2px;
+ classDef output fill:#29213d,stroke:#d6a0ff,color:#eff7ff,stroke-width:2px;
+ classDef note fill:#111a30,stroke:#54739f,color:#aebfe3,stroke-dasharray:4 4;
+  class I,T input
+  class D output
+  class B,M,P,S,V core

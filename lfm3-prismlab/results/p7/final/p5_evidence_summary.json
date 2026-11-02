@@ -1,0 +1,106 @@
+{
+  "P5.2 routing pilot": {
+    "source_path": "experiments/p5/results/p5_2_20261101T035440Z_summary.json",
+    "source_sha256": "d5ebf353ec5c5dbe7bec142648517442fdc7d5a60be09239365d3e8b32581b33",
+    "matching_runs": 1,
+    "observations": {
+      "cases": 24,
+      "successful": 24,
+      "errors": 0,
+      "route_accuracy": 0.9583333333333334,
+      "route_brier": 0.06652938384554916,
+      "latency_p50_s": 0.41285,
+      "latency_p95_s": 0.5034,
+      "failed_route_ids": [
+        "T06"
+      ]
+    }
+  },
+  "P5.3 routing stress": {
+    "source_path": "experiments/p5/results/p5_3_20261101T035635Z_summary.json",
+    "source_sha256": "ebf1b29811a2567aa733d1c1b30b33abb1f0147c25daf7d73dc8be0a45607d52",
+    "matching_runs": 1,
+    "observations": {
+      "total_cases": 24,
+      "successful_cases": 24,
+      "errors": 0,
+      "routing_accuracy": 0.8333333333333334,
+      "routing_brier": 0.24448332792432154,
+      "latency_p50_s": 0.41145,
+      "latency_p95_s": 0.4743,
+      "routing_failures": [
+        {
+          "id": "T07",
+          "expected": "technical",
+          "predicted": "billing",
+          "confidence": 0.7425272521701923
+        },
+        {
+          "id": "T08",
+          "expected": "technical",
+          "predicted": "billing",
+          "confidence": 0.7483774663464219
+        },
+        {
+          "id": "O10",
+          "expected": "other",
+          "predicted": "billing",
+          "confidence": 0.8254410694116308
+        },
+        {
+          "id": "O12",
+          "expected": "other",
+          "predicted": "technical",
+          "confidence": 0.7112210665537347
+        }
+      ]
+    }
+  },
+  "P5.6b audio vs transcript oracle": {
+    "source_path": "experiments/p5/results/p5_6b_audio_intent_20261101T044410Z_summary.json",
+    "source_sha256": "4a3946aed012dc854159a7710d9b02f185e35438240439a8cbd965fce2507596",
+    "matching_runs": 1,
+    "observations": {
+      "requested": 24,
+      "valid": 24,
+      "errors": 0,
+      "audio": {
+        "valid": 12,
+        "correct": 12,
+        "accuracy": 1.0,
+        "median_latency_s": 0.37398,
+        "p95_latency_s": 0.40743,
+        "incorrect_case_ids": []
+      },
+      "text_oracle": {
+        "valid": 12,
+        "correct": 12,
+        "accuracy": 1.0,
+        "median_latency_s": 0.32914,
+        "p95_latency_s": 0.59166,
+        "incorrect_case_ids": []
+      },
+      "fully_paired_cases": 12,
+      "prediction_disagreements": []
+    }
+  },
+  "P5.7 gated integration": {
+    "source_path": "experiments/p5/results/p5_7_integration_20261101T045955Z_summary.json",
+    "source_sha256": "89a21bf208e05588ae1e137ed57c22ae4d8ee64521773866744f5b830d8b3d36",
+    "matching_runs": 3,
+    "observations": {
+      "total_cases": 9,
+      "successful_records": 9,
+      "request_errors": 0,
+      "model_requests": 6,
+      "blocked_without_model_call": 3,
+      "auto_recommendations": 5,
+      "review_decisions": 4,
+      "labeled_inferences": 6,
+      "labeled_accuracy": 0.8333333333333334,
+      "review_required_auto_accepted": [],
+      "threshold": 0.9,
+      "threshold_was_selected_post_hoc": true
+    }
+  }
+}
