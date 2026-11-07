@@ -204,6 +204,16 @@ class ActivitySessionManager:
         """
         now = time.time()
         with self._lock:
+            if session_id:
+                with self._get_connection() as conn:
+                    cur = conn.execute(
+                        "SELECT visitor_id FROM activity_sessions WHERE session_id = ?",
+                        (session_id,)
+                    )
+                    row = cur.fetchone()
+                    if row and row["visitor_id"] != visitor_id:
+                        return False, None, "ACCESS_DENIED"
+
             session = self._sessions.get(visitor_id)
             if not session:
                 with self._get_connection() as conn:
@@ -274,8 +284,20 @@ class ActivitySessionManager:
         """
         now = time.time()
         with self._lock:
+            if activity_session_id:
+                with self._get_connection() as conn:
+                    cur = conn.execute(
+                        "SELECT visitor_id, status FROM activity_sessions WHERE session_id = ?",
+                        (activity_session_id,)
+                    )
+                    row = cur.fetchone()
+                    if row and row["visitor_id"] != visitor_id and row["status"] == "active":
+                        return False, "SESSION_OWNERSHIP_MISMATCH", None
+
             active = self.get_current_activity(visitor_id)
             if not active or active.status != "active":
+                if activity_session_id:
+                    return False, "SESSION_EXPIRED_OR_NOT_FOUND", None
                 return True, None, None
 
             # Visitor has an active session

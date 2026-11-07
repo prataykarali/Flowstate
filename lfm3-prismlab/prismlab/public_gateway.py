@@ -236,13 +236,14 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
     # Enforce activity exclusivity
     act_session_id = payload.get("activity_session_id") if payload else None
     allowed, err_code, active_sess = activity_manager.validate_request_allowed(visitor, act_session_id, task_name)
-    if not allowed and active_sess:
+    if not allowed:
+        status_code = 403 if err_code in {"SESSION_OWNERSHIP_MISMATCH", "ACCESS_DENIED"} else 409
         response = JSONResponse(
-            status_code=409,
+            status_code=status_code,
             content={
-                "error": "ACTIVE_ACTIVITY_CONFLICT",
-                "message": f"Visitor has active {active_sess.activity_type} session in progress.",
-                "active_session": active_sess.to_dict(),
+                "error": err_code or "ACTIVE_ACTIVITY_CONFLICT",
+                "message": f"Visitor has active {active_sess.activity_type} session in progress." if active_sess else "Activity session access denied or invalid.",
+                "active_session": active_sess.to_dict() if active_sess else None,
             },
             headers={"Cache-Control": "no-store"}
         )
@@ -342,13 +343,14 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
     # Enforce activity exclusivity
     act_session_id = payload.get("activity_session_id") if payload else None
     allowed, err_code, active_sess = activity_manager.validate_request_allowed(visitor, act_session_id, task_name)
-    if not allowed and active_sess:
+    if not allowed:
+        status_code = 403 if err_code in {"SESSION_OWNERSHIP_MISMATCH", "ACCESS_DENIED"} else 409
         response = JSONResponse(
-            status_code=409,
+            status_code=status_code,
             content={
-                "error": "ACTIVE_ACTIVITY_CONFLICT",
-                "message": f"Visitor has active {active_sess.activity_type} session in progress.",
-                "active_session": active_sess.to_dict(),
+                "error": err_code or "ACTIVE_ACTIVITY_CONFLICT",
+                "message": f"Visitor has active {active_sess.activity_type} session in progress." if active_sess else "Activity session access denied or invalid.",
+                "active_session": active_sess.to_dict() if active_sess else None,
             },
             headers={"Cache-Control": "no-store"}
         )
@@ -653,8 +655,9 @@ async def stop_activity_endpoint(request: Request):
 
     ok, session, err = activity_manager.stop_activity(visitor, sess_id, reason=reason)
     if not ok:
+        status_code = 403 if err == "ACCESS_DENIED" else 409
         response = JSONResponse(
-            status_code=409,
+            status_code=status_code,
             content={"error": err, "session": session.to_dict() if session else None},
             headers={"Cache-Control": "no-store"}
         )

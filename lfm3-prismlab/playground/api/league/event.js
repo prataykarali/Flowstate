@@ -4,8 +4,41 @@ import crypto from 'node:crypto';
 
 const CANONICAL_MODEL_IDS = new Set(['text', 'vision', 'audio', 'omni', 'd1', 'd1_omni']);
 
+const MODEL_MAP = {
+  'lfm3-1.7b': 'text',
+  'lfm3-text': 'text',
+  'text': 'text',
+  'lfm3-vl-2b': 'vision',
+  'lfm3-vision': 'vision',
+  'vision': 'vision',
+  'lfm3-audio-2b': 'audio',
+  'lfm3-audio': 'audio',
+  'audio': 'audio',
+  'lfm3-omni-2b': 'omni',
+  'omni': 'omni',
+  'd1-2b': 'd1',
+  'd1': 'd1',
+  'd1_omni-2b': 'd1_omni',
+  'd1_omni': 'd1_omni',
+};
+
+const ACTIVITY_MAP = {
+  ocr: 'chat',
+  audio_qa: 'chat',
+  video_qa: 'chat',
+  transcribe: 'chat',
+  summarize: 'chat',
+  decision: 'chat',
+};
+
 const ALLOWED_ACTIVITY_POINTS = {
   chat: 4,
+  ocr: 4,
+  audio_qa: 4,
+  video_qa: 4,
+  transcribe: 4,
+  summarize: 4,
+  decision: 4,
   story_turn: 1,
   story_complete: 10,
   trivia_correct: 100,
@@ -50,7 +83,7 @@ export default async function handler(request, response) {
   }
 
   const body = request.body || {};
-  const { event_id, visitor_id, activity_receipt, source_receipt_id } = body;
+  let { event_id, visitor_id, activity_receipt, source_receipt_id } = body;
 
   if (!event_id || typeof event_id !== 'string') {
     return response.status(422).json({ error: 'Missing or invalid event_id' });
@@ -61,7 +94,7 @@ export default async function handler(request, response) {
 
   // Session secret for receipt verification
   const sessionSecret = process.env.PRISMLAB_SESSION_SECRET;
-  let verifiedModelId = body.model_id;
+  let verifiedModelId = MODEL_MAP[body.model_id] || body.model_id;
   let verifiedActivityType = body.activity_type;
   let verifiedReceiptId = source_receipt_id;
 
@@ -73,11 +106,10 @@ export default async function handler(request, response) {
     if (!verified) {
       return response.status(403).json({ error: 'Invalid, forged, or expired activity receipt' });
     }
-    if (verified.vis !== visitor_id) {
-      return response.status(403).json({ error: 'Receipt visitor mismatch' });
-    }
-    verifiedModelId = verified.mod;
-    verifiedActivityType = verified.act;
+    // Authorize authentic server visitor ID from cryptographically verified receipt
+    visitor_id = verified.vis;
+    verifiedModelId = MODEL_MAP[verified.mod] || verified.mod;
+    verifiedActivityType = ACTIVITY_MAP[verified.act] || verified.act;
     verifiedReceiptId = verified.req;
   }
 

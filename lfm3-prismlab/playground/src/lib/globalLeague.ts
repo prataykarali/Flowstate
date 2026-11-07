@@ -139,7 +139,18 @@ export async function recordGlobalEvent(
   sourceReceiptId?: string,
   activityReceipt?: string
 ): Promise<{ status: string; points: number }> {
-  const visitorId = getOrCreateVisitorId();
+  let visitorId = getOrCreateVisitorId();
+  if (activityReceipt) {
+    try {
+      const parts = activityReceipt.split('.');
+      if (parts.length === 2) {
+        const payload = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload && typeof payload.vis === 'string') {
+          visitorId = payload.vis;
+        }
+      }
+    } catch {}
+  }
   const eventId = `ev_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 

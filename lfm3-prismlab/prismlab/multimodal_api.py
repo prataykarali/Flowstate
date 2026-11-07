@@ -285,6 +285,8 @@ def run_local(task, prompt, media, selected, model=None, decision_question=None,
             }
     finally:
         if on_demand:
+            if model == "text":
+                touch_model("text", "text")
             for active_key in tuple(manager._owned):
                 touch_model("multimodal", active_key)
         else:

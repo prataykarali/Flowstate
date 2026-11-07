@@ -86,48 +86,56 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
         }
         endpoint = "/v1/chat/completions"
 
+    from contextlib import nullcontext
+    try:
+        from prismlab.on_demand import busy_model
+        active_ctx = busy_model("multimodal", model) if auto_start else nullcontext()
+    except ImportError:
+        active_ctx = nullcontext()
+
     inference_started = time.perf_counter()
     first_token_at = None
     server_timings = {}
     ident = threading.get_ident()
-    if is_stream:
-        full_tokens = []
-        with urlopen(Request(spec.base_url.rstrip("/") + endpoint, json.dumps(payload).encode("utf-8"), headers=headers), timeout=360) as response:
-            register_upstream(ident, response)
-            try:
-                for line in response:
-                    decoded = line.decode("utf-8").strip()
-                    if not decoded.startswith("data: "):
-                        continue
-                    content_raw = decoded[6:].strip()
-                    if content_raw == "[DONE]":
-                        break
-                    try:
-                        chunk = json.loads(content_raw)
-                        if isinstance(chunk.get("timings"), dict):
-                            server_timings = chunk["timings"]
-                        delta = chunk.get("choices", [{}])[0].get("delta", {})
-                        token = delta.get("content")
-                        if token:
-                            if first_token_at is None:
-                                first_token_at = time.perf_counter()
-                            full_tokens.append(token)
-                            if on_token:
-                                on_token(token)
-                    except (json.JSONDecodeError, KeyError, IndexError):
-                        continue
-            finally:
-                unregister_upstream(ident)
-        raw = {"choices": [{"message": {"content": "".join(full_tokens)}}]}
-    else:
-        with urlopen(Request(spec.base_url.rstrip("/") + endpoint, json.dumps(payload).encode("utf-8"), headers=headers), timeout=360) as response:
-            register_upstream(ident, response)
-            try:
-                raw = json.load(response)
-            finally:
-                unregister_upstream(ident)
-        if isinstance(raw.get("timings"), dict):
-            server_timings = raw["timings"]
+    with active_ctx:
+        if is_stream:
+            full_tokens = []
+            with urlopen(Request(spec.base_url.rstrip("/") + endpoint, json.dumps(payload).encode("utf-8"), headers=headers), timeout=360) as response:
+                register_upstream(ident, response)
+                try:
+                    for line in response:
+                        decoded = line.decode("utf-8").strip()
+                        if not decoded.startswith("data: "):
+                            continue
+                        content_raw = decoded[6:].strip()
+                        if content_raw == "[DONE]":
+                            break
+                        try:
+                            chunk = json.loads(content_raw)
+                            if isinstance(chunk.get("timings"), dict):
+                                server_timings = chunk["timings"]
+                            delta = chunk.get("choices", [{}])[0].get("delta", {})
+                            token = delta.get("content")
+                            if token:
+                                if first_token_at is None:
+                                    first_token_at = time.perf_counter()
+                                full_tokens.append(token)
+                                if on_token:
+                                    on_token(token)
+                        except (json.JSONDecodeError, KeyError, IndexError):
+                            continue
+                finally:
+                    unregister_upstream(ident)
+            raw = {"choices": [{"message": {"content": "".join(full_tokens)}}]}
+        else:
+            with urlopen(Request(spec.base_url.rstrip("/") + endpoint, json.dumps(payload).encode("utf-8"), headers=headers), timeout=360) as response:
+                register_upstream(ident, response)
+                try:
+                    raw = json.load(response)
+                finally:
+                    unregister_upstream(ident)
+            if isinstance(raw.get("timings"), dict):
+                server_timings = raw["timings"]
     inference_s = time.perf_counter() - inference_started
     if model in {"d1", "d1_omni"}:
         if request.decision_question:

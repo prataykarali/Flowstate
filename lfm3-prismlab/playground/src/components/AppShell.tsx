@@ -12,6 +12,30 @@ interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, children }) => {
   return (
     <div className="app-shell">
+      {/* Public Beta Notice Banner */}
+      <div
+        className="beta-notice-banner"
+        role="region"
+        aria-label="Beta Notice"
+        style={{
+          background: 'rgba(192, 132, 252, 0.12)',
+          borderBottom: '1px solid rgba(192, 132, 252, 0.25)',
+          padding: '6px 16px',
+          fontSize: '12px',
+          textAlign: 'center',
+          color: 'var(--text-main)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+      >
+        <span style={{ color: 'var(--accent-lilac)', fontWeight: 600 }}>✦ Public Research Beta:</span>
+        <span style={{ color: 'var(--text-dim)' }}>
+          PrismLab is an experimental AI research playground. Inference runs on limited CPU hardware, so responses may be queued and service may occasionally be unavailable.
+        </span>
+      </div>
+
       {/* Top Header */}
       <header className="header-bar">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

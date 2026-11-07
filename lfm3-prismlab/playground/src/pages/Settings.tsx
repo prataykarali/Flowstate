@@ -70,13 +70,28 @@ export const Settings: React.FC = () => {
               </div>
             </div>
 
-            {/* Security Notice */}
+            {/* Security & Isolation */}
             <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14 }}>
               <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--accent-mint)', marginBottom: 4 }}>
                 Security & Isolation
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Local inference execution tokens (<code>PRISMLAB_LIVE_TOKEN</code>) are strictly excluded from client builds and client environment variables.
+                Local inference execution tokens (<code>PRISMLAB_LIVE_TOKEN</code>) are strictly excluded from client builds and client environment variables. Inference runs inside Bubblewrap filesystem isolation.
+              </div>
+            </div>
+
+            {/* Privacy & Data Handling */}
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 14 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--accent-lilac)', marginBottom: 4 }}>
+                Privacy & Data Handling Notice
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                <ul style={{ paddingLeft: 16, margin: '4px 0', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <li><strong>Prompts & Uploads:</strong> Processed in-memory within the local CPU execution worker. Images and audio payloads are discarded immediately upon execution completion.</li>
+                  <li><strong>Checkpoints:</strong> Story and Trivia turn progression is stored temporarily in local SQLite storage for session recovery and purged upon session conclusion.</li>
+                  <li><strong>Anonymous Identity:</strong> Sessions use short-lived cryptographic tokens. No tracking cookies, third-party analytics pixels, or personal identity collection.</li>
+                  <li><strong>Championship:</strong> Only signed cryptographic receipts and aggregate scores are persisted to Supabase for the global leaderboard.</li>
+                </ul>
               </div>
             </div>
           </div>

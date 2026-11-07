@@ -35,23 +35,27 @@ def _run_text(prompt: str, on_token=None, max_tokens: int = 256) -> dict:
     spec = TextRuntimeConfig.from_env().runtime_spec()
 
     if on_demand:
-        from prismlab.on_demand import warm_manager, touch_model
+        from prismlab.on_demand import warm_manager, touch_model, busy_model
         manager = warm_manager("text", [spec])
         touch_model("text", "text")
+        active_ctx = busy_model("text", "text")
     else:
+        from contextlib import nullcontext
         manager = LifecycleManager([spec], max_managed=1, log_dir="results/p6/server_logs")
+        active_ctx = nullcontext()
 
     request = PrismRequest(task="chat", text=prompt)
 
     try:
-        result = execute(
-            request,
-            manager,
-            auto_start=on_demand,
-            on_token=on_token,
-            max_tokens=max_tokens,
-            startup_timeout_s=120,
-        )
+        with active_ctx:
+            result = execute(
+                request,
+                manager,
+                auto_start=on_demand,
+                on_token=on_token,
+                max_tokens=max_tokens,
+                startup_timeout_s=120,
+            )
     finally:
         if not on_demand:
             manager.close()

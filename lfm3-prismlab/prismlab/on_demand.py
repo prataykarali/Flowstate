@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import atexit
 import threading
+import time
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -19,13 +20,14 @@ MODELS = {
     "d1_omni": ("d1-Omni-2B-GGUF", "d1-Omni-2B-Q8_0.gguf", "mmproj-d1-Omni-2B-Q8_0.gguf", "d1-omni"),
 }
 
-import time
+from contextlib import contextmanager, nullcontext
 
 _warm_lock = threading.Lock()
 _warm_managers: dict[str, tuple[tuple[RuntimeSpec, ...], LifecycleManager]] = {}
 _last_used: dict[str, float] = {}
+_active_models: set[str] = set()
 _reaper_started = False
-IDLE_COOLDOWN_SECONDS = max(0.0, float(os.getenv("PRISMLAB_IDLE_COOLDOWN_SECONDS", "300")))
+IDLE_COOLDOWN_SECONDS = max(0.0, float(os.getenv("PRISMLAB_IDLE_COOLDOWN_SECONDS", "600")))
 
 
 def _reaper_loop() -> None:
@@ -35,10 +37,13 @@ def _reaper_loop() -> None:
         with _warm_lock:
             for group, (_, manager) in list(_warm_managers.items()):
                 for key in list(manager._owned):
-                    last = _last_used.get(f"{group}:{key}", 0)
+                    item_key = f"{group}:{key}"
+                    if item_key in _active_models or (key == "text" and "text:text" in _active_models):
+                        continue
+                    last = _last_used.get(item_key, 0)
                     if IDLE_COOLDOWN_SECONDS > 0 and last > 0 and (now - last) >= IDLE_COOLDOWN_SECONDS:
                         manager.stop(key)
-                        _last_used.pop(f"{group}:{key}", None)
+                        _last_used.pop(item_key, None)
 
 
 def _start_reaper() -> None:
@@ -50,8 +55,36 @@ def _start_reaper() -> None:
 
 def touch_model(group: str, model_key: str) -> None:
     with _warm_lock:
-        _last_used[f"{group}:{model_key}"] = time.monotonic()
+        now = time.monotonic()
+        _last_used[f"{group}:{model_key}"] = now
+        if model_key == "text":
+            _last_used["text:text"] = now
         _start_reaper()
+
+
+@contextmanager
+def busy_model(group: str, model_key: str):
+    with _warm_lock:
+        _active_models.add(f"{group}:{model_key}")
+        if model_key == "text":
+            _active_models.add("text:text")
+        now = time.monotonic()
+        _last_used[f"{group}:{model_key}"] = now
+        if model_key == "text":
+            _last_used["text:text"] = now
+        _start_reaper()
+    try:
+        yield
+    finally:
+        with _warm_lock:
+            _active_models.discard(f"{group}:{model_key}")
+            if model_key == "text":
+                _active_models.discard("text:text")
+            now = time.monotonic()
+            _last_used[f"{group}:{model_key}"] = now
+            if model_key == "text":
+                _last_used["text:text"] = now
+
 
 
 def warm_manager(group: str, specs: list[RuntimeSpec]) -> LifecycleManager:
