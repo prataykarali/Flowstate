@@ -109,8 +109,12 @@ export default async function handler(request, response) {
     // Authorize authentic server visitor ID from cryptographically verified receipt
     visitor_id = verified.vis;
     verifiedModelId = MODEL_MAP[verified.mod] || verified.mod;
-    verifiedActivityType = ACTIVITY_MAP[verified.act] || verified.act;
-    verifiedReceiptId = verified.req;
+    if (body.activity_type && body.activity_type in ALLOWED_ACTIVITY_POINTS) {
+      verifiedActivityType = body.activity_type;
+    } else {
+      verifiedActivityType = ACTIVITY_MAP[verified.act] || verified.act;
+    }
+    verifiedReceiptId = `${verified.req}:${verifiedActivityType}`;
   }
 
   if (!verifiedModelId || !CANONICAL_MODEL_IDS.has(verifiedModelId)) {
@@ -122,6 +126,7 @@ export default async function handler(request, response) {
 
   // Server-authoritative point calculation (strictly server enforced)
   const awardedPoints = ALLOWED_ACTIVITY_POINTS[verifiedActivityType];
+  verifiedActivityType = ACTIVITY_MAP[verifiedActivityType] || verifiedActivityType;
 
   // Idempotency check
   if (processedEvents.has(event_id)) {
