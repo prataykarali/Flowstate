@@ -4,7 +4,7 @@ import { MascotAvatar } from '../components/mascots/MascotAvatar.tsx';
 import { MODEL_LIST, MODELS, type CanonicalModelId } from '../data/models.ts';
 import { useExperience } from '../app/ExperienceContext.tsx';
 import { buildChatPrompt } from '../lib/chatPrompt.ts';
-import { executeLocalStream, generateTextStream, getGatewayStatus, outputText, readMedia, getCurrentActivity, stopActivity, type GatewayStatus, type LiveResult, type LiveTask, type TextStreamUpdate, type ActivitySessionInfo } from '../lib/api.ts';
+import { executeLocal, executeLocalStream, generateTextStream, getGatewayStatus, outputText, readMedia, getCurrentActivity, stopActivity, type GatewayStatus, type LiveResult, type LiveTask, type TextStreamUpdate, type ActivitySessionInfo } from '../lib/api.ts';
 import { useInferenceLock, cancelActiveInference } from '../lib/inferenceLock.ts';
 import { awardChatSession } from '../lib/leagueAdapters.ts';
 import { AutoStoryShow, type AutoStoryView } from './AutoStoryShow.tsx';
@@ -117,6 +117,7 @@ export const Chat: React.FC = () => {
   useEffect(() => {
     let mounted = true;
     const pollActivity = async () => {
+      if (document.hidden) return;
       try {
         const res = await getCurrentActivity();
         if (mounted) {
@@ -129,7 +130,7 @@ export const Chat: React.FC = () => {
       } catch {}
     };
     void pollActivity();
-    const interval = setInterval(pollActivity, 5000);
+    const interval = setInterval(pollActivity, 15_000);
     return () => { mounted = false; clearInterval(interval); };
   }, []);
 
@@ -174,7 +175,7 @@ export const Chat: React.FC = () => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onMotion = () => setReduced(media.matches);
     const onVisibility = () => { setVisible(!document.hidden); if (!document.hidden) void getGatewayStatus(true).then(setGateway); };
-    const poll = window.setInterval(() => { if (!document.hidden) void getGatewayStatus(true).then(setGateway); }, 15_000);
+    const poll = window.setInterval(() => { if (!document.hidden) void getGatewayStatus(false).then(setGateway); }, 30_000);
     media.addEventListener('change', onMotion);
     document.addEventListener('visibilitychange', onVisibility);
     return () => { media.removeEventListener('change', onMotion); document.removeEventListener('visibilitychange', onVisibility); window.clearInterval(poll); if (switchTimer.current !== null) window.clearTimeout(switchTimer.current); };
@@ -267,7 +268,17 @@ export const Chat: React.FC = () => {
         else setStreamStatus(update.message);
       };
       const result: LiveResult = model === 'text'
-        ? await generateTextStream(built!.prompt, onStream, 128)
+        ? await generateTextStream(built!.prompt, onStream, 80)
+        : (model === 'd1' || model === 'd1_omni')
+        ? await executeLocal({
+            model,
+            task,
+            prompt: modelPrompt,
+            image: activeImage ? await readMedia(activeImage, 'image') : undefined,
+            audio: activeAudio ? await readMedia(activeAudio, 'audio') : undefined,
+            video: activeVideo ? await readMedia(activeVideo, 'video') : undefined,
+            required_media: selectedMedia.length ? selectedMedia : undefined,
+          })
         : await executeLocalStream({
             model,
             task,
@@ -276,7 +287,7 @@ export const Chat: React.FC = () => {
             audio: activeAudio ? await readMedia(activeAudio, 'audio') : undefined,
             video: activeVideo ? await readMedia(activeVideo, 'video') : undefined,
             required_media: selectedMedia.length ? selectedMedia : undefined,
-            max_tokens: 96,
+            max_tokens: 80,
           }, onStream);
       if (result.status === 'completed' && result.output != null && outputText(result.output).trim()) {
         const rawOutput = outputText(result.output).trim();

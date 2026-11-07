@@ -130,14 +130,19 @@ export async function authHeaders(): Promise<Record<string, string>> {
 let nextStatusProbe = 0;
 let statusFailures = 0;
 let cachedOffline: GatewayStatus | null = null;
+let cachedOnline: GatewayStatus | null = null;
+let cachedOnlineExpires = 0;
 
 export function invalidateGatewayCache(): void {
   statusFailures = 0;
   nextStatusProbe = 0;
   cachedOffline = null;
+  cachedOnline = null;
+  cachedOnlineExpires = 0;
 }
 
 export async function getGatewayStatus(force = false): Promise<GatewayStatus> {
+  if (!force && Date.now() < cachedOnlineExpires && cachedOnline) return cachedOnline;
   if (!force && Date.now() < nextStatusProbe && cachedOffline) return cachedOffline;
   try {
     const headers = await authHeaders();
@@ -153,8 +158,12 @@ export async function getGatewayStatus(force = false): Promise<GatewayStatus> {
     status.health_state = (status.gateway_enabled && status.backend_live_enabled)
       ? (isBusy ? 'BUSY' : 'ONLINE')
       : 'OFFLINE';
+    cachedOnline = status;
+    cachedOnlineExpires = Date.now() + 10_000;
     return status;
   } catch (err) {
+    cachedOnline = null;
+    cachedOnlineExpires = 0;
     if (err instanceof ApiError && err.status === 401) {
       // Session expired or invalid; trigger renewal on next call without long lockout
       tokenPromise = null;
@@ -267,7 +276,6 @@ export async function executeLocal(request: ExecuteRequest): Promise<LiveResult>
   const lock = needLock ? lockAcquire!(targetModel, request.task) : null;
   try {
     const result = await post<LiveResult>('/execute', request, request.job_id);
-    invalidateGatewayCache();
     lock?.release('completed');
     return result;
   } catch (err) {
@@ -336,12 +344,18 @@ export async function executeLocalStream(request: ExecuteRequest, onUpdate: (upd
           parse(buffer.slice(0, boundary));
           buffer = buffer.slice(boundary + 2);
           boundary = buffer.indexOf('\n\n');
+          if (result) break;
+        }
+        if (result) {
+          try { await reader.cancel(); } catch {}
+          break;
         }
       }
-      buffer += decoder.decode();
-      if (buffer.trim()) parse(buffer);
+      if (!result && buffer.trim()) {
+        buffer += decoder.decode();
+        parse(buffer);
+      }
       if (!result) throw new Error('Local stream ended without a final result.');
-      invalidateGatewayCache();
       lock?.release('completed');
       return result;
     }
@@ -353,7 +367,6 @@ export async function executeLocalStream(request: ExecuteRequest, onUpdate: (upd
       }
       try {
         const res = await executeLocal(request);
-        invalidateGatewayCache();
         lock?.release('completed');
         return res;
       } catch (e) {
@@ -475,12 +488,18 @@ export async function generateTextStream(
           parse(buffer.slice(0, boundary));
           buffer = buffer.slice(boundary + 2);
           boundary = buffer.indexOf('\n\n');
+          if (result) break;
+        }
+        if (result) {
+          try { await reader.cancel(); } catch {}
+          break;
         }
       }
-      buffer += decoder.decode();
-      if (buffer.trim()) parse(buffer);
+      if (!result && buffer.trim()) {
+        buffer += decoder.decode();
+        parse(buffer);
+      }
       if (!result) throw new Error('Local text stream ended without a final result.');
-      invalidateGatewayCache();
       lock?.release('completed');
       return result;
     }

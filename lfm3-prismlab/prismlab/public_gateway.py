@@ -74,6 +74,7 @@ async def pna_middleware(request: Request, call_next):
             res.headers["Access-Control-Allow-Headers"] = "*"
             res.headers["Access-Control-Allow-Credentials"] = "true"
             res.headers["Access-Control-Allow-Private-Network"] = "true"
+            res.headers["Access-Control-Max-Age"] = "86400"
         return res
     response = await call_next(request)
     if request.headers.get("access-control-request-private-network") == "true":
@@ -82,7 +83,7 @@ async def pna_middleware(request: Request, call_next):
 
 if _allowed_origins:
     app.add_middleware(CORSMiddleware, allow_origins=_allowed_origins, allow_methods=["GET", "POST", "OPTIONS"],
-                       allow_headers=["*"], max_age=600)
+                       allow_headers=["*"], max_age=86400)
 queue = AdmissionQueue.from_env()
 _cookie_secret = secrets.token_bytes(32)
 _cookie_name = "prismlab_visitor"
@@ -490,6 +491,8 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
                 if kind == "done":
                     return
                 yield _sse(kind, data)
+                if kind in ("result", "error"):
+                    return
         finally:
             if not started:
                 await queue.release(ticket)

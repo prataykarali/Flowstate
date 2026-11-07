@@ -1,0 +1,65 @@
+{
+  "timestamp": 1794025780.2908652,
+  "environment": {
+    "production_url": "https://prismlab-playground-rho.vercel.app",
+    "inference_gateway": "https://pratay-karali-aspire-a515-58gm.tailc51468.ts.net",
+    "cpu_threads": 4,
+    "gpu_layers": 0,
+    "confinement": "bubblewrap",
+    "active_model_mode": "single-active-on-demand"
+  },
+  "models": {
+    "text": {
+      "character": "Prism Pure",
+      "model_id": "text",
+      "task": "chat",
+      "browser_wall_s": 8.61,
+      "ttft_s": 0.18,
+      "output_preview": "Gravity is the force that pulls objects toward each other, creating weight and orbits. It\u2019s why things fall down and pla",
+      "status": "completed"
+    },
+    "vision": {
+      "character": "Spectra",
+      "model_id": "vision",
+      "task": "ocr",
+      "browser_wall_s": 12.14,
+      "ttft_s": 0.19,
+      "output_preview": "Vibrant yellow, bright blue, warm orange, and soft purple tones.",
+      "status": "completed"
+    },
+    "audio": {
+      "character": "Echo",
+      "model_id": "audio",
+      "task": "transcribe",
+      "browser_wall_s": 10.72,
+      "ttft_s": 0.27,
+      "output_preview": "The right most rectangle is red.",
+      "status": "completed"
+    },
+    "omni": {
+      "character": "Omni Pup",
+      "model_id": "omni",
+      "task": "chat",
+      "browser_wall_s": 9.79,
+      "ttft_s": 0.36,
+      "output_preview": "Multimodal perception is using multiple senses to understand the world.",
+      "status": "completed"
+    },
+    "d1": {
+      "character": "Prism Thinker",
+      "model_id": "d1",
+      "task": "decision",
+      "browser_wall_s": 7.71,
+      "mode": "system-1 logit evaluation",
+      "status": "completed"
+    },
+    "d1_omni": {
+      "character": "Sherlock Omni",
+      "model_id": "d1_omni",
+      "task": "decision",
+      "browser_wall_s": 11.17,
+      "mode": "system-1 logit evaluation",
+      "status": "completed"
+    }
+  }
+}

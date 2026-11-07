@@ -107,11 +107,10 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // Background interval: 15s visible, 60s hidden
+  // Background interval: 30s
   window.setInterval(() => {
-    const shouldForce = !document.hidden;
-    void refreshAvailability(shouldForce);
-  }, 15_000);
+    if (!document.hidden) void refreshAvailability(false);
+  }, 30_000);
 }
 
 export function getAvailabilitySnapshot(): ModelAvailabilityState {
