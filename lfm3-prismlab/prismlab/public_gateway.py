@@ -208,13 +208,14 @@ async def readyz():
                         headers={"Cache-Control": "no-store"})
 
 
-def _attach_receipt(result: dict, visitor: str) -> None:
+def _attach_receipt(result: dict, visitor: str, act_type: str | None = None, context_id: str | None = None) -> None:
     secret = os.getenv("PRISMLAB_SESSION_SECRET")
     if secret and isinstance(result, dict) and result.get("status") == "completed":
         req_id = result.get("request_id") or secrets.token_hex(16)
         route = result.get("route") or []
         model = result.get("backend_model_id") or result.get("requested_model") or (route[0] if route else "text")
-        act = result.get("task") or "chat"
+        act = act_type or result.get("task") or "chat"
+        ctx = context_id or result.get("activity_session_id") or ""
         try:
             result["activity_receipt"] = issue_activity_receipt(
                 secret=secret,
@@ -223,9 +224,11 @@ def _attach_receipt(result: dict, visitor: str) -> None:
                 model_id=model,
                 activity_type=act,
                 output_text=result.get("output"),
+                context_id=ctx,
             )
         except Exception:
             pass
+
 
 
 async def _run_json(request: Request, job: Callable, payload: dict | None = None):
@@ -294,7 +297,17 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
 
         try:
             result = await asyncio.shield(task)
-            _attach_receipt(result, visitor)
+            verified_act = "chat"
+            if active_sess:
+                verified_act = active_sess.activity_type.lower()
+            elif payload and payload.get("checkpoint", {}).get("activity_type") == "STORY":
+                verified_act = "story"
+            elif act_session_id and "match" in str(act_session_id).lower():
+                verified_act = "trivia"
+            elif task_name and task_name in {"ocr", "audio_qa", "video_qa", "transcribe", "summarize", "decision"}:
+                verified_act = task_name
+
+            _attach_receipt(result, visitor, act_type=verified_act, context_id=act_session_id)
             if handle.cancelled:
                 job_rec.status = "cancelled"
             else:
@@ -440,7 +453,17 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
                         loop.call_soon_threadsafe(updates.put_nowait, ("token", {"text": token}))
                 try:
                     result = job(on_token=on_token)
-                    _attach_receipt(result, visitor)
+                    verified_act = "chat"
+                    if active_sess:
+                        verified_act = active_sess.activity_type.lower()
+                    elif payload and payload.get("checkpoint", {}).get("activity_type") == "STORY":
+                        verified_act = "story"
+                    elif act_session_id and "match" in str(act_session_id).lower():
+                        verified_act = "trivia"
+                    elif task_name and task_name in {"ocr", "audio_qa", "video_qa", "transcribe", "summarize", "decision"}:
+                        verified_act = task_name
+
+                    _attach_receipt(result, visitor, act_type=verified_act, context_id=act_session_id)
                     if handle.cancelled:
                         job_rec.status = "cancelled"
                     else:
@@ -677,9 +700,26 @@ async def stop_activity_endpoint(request: Request):
                 if h.thread_ident:
                     abort_upstream(h.thread_ident)
 
+    secret = os.getenv("PRISMLAB_SESSION_SECRET")
+    completion_receipt = None
+    if secret and session and reason == "completed":
+        try:
+            completion_receipt = issue_activity_receipt(
+                secret=secret,
+                request_id=f"complete_{sess_id}_{secrets.token_hex(4)}",
+                visitor_id=visitor,
+                model_id="text",
+                activity_type="story_complete",
+                output_text=f"Story session {sess_id} completed",
+                context_id=sess_id,
+            )
+        except Exception:
+            pass
+
     response = JSONResponse({
         "status": "stopped",
         "session": session.to_dict() if session else None,
+        "completion_receipt": completion_receipt,
     }, headers={"Cache-Control": "no-store"})
     _set_cookie(response, request, cookie)
     return response

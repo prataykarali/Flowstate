@@ -106,14 +106,69 @@ export default async function handler(request, response) {
     if (!verified) {
       return response.status(403).json({ error: 'Invalid, forged, or expired activity receipt' });
     }
-    // Authorize authentic server visitor ID from cryptographically verified receipt
-    visitor_id = verified.vis;
-    verifiedModelId = MODEL_MAP[verified.mod] || verified.mod;
-    if (body.activity_type && body.activity_type in ALLOWED_ACTIVITY_POINTS) {
-      verifiedActivityType = body.activity_type;
-    } else {
-      verifiedActivityType = ACTIVITY_MAP[verified.act] || verified.act;
+
+    // 1. Authorize authentic visitor ownership from cryptographically verified receipt
+    if (body.visitor_id && body.visitor_id !== verified.vis) {
+      return response.status(403).json({
+        error: `Visitor identity mismatch: receipt issued to ${verified.vis}, cannot score for ${body.visitor_id}`
+      });
     }
+    visitor_id = verified.vis;
+
+    // 2. Authorize authentic model identity from cryptographically verified receipt
+    const receiptModel = MODEL_MAP[verified.mod] || verified.mod;
+    if (body.model_id) {
+      const clientModel = MODEL_MAP[body.model_id] || body.model_id;
+      if (clientModel && clientModel !== receiptModel) {
+        return response.status(403).json({
+          error: `Model mismatch: receipt was issued for model '${receiptModel}', cannot score for '${clientModel}'`
+        });
+      }
+    }
+    verifiedModelId = receiptModel;
+
+    // 3. Strict domain separation and activity eligibility
+    const reqAct = body.activity_type || ACTIVITY_MAP[verified.act] || verified.act || 'chat';
+    if (reqAct === 'trivia_correct' || reqAct === 'trivia_match') {
+      if (verified.act !== 'trivia') {
+        return response.status(403).json({
+          error: `Forbidden: Receipt for activity '${verified.act}' is not eligible for trivia scoring`
+        });
+      }
+      verifiedActivityType = reqAct;
+    } else if (reqAct === 'story_turn') {
+      if (verified.act !== 'story') {
+        return response.status(403).json({
+          error: `Forbidden: Receipt for activity '${verified.act}' is not eligible for story turns`
+        });
+      }
+      verifiedActivityType = 'story_turn';
+    } else if (reqAct === 'story_complete') {
+      if (verified.act !== 'story' && verified.act !== 'story_complete') {
+        return response.status(403).json({
+          error: `Forbidden: Receipt for activity '${verified.act}' is not eligible for story completion`
+        });
+      }
+      verifiedActivityType = 'story_complete';
+    } else if (reqAct === 'chat') {
+      if (verified.act === 'trivia' || verified.act === 'story' || verified.act === 'story_complete') {
+        return response.status(403).json({
+          error: `Forbidden: Activity receipt for '${verified.act}' cannot be claimed as general chat`
+        });
+      }
+      verifiedActivityType = 'chat';
+    } else if (reqAct in ALLOWED_ACTIVITY_POINTS) {
+      if (verified.act !== reqAct && verified.act !== 'chat') {
+        return response.status(403).json({
+          error: `Forbidden: Receipt for activity '${verified.act}' cannot be claimed for '${reqAct}'`
+        });
+      }
+      verifiedActivityType = reqAct;
+    } else {
+      return response.status(422).json({ error: `Unsupported activity_type: ${reqAct}` });
+    }
+
+    // 4. Cryptographic receipt idempotency binding
     verifiedReceiptId = `${verified.req}:${verifiedActivityType}`;
   }
 
