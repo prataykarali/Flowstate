@@ -67,6 +67,7 @@ def stream_vision(
     blob: bytes,
     mime: str,
     on_token: Callable[[str], None] | None = None,
+    auth_token: str | None = None,
 ) -> VisionStream:
     payload = build_vision_payload(prompt, blob, mime)
     payload["model"] = model_id
@@ -78,6 +79,7 @@ def stream_vision(
         headers={
             "Content-Type": "application/json",
             "Accept": "text/event-stream",
+            **({"Authorization": f"Bearer {auth_token}"} if auth_token else {}),
         },
         method="POST",
     )
@@ -133,8 +135,10 @@ def stream_vision(
 
     content = "".join(chunks).strip()
 
-    if content.startswith("</think>"):
-        content = content.removeprefix("</think>").strip()
+    if "</think>" in content:
+        content = content.rsplit("</think>", 1)[1].strip()
+    elif content.startswith("<think>"):
+        raise RuntimeError("Vision model returned reasoning without a final answer")
 
     if not content or first is None:
         raise RuntimeError("Vision stream returned no final answer text")
@@ -279,6 +283,7 @@ def execute_vision(
             manager.specs["vision"].base_url,
             manager.specs["vision"].model_id,
             prompt, blob, mime, on_token,
+            **({"auth_token": getattr(manager.specs["vision"], "auth_token", None)} if getattr(manager.specs["vision"], "auth_token", None) else {}),
         )
 
         trace.append(TraceStep(

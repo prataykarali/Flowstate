@@ -15,6 +15,7 @@ class FakeManager:
             name: SimpleNamespace(
                 base_url="http://127.0.0.1:8188",
                 model_id=alias,
+                auth_token=None,
             )
             for name, alias in (
                 ("d1", "d1"),

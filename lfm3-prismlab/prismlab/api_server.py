@@ -67,6 +67,9 @@ def health():
         os.getenv("PRISMLAB_LIVE_ENABLED") == "1"
         and bool(os.getenv("PRISMLAB_LIVE_TOKEN"))
     )
+    on_demand = live_enabled and os.getenv("PRISMLAB_ON_DEMAND") == "1"
+    if on_demand:
+        from prismlab.on_demand import available_routes
     return {
         "status": "ok",
         "mode": (
@@ -74,6 +77,8 @@ def health():
             if live_enabled else "replay_only"
         ),
         "live_inference_enabled": live_enabled,
+        "on_demand_enabled": on_demand,
+        "on_demand_routes": available_routes() if on_demand else [],
     }
 
 

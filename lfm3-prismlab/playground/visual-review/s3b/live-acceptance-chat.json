@@ -1,0 +1,242 @@
+{
+  "show": {
+    "version": "s3b.1",
+    "showId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+    "createdAt": "2026-11-04T06:55:53.936Z",
+    "updatedAt": "2026-11-04T06:57:15.565Z",
+    "config": {
+      "theme": "Celestial mystery",
+      "opening": "At midnight, a new constellation appeared above the glass observatory.",
+      "turnCount": 5,
+      "modelIds": [
+        "text",
+        "d1"
+      ],
+      "playback": "automatic",
+      "maxTokens": 64
+    },
+    "turnOrder": [
+      "text",
+      "text",
+      "d1",
+      "text",
+      "text"
+    ],
+    "turns": [
+      {
+        "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:1",
+        "index": 0,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "e97ad1cce75a4b1fb53631dbed7b2ba1",
+        "route": [
+          "text"
+        ],
+        "output": "At midnight, a new constellation rose over the observatory's glass dome—its light pulsing like a warning.",
+        "promptLength": 298,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:55:54.059Z",
+        "finishedAt": "2026-11-04T06:56:04.824Z",
+        "latencyS": 10.358160355999644
+      },
+      {
+        "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:2",
+        "index": 1,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "ce39ddbfe4e04d1d90b3d629daa19883",
+        "route": [
+          "text"
+        ],
+        "output": "Midnight's pulse ignites; the alien constellation flickers, shattering glass and awakening ancient secrets within the observatory.",
+        "promptLength": 491,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:56:05.145Z",
+        "finishedAt": "2026-11-04T06:56:15.398Z",
+        "latencyS": 9.876074289999451
+      },
+      {
+        "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:3",
+        "index": 2,
+        "modelId": "d1",
+        "role": "decision_assistant",
+        "status": "completed",
+        "requestId": "353dcac216b448f1a4bc18053473b48d",
+        "route": [
+          "d1"
+        ],
+        "output": "{\n  \"predicted_route\": \"other\",\n  \"confidence\": 0.37016070472631446,\n  \"probabilities\": {\n    \"billing\": 0.2124492579991817,\n    \"technical\": 0.267568003467539,\n    \"shipping\": 0.14982203380696477,\n    \"other\": 0.37016070472631446\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+        "stageText": "This clue does not fit a familiar route. I would keep investigating before calling the mystery solved.",
+        "promptLength": 611,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:56:19.010Z",
+        "finishedAt": "2026-11-04T06:56:28.613Z",
+        "latencyS": 9.11820210299993
+      },
+      {
+        "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:4",
+        "index": 3,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "eb667add99d942f0b73b92385c2a39a0",
+        "route": [
+          "text"
+        ],
+        "output": "The alien constellation shatters glass, unleashing dormant secrets; the observatory's ancient mechanisms ignite, and the new star's blue hum signals the central conflict's decisive resolution: the hidden entity awakens within its depths.",
+        "promptLength": 856,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:56:29.514Z",
+        "finishedAt": "2026-11-04T06:56:44.271Z",
+        "latencyS": 14.271925975001068
+      },
+      {
+        "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5",
+        "index": 4,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "71047ae6211440ed8cf8b611188ee944",
+        "route": [
+          "text"
+        ],
+        "output": "The astronomer traced the shattered lens, channeling the blue hum into the core; he sealed the alien constellation’s pulse, silencing the dormant secrets and forcing the hidden entity to dissolve. The observatory glowed calm as the new star faded. A single silver comet streaked across the midnight sky, its tail frozen in time.",
+        "promptLength": 848,
+        "contextTruncated": true,
+        "startedAt": "2026-11-04T06:56:54.273Z",
+        "finishedAt": "2026-11-04T06:57:15.564Z",
+        "latencyS": 20.598356655000316
+      }
+    ],
+    "humanTurns": [
+      {
+        "id": "6a37c91e-ddba-438f-83ed-3b8fba05e884",
+        "text": "The star hums in blue.",
+        "afterTurn": 2,
+        "createdAt": "2026-11-04T06:56:17.209Z"
+      }
+    ],
+    "status": "completed",
+    "mode": "live_local_show"
+  },
+  "requests": [
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793775354136
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793775365192
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/execute",
+      "at": 1793775379162
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793775389672
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793775414633
+    }
+  ],
+  "leagueEvents": [
+    {
+      "eventId": "666beb61-f2a4-41e9-856a-3559bee022e2",
+      "idempotencyKey": "auto-story:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:1:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:56:04.825Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:turn:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:1:request:e97ad1cce75a4b1fb53631dbed7b2ba1",
+      "requestId": "e97ad1cce75a4b1fb53631dbed7b2ba1",
+      "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:1"
+    },
+    {
+      "eventId": "5dba3680-7fb0-4b1a-aeb8-dd4656a7df19",
+      "idempotencyKey": "auto-story:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:2:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:56:15.398Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:turn:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:2:request:ce39ddbfe4e04d1d90b3d629daa19883",
+      "requestId": "ce39ddbfe4e04d1d90b3d629daa19883",
+      "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:2"
+    },
+    {
+      "eventId": "56614aef-1a80-4327-8ecf-a3cf9ac2ba17",
+      "idempotencyKey": "auto-story:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:3:d1",
+      "modelId": "d1",
+      "activity": "auto_story_turn",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:56:28.614Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 3,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:turn:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:3:request:353dcac216b448f1a4bc18053473b48d",
+      "requestId": "353dcac216b448f1a4bc18053473b48d",
+      "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:3"
+    },
+    {
+      "eventId": "b45d98ed-9c40-46a1-9ee1-2cad68f271b2",
+      "idempotencyKey": "auto-story:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:4:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:56:44.271Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:turn:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:4:request:eb667add99d942f0b73b92385c2a39a0",
+      "requestId": "eb667add99d942f0b73b92385c2a39a0",
+      "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:4"
+    },
+    {
+      "eventId": "4d0ab90a-8db5-4e87-b7ec-bef90f1a28c2",
+      "idempotencyKey": "auto-story:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:57:15.564Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:turn:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5:request:71047ae6211440ed8cf8b611188ee944",
+      "requestId": "71047ae6211440ed8cf8b611188ee944",
+      "turnId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:5"
+    },
+    {
+      "eventId": "1fc5e100-d4a4-40b2-a630-a2f1f611b60f",
+      "idempotencyKey": "auto-story-session:s3b.1:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "modelId": "text",
+      "activity": "auto_story_session",
+      "sessionId": "5f936c8f-2fcb-4149-84e3-a9b7f049f0ce",
+      "timestamp": "2026-11-04T06:57:15.565Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_session",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 8,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:5f936c8f-2fcb-4149-84e3-a9b7f049f0ce:completed:e97ad1cce75a4b1fb53631dbed7b2ba1,ce39ddbfe4e04d1d90b3d629daa19883,353dcac216b448f1a4bc18053473b48d,eb667add99d942f0b73b92385c2a39a0,71047ae6211440ed8cf8b611188ee944"
+    }
+  ]
+}

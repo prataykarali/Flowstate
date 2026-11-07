@@ -98,6 +98,7 @@ def post_audio(
     task: str,
     prompt: str,
     wav: bytes,
+    auth_token: str | None = None,
 ) -> AudioResponse:
     system = ASR_SYSTEM if task == "transcribe" else QA_SYSTEM
 
@@ -117,8 +118,9 @@ def post_audio(
     payload = {
         "model": model_id,
         "temperature": 0,
-        "max_tokens": 256,
+        "max_tokens": 96,
         "stream": False,
+        "chat_template_kwargs": {"enable_thinking": False},
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": content},
@@ -128,7 +130,7 @@ def post_audio(
     req = Request(
         base_url.rstrip("/") + "/v1/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", **({"Authorization": f"Bearer {auth_token}"} if auth_token else {})},
         method="POST",
     )
 
@@ -278,6 +280,7 @@ def execute_audio(
             request.task,
             request.text,
             blob,
+            **({"auth_token": getattr(manager.specs["audio"], "auth_token", None)} if getattr(manager.specs["audio"], "auth_token", None) else {}),
         )
 
         trace.append(TraceStep(

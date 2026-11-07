@@ -1,0 +1,486 @@
+{
+  "id": "5d9803cb-1bfc-41ba-8951-baba1f29b802",
+  "mode": "live",
+  "status": "running",
+  "length": 10,
+  "startedAt": "2026-11-05T13:21:33.948Z",
+  "rounds": [
+    {
+      "index": 0,
+      "question": {
+        "id": "7f4ab580-3640-46f3-a6ef-f28f5e48110f",
+        "topic": "General Knowledge",
+        "difficulty": "easy",
+        "question": "Which planet is known as the 'Red Planet' due to its iron oxide-rich surface?",
+        "options": {
+          "A": "Mars",
+          "B": "Venus",
+          "C": "Jupiter",
+          "D": "Saturn"
+        },
+        "correct_option": "A",
+        "explanation": "Mars is called the Red Planet because its soil and atmosphere contain iron oxide, giving it a reddish appearance. This fact is well-documented in astronomy. It has 12 characters or more in explanation.",
+        "hostId": "text",
+        "requestId": "569eb5b685434728a874c7e7095408ec",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 31.540789989000587
+      },
+      "attempts": [
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "e19e1ed0ba96418d8694b3ad5e93e12a",
+          "latencyS": 10.318560343000172,
+          "timestamp": "2026-11-05T13:22:05.650Z"
+        },
+        {
+          "modelId": "vision",
+          "backendModelId": "lfm3-vision",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "b0fca2e72e274ae997e7b2a3e22314aa",
+          "latencyS": 13.354608428000574,
+          "timestamp": "2026-11-05T13:22:16.004Z"
+        },
+        {
+          "modelId": "omni",
+          "backendModelId": "lfm3-omni",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "848953ef4e0f4a39b37d4a8aaeb8cfc7",
+          "latencyS": 11.981362606999937,
+          "timestamp": "2026-11-05T13:22:29.390Z"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "question": {
+        "id": "ab3fc200-a2c8-4967-9f65-b421eaf75cf4",
+        "topic": "Machine Learning",
+        "difficulty": "medium",
+        "question": "Which algorithm is primarily used for clustering unsupervised data?",
+        "options": {
+          "A": "K-Means",
+          "B": "Decision Tree",
+          "C": "Support Vector Machine",
+          "D": "Random Forest"
+        },
+        "correct_option": "A",
+        "explanation": "K-Means is an unsupervised learning algorithm that groups data points into clusters based on similarity, making it suitable for clustering tasks.",
+        "hostId": "vision",
+        "requestId": "f361e645ec584eddb8654647c1be1bc0",
+        "backendModelId": "lfm3-vision",
+        "latencyS": 24.297472567000113
+      },
+      "attempts": [
+        {
+          "modelId": "text",
+          "backendModelId": "lfm3-1.7b",
+          "answer": "B",
+          "status": "incorrect",
+          "points": 0,
+          "requestId": "5ec9c3f831a44621869c1f4e423d6623",
+          "latencyS": 4.974970330999895,
+          "timestamp": "2026-11-05T13:23:39.359Z"
+        },
+        {
+          "modelId": "d1_omni",
+          "backendModelId": "d1-omni",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "6f04b4d30cf84b41bc428738427ac3b0",
+          "latencyS": 7.994842258000062,
+          "timestamp": "2026-11-05T13:23:44.361Z"
+        },
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": null,
+          "status": "invalid",
+          "points": 0,
+          "requestId": "c7baab06ec5342c487dade7dc5877586",
+          "latencyS": 9.459104399000353,
+          "timestamp": "2026-11-05T13:23:52.406Z"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "question": {
+        "id": "0144d2e4-d78f-48e0-bf3e-80cdb90f4432",
+        "topic": "General Science",
+        "difficulty": "hard",
+        "question": "Which of the following is a fundamental principle in thermodynamics that explains why heat flows from hotter to cooler objects?",
+        "options": {
+          "A": "Heat always flows from cold to hot.",
+          "B": "The second law of thermodynamics states that entropy increases in an isolated system over time.",
+          "C": "All systems tend to move towards equilibrium.",
+          "D": "Work is done when force and displacement occur."
+        },
+        "correct_option": "B",
+        "explanation": "The second law of thermodynamics explains the direction of heat flow, stating that entropy increases in an isolated system, which aligns with option B.",
+        "hostId": "vision",
+        "requestId": "1534bfb4fa604c7bb87f1f4e8939e40b",
+        "backendModelId": "lfm3-vision",
+        "latencyS": 33.665355998999985
+      },
+      "attempts": [
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "38b273e8bece4d37bf5396591e3cb826",
+          "latencyS": 11.249727110999629,
+          "timestamp": "2026-11-05T13:27:54.065Z"
+        },
+        {
+          "modelId": "text",
+          "backendModelId": "lfm3-1.7b",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "d9ac93b36bf946ada43e214792c6a09e",
+          "latencyS": 6.693886785000359,
+          "timestamp": "2026-11-05T13:28:05.348Z"
+        },
+        {
+          "modelId": "d1",
+          "backendModelId": "d1",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "dc275c24362448169fad54374c3f9561",
+          "latencyS": 10.585160284000267,
+          "timestamp": "2026-11-05T13:28:12.074Z"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "question": {
+        "id": "0e87b920-a7ce-49b1-980b-5df341c71284",
+        "topic": "Computer Science",
+        "difficulty": "easy",
+        "question": "Which sorting algorithm has an average time complexity of O(n log n) and is commonly used for efficient data organization?",
+        "options": {
+          "A": "Bubble Sort",
+          "B": "Merge Sort",
+          "C": "Quick Sort",
+          "D": "Insertion Sort"
+        },
+        "correct_option": "B",
+        "explanation": "Merge Sort divides the list into halves recursively and merges them in sorted order, achieving O(n log n) average time complexity, making it a reliable choice for efficient sorting.",
+        "hostId": "text",
+        "requestId": "e34d368b958e4185a0eb7ba4f2832ec6",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 32.91237846599961
+      },
+      "attempts": [
+        {
+          "modelId": "vision",
+          "backendModelId": "lfm3-vision",
+          "answer": "C",
+          "status": "incorrect",
+          "points": 0,
+          "requestId": "bc407459ad5948ebab2aab9af26ab734",
+          "latencyS": 10.44358628000009,
+          "timestamp": "2026-11-05T13:28:58.237Z"
+        },
+        {
+          "modelId": "d1_omni",
+          "backendModelId": "d1-omni",
+          "answer": "C",
+          "status": "incorrect",
+          "points": 0,
+          "requestId": "374eed8234d145b391b43a75080d8ed4",
+          "latencyS": 10.221486264000305,
+          "timestamp": "2026-11-05T13:29:08.706Z"
+        },
+        {
+          "modelId": "omni",
+          "backendModelId": "lfm3-omni",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "3976581e2729427f8864f8a1ba4ee305",
+          "latencyS": 10.88231275399994,
+          "timestamp": "2026-11-05T13:29:18.963Z"
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "question": {
+        "id": "3b5d3a7c-509e-4795-8341-f6ba9e0a9c7f",
+        "topic": "Mathematics",
+        "difficulty": "medium",
+        "question": "Which mathematical concept defines the rate at which the number of solutions to an equation grows as the variable increases?",
+        "options": {
+          "A": "Polynomial growth",
+          "B": "Exponential growth",
+          "C": "Factorial growth",
+          "D": "Logarithmic growth"
+        },
+        "correct_option": "B",
+        "explanation": "In mathematics, exponential growth describes a function where the output increases by a constant factor for each increment in the input, such as 2^n, and this is distinct from polynomial or logarithmic growth.",
+        "hostId": "text",
+        "requestId": "542714270fd143b19172497ce9d247de",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 34.62968536399967
+      },
+      "attempts": [
+        {
+          "modelId": "d1_omni",
+          "backendModelId": "d1-omni",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "3924fef610a34f2ba0a5c658bcf2fa34",
+          "latencyS": 9.562184641000385,
+          "timestamp": "2026-11-05T13:31:29.613Z"
+        },
+        {
+          "modelId": "d1",
+          "backendModelId": "d1",
+          "answer": "A",
+          "status": "incorrect",
+          "points": 0,
+          "requestId": "037555c02ed349c7bbf61290db40256f",
+          "latencyS": 8.599411815999702,
+          "timestamp": "2026-11-05T13:31:39.210Z"
+        },
+        {
+          "modelId": "omni",
+          "backendModelId": "lfm3-omni",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "acd37bc2697e407cb295269b47d424ff",
+          "latencyS": 13.114218552999773,
+          "timestamp": "2026-11-05T13:31:47.854Z"
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "question": {
+        "id": "e7ec46da-478b-4372-b08b-9b8989b367ab",
+        "topic": "History and Geography",
+        "difficulty": "hard",
+        "question": "Which ancient civilization built the city of Machu Picchu in the Andes Mountains?",
+        "options": {
+          "A": "The Inca Empire",
+          "B": "The Maya Civilization",
+          "C": "The Aztec Empire",
+          "D": "The Roman Empire"
+        },
+        "correct_option": "A",
+        "explanation": "Machu Picchu was constructed by the Inca Empire in the 15th century as a royal estate and religious site high in the Andes Mountains.",
+        "hostId": "text",
+        "requestId": "fbe1c0b325054309a73ee2361049286f",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 41.712364807000085
+      },
+      "attempts": [
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "eff431bcfb9149a6a7be6b3e3127fe62",
+          "latencyS": 12.239177911999832,
+          "timestamp": "2026-11-05T13:35:05.065Z"
+        },
+        {
+          "modelId": "vision",
+          "backendModelId": "lfm3-vision",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "be76bb231fac4923b9838c4232baf613",
+          "latencyS": 13.080579327999658,
+          "timestamp": "2026-11-05T13:35:17.340Z"
+        },
+        {
+          "modelId": "d1",
+          "backendModelId": "d1",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "586a00956c084b159941cc7e3f4cf2e5",
+          "latencyS": 10.282551190999584,
+          "timestamp": "2026-11-05T13:35:30.452Z"
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "question": {
+        "id": "faee2cf8-cec6-4888-a6e6-4dd354726c3e",
+        "topic": "Artificial Intelligence",
+        "difficulty": "easy",
+        "question": "Which AI technique is commonly used for image recognition?",
+        "options": {
+          "A": "Neural Networks",
+          "B": "Linear Regression",
+          "C": "Decision Trees",
+          "D": "Clustering"
+        },
+        "correct_option": "A",
+        "explanation": "Neural Networks are a fundamental subset of machine learning models designed to process and interpret complex data patterns, making them widely used for image recognition tasks.",
+        "hostId": "text",
+        "requestId": "f577ba256eaf47c2886f6b06db931cb2",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 38.34767861599994
+      },
+      "attempts": [
+        {
+          "modelId": "vision",
+          "backendModelId": "lfm3-vision",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "c6cf91bd4214443c97a5d807aef407f8",
+          "latencyS": 10.88537276399984,
+          "timestamp": "2026-11-05T13:36:21.839Z"
+        },
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "7bfb1481e7154e3a840e2a089c412271",
+          "latencyS": 11.088173973999801,
+          "timestamp": "2026-11-05T13:36:32.755Z"
+        },
+        {
+          "modelId": "d1_omni",
+          "backendModelId": "d1-omni",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "08f82945547844e3840c72a2d27bd389",
+          "latencyS": 13.354465436000282,
+          "timestamp": "2026-11-05T13:36:43.873Z"
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "question": {
+        "id": "ae624753-29ee-4055-b080-e00c4e2b152a",
+        "topic": "Logical Reasoning",
+        "difficulty": "medium",
+        "question": "Which logical principle states that if two statements are both true, then their conjunction must be true?",
+        "options": {
+          "A": "If P and Q are true, then P or Q is true.",
+          "B": "If P is true and Q is false, then neither P nor Q is true.",
+          "C": "If P is true and Q is false, then P implies Q.",
+          "D": "If P and Q are both false, then neither P nor Q is true."
+        },
+        "correct_option": "B",
+        "explanation": "The principle described in option B is the law of disjunctive syllogism, which states that if one premise (P) is true and the other (Q) is false, then the conclusion (neither P nor Q) must be true.",
+        "hostId": "vision",
+        "requestId": "bc0b1df11d0d44f788c58e165f78971a",
+        "backendModelId": "lfm3-vision",
+        "latencyS": 59.41162038499988
+      },
+      "attempts": [
+        {
+          "modelId": "d1",
+          "backendModelId": "d1",
+          "answer": "A",
+          "status": "incorrect",
+          "points": 0,
+          "requestId": "9606741a184b45ab9deee5688e68d3d5",
+          "latencyS": 12.334263662000012,
+          "timestamp": "2026-11-05T13:37:59.345Z"
+        },
+        {
+          "modelId": "text",
+          "backendModelId": "lfm3-1.7b",
+          "answer": "B",
+          "status": "correct",
+          "points": 100,
+          "requestId": "cdcbbaf7da174592a806b07cf9ebf37d",
+          "latencyS": 9.502839654999661,
+          "timestamp": "2026-11-05T13:38:11.774Z"
+        },
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": null,
+          "status": "invalid",
+          "points": 0,
+          "requestId": "24702a2ca0be424da43e1ed3e8a0c3cf",
+          "latencyS": 17.525256982999963,
+          "timestamp": "2026-11-05T13:38:21.313Z"
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "question": {
+        "id": "a257f649-5e0a-42c8-b056-c68c866d2b27",
+        "topic": "General Knowledge",
+        "difficulty": "hard",
+        "question": "Which ancient civilization built Machu Picchu in the Andes?",
+        "options": {
+          "A": "The Inca",
+          "B": "The Maya",
+          "C": "The Aztec",
+          "D": "The Romans"
+        },
+        "correct_option": "A",
+        "explanation": "Machu Picchu was constructed by the Incas in the 15th century as a royal estate and religious site.",
+        "hostId": "text",
+        "requestId": "585930131c5b4b48947d72c96c49cd52",
+        "backendModelId": "lfm3-1.7b",
+        "latencyS": 36.96831162000035
+      },
+      "attempts": [
+        {
+          "modelId": "d1",
+          "backendModelId": "d1",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "fa789953de1b4a28b1afb084d2443988",
+          "latencyS": 8.777082284999778,
+          "timestamp": "2026-11-05T13:41:04.429Z"
+        },
+        {
+          "modelId": "omni",
+          "backendModelId": "lfm3-omni",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "02c6189b15954cd4b7bb2ba854707e60",
+          "latencyS": 11.849355341000773,
+          "timestamp": "2026-11-05T13:41:13.236Z"
+        },
+        {
+          "modelId": "audio",
+          "backendModelId": "lfm3-audio",
+          "answer": "A",
+          "status": "correct",
+          "points": 100,
+          "requestId": "1b0ae2cdcc6e47fdb83d4c779ec6ab15",
+          "latencyS": 10.798686794999412,
+          "timestamp": "2026-11-05T13:41:25.116Z"
+        }
+      ]
+    }
+  ]
+}

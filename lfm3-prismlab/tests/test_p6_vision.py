@@ -23,6 +23,7 @@ class FakeManager:
             "vision": SimpleNamespace(
                 base_url="http://127.0.0.1:8180",
                 model_id="lfm3-vision",
+                auth_token=None,
             )
         }
 
@@ -61,10 +62,13 @@ class TestP6Vision(unittest.TestCase):
     )
     def test_success(self, mock_stream):
         req = self.request()
-        result = execute_vision(req, FakeManager(), plan_route(req))
+        manager = FakeManager()
+        manager.specs["vision"].auth_token = "test-key"
+        result = execute_vision(req, manager, plan_route(req))
         self.assertEqual(result.status, "completed")
         self.assertEqual(result.output, "BLUE")
         self.assertTrue(result.evidence[0].startswith("image_sha256:"))
+        self.assertEqual(mock_stream.call_args.kwargs["auth_token"], "test-key")
 
     @patch(
         "prismlab.core.vision_adapter.stream_vision",

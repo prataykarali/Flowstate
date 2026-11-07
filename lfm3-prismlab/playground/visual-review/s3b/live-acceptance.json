@@ -1,0 +1,233 @@
+{
+  "show": {
+    "version": "s3b.1",
+    "showId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+    "createdAt": "2026-11-04T06:18:54.653Z",
+    "updatedAt": "2026-11-04T06:20:36.095Z",
+    "config": {
+      "theme": "Celestial mystery",
+      "opening": "A silent star vanished just as the city clocks struck twelve.",
+      "turnCount": 5,
+      "modelIds": [
+        "text",
+        "d1"
+      ],
+      "playback": "automatic",
+      "maxTokens": 64
+    },
+    "turnOrder": [
+      "text",
+      "text",
+      "text",
+      "d1",
+      "text"
+    ],
+    "turns": [
+      {
+        "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:1",
+        "index": 0,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "d9bf0885ddb1422e829455c8d643c780",
+        "route": [
+          "text"
+        ],
+        "output": "Silent star fell at midnight; city bells tolled twelve. No witness, no trace—just a void where light should be. Something stole the night’s first glow.",
+        "promptLength": 235,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:18:54.745Z",
+        "finishedAt": "2026-11-04T06:19:09.398Z",
+        "latencyS": 14.140858981998463
+      },
+      {
+        "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:2",
+        "index": 1,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "f20b70b357ed4d86a5c9dedc3521de0b",
+        "route": [
+          "text"
+        ],
+        "output": "Silent star fell at midnight; city bells tolled twelve. A shadow slipped through the sky, stealing the first gleam before dawn could claim it. Now, the city watches for its return—and who pulled the curtain?",
+        "promptLength": 458,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:19:10.932Z",
+        "finishedAt": "2026-11-04T06:19:29.192Z",
+        "latencyS": 17.74330689800081
+      },
+      {
+        "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:3",
+        "index": 2,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "54e4d4946e954d1392347de93f9a59ff",
+        "route": [
+          "text"
+        ],
+        "output": "The shadow slipped into the abyss where light once burned, and the stolen star’s absence shattered the city’s hope—revealing a hidden cult that stole the night’s first gleam to feed on darkness.",
+        "promptLength": 684,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:19:29.843Z",
+        "finishedAt": "2026-11-04T06:19:49.768Z",
+        "latencyS": 19.459322292999786
+      },
+      {
+        "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:4",
+        "index": 3,
+        "modelId": "d1",
+        "role": "decision_assistant",
+        "status": "completed",
+        "requestId": "634fb60cd4a54f83b621e95e37750cb4",
+        "route": [
+          "d1"
+        ],
+        "output": "{\n  \"predicted_route\": \"other\",\n  \"confidence\": 0.529873969102572,\n  \"probabilities\": {\n    \"billing\": 0.2222400678476973,\n    \"technical\": 0.08886124402437218,\n    \"shipping\": 0.15902471902535856,\n    \"other\": 0.529873969102572\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+        "promptLength": 855,
+        "contextTruncated": false,
+        "startedAt": "2026-11-04T06:19:50.419Z",
+        "finishedAt": "2026-11-04T06:20:07.255Z",
+        "latencyS": 16.308493336000538
+      },
+      {
+        "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:5",
+        "index": 4,
+        "modelId": "text",
+        "role": "writer",
+        "status": "completed",
+        "requestId": "e254994196204b83a3ca4020a10fa8ab",
+        "route": [
+          "text"
+        ],
+        "output": "The cult's abyssal pact shattered; the stolen star's void collapsed, and the city's hope rekindled as darkness was finally claimed. The shadow retreated into the abyss, leaving only silence—yet a faint ember glowed where light once burned.",
+        "promptLength": 990,
+        "contextTruncated": true,
+        "startedAt": "2026-11-04T06:20:07.907Z",
+        "finishedAt": "2026-11-04T06:20:36.093Z",
+        "latencyS": 27.6600322639988
+      }
+    ],
+    "status": "completed",
+    "mode": "live_local_show"
+  },
+  "requests": [
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793773134869
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793773151014
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793773169925
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/execute",
+      "at": 1793773190509
+    },
+    {
+      "url": "http://127.0.0.1:5173/local-api/text/stream",
+      "at": 1793773208000
+    }
+  ],
+  "leagueEvents": [
+    {
+      "eventId": "f1b9a268-41f1-4fec-976d-d09a74490740",
+      "idempotencyKey": "auto-story:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:1:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:19:09.399Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:turn:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:1:request:d9bf0885ddb1422e829455c8d643c780",
+      "requestId": "d9bf0885ddb1422e829455c8d643c780",
+      "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:1"
+    },
+    {
+      "eventId": "2cd4fa62-31f3-41c8-8129-25a4e50105f1",
+      "idempotencyKey": "auto-story:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:2:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:19:29.192Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:turn:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:2:request:f20b70b357ed4d86a5c9dedc3521de0b",
+      "requestId": "f20b70b357ed4d86a5c9dedc3521de0b",
+      "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:2"
+    },
+    {
+      "eventId": "a4694b03-969c-4e50-8f25-912a0009610e",
+      "idempotencyKey": "auto-story:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:3:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:19:49.769Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:turn:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:3:request:54e4d4946e954d1392347de93f9a59ff",
+      "requestId": "54e4d4946e954d1392347de93f9a59ff",
+      "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:3"
+    },
+    {
+      "eventId": "01474c92-6db2-4475-addc-ab174b71060b",
+      "idempotencyKey": "auto-story:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:4:d1",
+      "modelId": "d1",
+      "activity": "auto_story_turn",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:20:07.256Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 3,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:turn:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:4:request:634fb60cd4a54f83b621e95e37750cb4",
+      "requestId": "634fb60cd4a54f83b621e95e37750cb4",
+      "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:4"
+    },
+    {
+      "eventId": "9e353eee-4410-4a41-909d-f184062e00ef",
+      "idempotencyKey": "auto-story:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:5:text",
+      "modelId": "text",
+      "activity": "auto_story_turn",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:20:36.094Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_turn",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 6,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:turn:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:5:request:e254994196204b83a3ca4020a10fa8ab",
+      "requestId": "e254994196204b83a3ca4020a10fa8ab",
+      "turnId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1:5"
+    },
+    {
+      "eventId": "85c10da1-4919-42a5-9d27-3f01e1cb4265",
+      "idempotencyKey": "auto-story-session:s3b.1:e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "modelId": "text",
+      "activity": "auto_story_session",
+      "sessionId": "e2259e42-cb5f-4de4-9fb4-b2066668a7e1",
+      "timestamp": "2026-11-04T06:20:36.095Z",
+      "completionStatus": "completed",
+      "ruleId": "auto_story_session",
+      "ruleVersion": "s3b.1",
+      "pointsEarned": 8,
+      "validationStatus": "validated",
+      "evidenceRef": "live-show:e2259e42-cb5f-4de4-9fb4-b2066668a7e1:completed:d9bf0885ddb1422e829455c8d643c780,f20b70b357ed4d86a5c9dedc3521de0b,54e4d4946e954d1392347de93f9a59ff,634fb60cd4a54f83b621e95e37750cb4,e254994196204b83a3ca4020a10fa8ab"
+    }
+  ]
+}

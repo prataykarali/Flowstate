@@ -1,0 +1,175 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>PrismLab P7 — Six-Model Atlas</title><style>
+:root {color-scheme:dark; --mint:#52efd0; --blue:#67baff; --pink:#d6a0ff; --background:#070d19}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050913}
+body{display:grid;place-items:center;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+.arch{width:min(100vw,1590px);max-height:100vh;height:auto;display:block;aspect-ratio:1380/1030}
+.header{font-family:inherit;font-size:38px;font-weight:760;letter-spacing:-.8px;fill:#eff7ff}
+.section-label{font-size:15px;fill:#9bb3db;font-weight:720;letter-spacing:1.8px}
+.top-label{font-size:22px;fill:#f4f8ff;font-weight:710}
+.top-sub{font-size:14px;fill:#acc6e8}
+.model-label{font-size:20px;font-weight:730;fill:#f1f6ff;letter-spacing:-.5px}
+.model-role{font-size:12px;fill:#9db5df;font-weight:640;letter-spacing:1.5px}
+.pipeline-title{font-size:20.5px;font-weight:760;fill:#f3f7ff;letter-spacing:-.3px}
+.pipeline-sub{font-size:16px;fill:#aebfe3;font-weight:540}
+.final-label{font-size:23px;font-weight:760;fill:#f3f7ff}
+.final-sub{font-size:14px;fill:#b2c5e6;letter-spacing:.2px}
+.core rect.node-base{fill:#101f3b;stroke:#426b9c;stroke-width:1.6}
+.core.route rect.node-base{fill:#13264b;stroke:#55a9f5;stroke-width:2}
+.node-base{fill:#121d34;stroke:#476a95;stroke-width:1.6;filter:url(#softShadow)}
+.model .node-base{transition:stroke .35s, filter .35s, fill .35s}
+.model.on .node-base{stroke:#52efd0;fill:#122b39;filter:url(#mintGlow)}
+.model[data-model="d1"].on .node-base,.model[data-model="d1omni"].on .node-base{stroke:#d6a0ff;fill:#29213d;filter:url(#pinkGlow)}
+.model.on .icon-bubble circle{stroke:#51eec9;fill:#113c40}
+.model[data-model="d1"].on .icon-bubble circle,.model[data-model="d1omni"].on .icon-bubble circle{stroke:#d6a0ff;fill:#342447}
+.icon-bubble circle{fill:#20324e;stroke:#456e9f;stroke-width:1.2}
+.icon-bubble use{stroke:#d6e7ff;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.core .icon-bubble circle{fill:#16446a;stroke:#69b7ef}
+.pool-boundary{fill:url(#poolBG);stroke:#375c89;stroke-opacity:.75;stroke-width:1.4;stroke-dasharray:8 9}
+.mini-star{fill:#6ca9f4;opacity:.4}
+.pipe .node-base{fill:#12203a;stroke:#5075a6;stroke-width:1.8;transition:stroke .35s,fill .35s,filter .35s}
+.pipe.on .node-base{stroke:var(--accent);fill:var(--fill);filter:url(#focusGlow)}
+.pipe .pipe-icon-bg{fill:#213653;stroke:#567ab0;stroke-width:1.5}
+.pipe.on .pipe-icon-bg{fill:#19394b;stroke:var(--accent)}
+.pipe .pipe-icon{stroke:#d6e5ff;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.pipe.on .pipe-icon{stroke:var(--accent)}
+.pipe{cursor:pointer;outline:none}
+.pipe:focus-visible .node-base{stroke:#f6f7ff;stroke-width:3}
+.pipe[data-flow="doc"]{--accent:#52efd0;--fill:#102d35}
+.pipe[data-flow="voice"]{--accent:#67baff;--fill:#112740}
+.pipe[data-flow="decision"]{--accent:#d6a0ff;--fill:#261d40}
+.link{fill:none;stroke-width:2.2;stroke-linecap:round;opacity:.16;transition:opacity .4s,filter .4s,stroke-width .4s;pointer-events:none}
+.link.source{stroke:#80b8f6;stroke-dasharray:5 9;animation:dash 1.4s linear infinite}
+.link.converge{stroke:#80b8f6;stroke-width:2.5;stroke-dasharray:7 10;animation:dash 1.4s linear infinite}
+.link.on{stroke:var(--accent);stroke-width:3.2;opacity:.88;filter:drop-shadow(0 0 6px var(--accent))}
+.link.mint{--accent:#52efd0}.link.blue{--accent:#67baff}.link.pink{--accent:#d6a0ff}
+.link.trunk{stroke:#67baff;opacity:.8;filter:drop-shadow(0 0 5px #67baff);stroke-dasharray:5 11;animation:dash 1.6s linear infinite}
+.signal{fill:var(--accent);opacity:.08;transition:opacity .35s;filter:drop-shadow(0 0 5px var(--accent))}
+.signal.on{opacity:1}
+.signal.mint{--accent:#52efd0}.signal.blue{--accent:#67baff}.signal.pink{--accent:#d6a0ff}
+.pipeline-group{filter:drop-shadow(0 5px 17px rgba(0,0,0,.12))}
+.final rect.node-base{fill:#122a45;stroke:#60aefa;stroke-width:1.8;filter:url(#blueGlow)}
+@keyframes dash{to{stroke-dashoffset:-28}}
+@media(prefers-reduced-motion:reduce){.link{animation:none}.signal{display:none}}
+
+/* Additional processing stage and three downstream destinations */
+.stage .node-base{fill:#101e37;stroke:#4a719d;stroke-width:1.7;transition:stroke .3s,fill .3s,filter .3s}
+.stage.on .node-base{stroke:var(--accent);filter:url(#focusGlow)}
+.stage .pipe-icon-bg{fill:#203450;stroke:#4c759e;stroke-width:1.4}
+.stage .pipe-icon{fill:none;stroke:#b8d1f4;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stage.on .pipe-icon{stroke:var(--accent)}
+.stage[data-flow="doc"]{--accent:#52efd0}
+.stage[data-flow="voice"]{--accent:#67baff}
+.stage[data-flow="decision"]{--accent:#d6a0ff}
+.stage-label{font-size:21px;font-weight:750;fill:#eaf5ff}
+.stage-hint{font-size:13px;fill:#9cb9de;letter-spacing:.3px}
+.output .node-base{fill:#13213c;stroke:#5584b5;stroke-width:1.8;filter:url(#softShadow);transition:stroke .3s,filter .3s}
+.output:hover .node-base{stroke:#82c9ff;filter:url(#blueGlow)}
+.output-icon{fill:#203451;stroke:#6a9fd2;stroke-width:1.4}
+.output use{fill:none;stroke:#d6e7ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.output-title{font-size:21px;font-weight:750;fill:#f0f7ff}
+.output-sub{font-size:13px;fill:#a9c6ec}
+.link.deliver{stroke:#69c6fa;opacity:.75;stroke-width:2.6;filter:drop-shadow(0 0 4px #67baff);stroke-dasharray:5 10;animation:dash 1.3s linear infinite}
+.link.stage-path{stroke-width:2.6}
+.stage-title{font-size:15px;letter-spacing:1.8px;font-weight:700;fill:#86a5cc}
+
+
+/* P7-only additions: exact P6 color variables, node geometry and symbols are reused above. */
+html,body{height:auto;min-height:100%;overflow:auto}
+body{display:block;background:#050913}
+.atlas-layout{width:100%;max-width:1600px;margin:auto;padding:8px 10px 18px}
+.arch{margin:auto;display:block;width:100%;height:auto;max-height:none;aspect-ratio:1380/1030}
+.navnode{cursor:pointer;outline:none}
+.navnode.active .node-base{stroke:#52efd0;fill:#122b39;filter:url(#mintGlow)}
+.navnode:hover .node-base,.navnode:focus-visible .node-base{stroke:#e9fbff;stroke-width:2.6}
+.navnode:not(.active) .model-role{fill:#90a7ca}
+.layer-link{fill:none;stroke:#67baff;stroke-width:2.3;opacity:.48;stroke-linecap:round;stroke-dasharray:4 7;animation:dash 1.4s linear infinite}
+.step-node{cursor:pointer;outline:none}
+.step-node .node-base{fill:#121d34;stroke:var(--accent);stroke-width:1.3;transition:fill .22s,stroke-width .22s,filter .22s}
+.step-node.active .node-base{fill:var(--node-fill);stroke-width:3;filter:drop-shadow(0 0 7px var(--accent))}
+.step-node:focus-visible .node-base,.step-node:hover .node-base{stroke:#fff;stroke-width:2.6}
+.layer-no{font-size:18px;font-weight:800;fill:#f4f8ff;letter-spacing:.5px}
+.layer-label{font-size:10px;font-weight:750;fill:var(--accent);letter-spacing:.6px}
+.layer-desc{font-size:10px;font-weight:500;fill:#a8c2df}
+.controls{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;margin:0 auto 14px;padding:3px 10px 8px;color:#acc6e8;font-family:inherit}
+.controls button,.controls a{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:37px;padding:8px 14px;border:1px solid #476a95;background:#13264b;color:#f4f8ff;border-radius:13px;font:600 13px inherit;text-decoration:none;cursor:pointer}
+.controls button:hover,.controls a:hover,.controls button:focus-visible,.controls a:focus-visible{border-color:#52efd0;color:#e5fff9}
+.controls button:focus-visible,.controls a:focus-visible{outline:2px solid #52efd0;outline-offset:3px}
+#atlas-live-status{min-width:210px;text-align:center;font-size:13px}
+@media(prefers-reduced-motion:reduce){.layer-link{animation:none}}
+@media(max-width:700px){.atlas-layout{padding:4px}.controls{gap:7px}.controls button,.controls a{font-size:12px;padding:6px 9px;min-height:34px}}
+</style></head><body><main class="atlas-layout"><svg id="atlas" class="arch" viewBox="0 0 1380 1030" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PrismLab model architecture atlas. Select a model to inspect its architecture."><defs>
+  <radialGradient id="background" cx="48%" cy="6%" r="93%"><stop stop-color="#0f2344"/><stop offset=".54" stop-color="#08142b"/><stop offset="1" stop-color="#060b17"/></radialGradient>
+  <linearGradient id="poolBG" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#13243d"/><stop offset="1" stop-color="#0e1930"/></linearGradient>
+  <linearGradient id="nodeShine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ddf8ff"/><stop offset=".5" stop-color="transparent"/><stop offset="1" stop-color="#93cfff"/></linearGradient>
+  <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#67baff"/><stop offset=".52" stop-color="#52efd0"/><stop offset="1" stop-color="#d6a0ff"/></linearGradient>
+  <filter id="softShadow" x="-25%" y="-30%" width="150%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#01050d" flood-opacity=".42"/></filter>
+  <filter id="mintGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#52efd0" flood-opacity=".3"/><feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#000000" flood-opacity=".45"/></filter>
+  <filter id="pinkGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#d6a0ff" flood-opacity=".32"/></filter>
+  <filter id="blueGlow" x="-50%" y="-65%" width="200%" height="230%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#67baff" flood-opacity=".22"/></filter>
+  <filter id="focusGlow" x="-35%" y="-50%" width="170%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#67baff" flood-opacity=".2"/></filter>
+  <pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".7" fill="#6ea7dd" opacity=".14"/></pattern>
+  <symbol id="ico-text" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+  <symbol id="ico-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.2"/><path d="m3 17 5-5 4 4 3-3 6 5"/></symbol>
+  <symbol id="ico-audio" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></symbol>
+  <symbol id="ico-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+  <symbol id="ico-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ico-scan" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/><circle cx="12" cy="12" r="3"/><path d="M12 6v2M12 16v2M6 12h2M16 12h2"/></symbol>
+  <symbol id="ico-input" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h6"/></symbol>
+  <symbol id="ico-route" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v5a5 5 0 0 0 5 5h5M6 12h9a3 3 0 0 0 0-6h-3"/></symbol>
+  <symbol id="ico-document" viewBox="0 0 24 24"><rect x="4" y="3" width="13" height="18" rx="2"/><path d="M8 8h5M8 12h5M8 16h4M19 9h2M19 13h2"/></symbol>
+  <symbol id="ico-speech" viewBox="0 0 24 24"><path d="M3 11v2M7 7v10M11 4v16M15 8v8M19 6v12M23 11v2"/></symbol>
+  <symbol id="ico-decision" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="ico-unified" viewBox="0 0 24 24"><rect x="2" y="2" width="7" height="7" rx="2"/><rect x="15" y="2" width="7" height="7" rx="2"/><rect x="9" y="15" width="7" height="7" rx="2"/><path d="M5.5 9v3h7M18.5 9v3h-6M12.5 12v3"/></symbol>
+
+<symbol id="ico-context" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h10M7 12h10M7 16h6"/><path d="m16 16 1.5 1.5L21 14"/></symbol>
+<symbol id="ico-dialogue" viewBox="0 0 24 24"><path d="M3 4h18v13H9l-6 4V4Z"/><path d="M7 9h10M7 13h7"/></symbol>
+<symbol id="ico-signal" viewBox="0 0 24 24"><path d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
+<symbol id="ico-answer" viewBox="0 0 24 24"><path d="M4 4h16v13H9l-5 4V4Z"/><path d="M8 8h8M8 12h5"/></symbol>
+<symbol id="ico-action" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="ico-eval" viewBox="0 0 24 24"><path d="M4 20V11M10 20V7M16 20v-9M22 20V4"/><path d="M2 20h21"/></symbol>
+</defs><rect width="1380" height="1030" fill="url(#background)"/><rect width="1380" height="1030" fill="url(#dots)"/><rect x="16" y="15" width="1348" height="1000" rx="31" fill="none" stroke="#40608d" stroke-opacity=".44" stroke-width="1.4"/><g transform="translate(341,46)" stroke="url(#brand)" stroke-width="2.5" fill="none" stroke-linejoin="round"><path d="M19 0 37 10.5v20.5L19 42 1 31V10.5Z"/><path d="M19 0v42M1 10.5l18 10 18-10.5M1 31l18-10 18 10"/></g><text x="717" y="78" class="header" text-anchor="middle">PrismLab Model Atlas</text><path d="M527 98h326" stroke="url(#brand)" stroke-opacity=".65" stroke-width="2.3" stroke-linecap="round"/><text x="690" y="122" text-anchor="middle" class="top-sub">P7 · SOURCE-GROUNDED MODEL ARCHITECTURES</text><g class="model navnode" data-model="text" role="button" tabindex="0" aria-label="Inspect LFM3-1.7B" transform="translate(71,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-text" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">LFM3-1.7B</text><text class="model-role" x="15" y="73" style="font-size:10px">TEXT</text></g><g class="model navnode" data-model="vision" role="button" tabindex="0" aria-label="Inspect LFM3-VL-2B" transform="translate(278,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-image" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">LFM3-VL-2B</text><text class="model-role" x="15" y="73" style="font-size:10px">VISION</text></g><g class="model navnode" data-model="audio" role="button" tabindex="0" aria-label="Inspect LFM3-Audio-2B" transform="translate(485,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-audio" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">LFM3-Audio-2B</text><text class="model-role" x="15" y="73" style="font-size:10px">AUDIO</text></g><g class="model navnode" data-model="omni" role="button" tabindex="0" aria-label="Inspect LFM3-Omni-2B" transform="translate(692,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-layers" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">LFM3-Omni-2B</text><text class="model-role" x="15" y="73" style="font-size:10px">OMNI</text></g><g class="model navnode" data-model="d1" role="button" tabindex="0" aria-label="Inspect d1-2B" transform="translate(899,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-eye" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">d1-2B</text><text class="model-role" x="15" y="73" style="font-size:10px">DECISION</text></g><g class="model navnode" data-model="d1omni" role="button" tabindex="0" aria-label="Inspect d1-Omni-2B" transform="translate(1106,153)"><rect class="node-base" width="196" height="82" rx="19"/><g class="icon-bubble"><circle cx="30" cy="29" r="18"/><use href="#ico-scan" x="18" y="17" width="24" height="24"/></g><text class="model-label" x="15" y="56" style="font-size:17px">d1-Omni-2B</text><text class="model-role" x="15" y="73" style="font-size:10px">A/V DECISION</text></g><g id="text-view"><text x="88" y="271" class="section-label">LANGUAGE PATH</text><g class="core" transform="translate(84,288)"><rect class="node-base" width="310" height="66" rx="18"/><g class="icon-bubble"><circle cx="38" cy="33" r="21"/><use href="#ico-input" x="26" y="21" width="24" height="24"/></g><text x="80" y="28" class="top-label">Input text tokens</text><text x="80" y="49" class="top-sub">Token IDs · sequence positions</text></g><path d="M400 321h117" class="link trunk"/><g class="core" transform="translate(520,288)"><rect class="node-base" width="343" height="66" rx="18"/><g class="icon-bubble"><circle cx="38" cy="33" r="21"/><use href="#ico-text" x="26" y="21" width="24" height="24"/></g><text x="80" y="28" class="top-label">Token embeddings</text><text x="80" y="49" class="top-sub">128,000 vocabulary · d=2048</text></g><path d="M864 321H983" class="link trunk"/><g class="core" transform="translate(990,288)"><rect class="node-base" width="312" height="66" rx="18"/><g class="icon-bubble"><circle cx="38" cy="33" r="21"/><use href="#ico-layers" x="26" y="21" width="24" height="24"/></g><text x="80" y="28" class="top-label">Hybrid backbone</text><text x="80" y="49" class="top-sub">24 ordered operator layers</text></g><rect class="pool-boundary" x="40" y="381" width="1300" height="315" rx="25"/><text x="77" y="410" class="section-label">OPERATOR SEQUENCE · 01 → 24</text><path class="layer-link" id="edge-0" d="M198 459 L226 459"/><path class="layer-link" id="edge-1" d="M363 459 L391 459"/><path class="layer-link" id="edge-2" d="M528 459 L556 459"/><path class="layer-link" id="edge-3" d="M693 459 L721 459"/><path class="layer-link" id="edge-4" d="M858 459 L886 459"/><path class="layer-link" id="edge-5" d="M1023 459 L1051 459"/><path class="layer-link" id="edge-6" d="M1188 459 L1216 459"/><path class="layer-link" id="edge-7" d="M1284.5 490 C1340 490 1340 510 1284.5 510"/><path class="layer-link" id="edge-8" d="M1216 541 L1188 541"/><path class="layer-link" id="edge-9" d="M1051 541 L1023 541"/><path class="layer-link" id="edge-10" d="M886 541 L858 541"/><path class="layer-link" id="edge-11" d="M721 541 L693 541"/><path class="layer-link" id="edge-12" d="M556 541 L528 541"/><path class="layer-link" id="edge-13" d="M391 541 L363 541"/><path class="layer-link" id="edge-14" d="M226 541 L198 541"/><path class="layer-link" id="edge-15" d="M129.5 572 C40 572 40 592 129.5 592"/><path class="layer-link" id="edge-16" d="M198 623 L226 623"/><path class="layer-link" id="edge-17" d="M363 623 L391 623"/><path class="layer-link" id="edge-18" d="M528 623 L556 623"/><path class="layer-link" id="edge-19" d="M693 623 L721 623"/><path class="layer-link" id="edge-20" d="M858 623 L886 623"/><path class="layer-link" id="edge-21" d="M1023 623 L1051 623"/><path class="layer-link" id="edge-22" d="M1188 623 L1216 623"/><g class="step-node" data-step="0" role="button" tabindex="0" aria-label="Inspect layer 1" transform="translate(61,428)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L01</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="1" role="button" tabindex="0" aria-label="Inspect layer 2" transform="translate(226,428)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L02</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="2" role="button" tabindex="0" aria-label="Inspect layer 3" transform="translate(391,428)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L03</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="3" role="button" tabindex="0" aria-label="Inspect layer 4" transform="translate(556,428)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L04</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="4" role="button" tabindex="0" aria-label="Inspect layer 5" transform="translate(721,428)" style="--accent:#67baff;--node-fill:#112740"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L05</text><text class="layer-label" x="15" y="39">SLIDING ATTN</text><text class="layer-desc" x="15" y="54">Window 256</text></g><g class="step-node" data-step="5" role="button" tabindex="0" aria-label="Inspect layer 6" transform="translate(886,428)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L06</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="6" role="button" tabindex="0" aria-label="Inspect layer 7" transform="translate(1051,428)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L07</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="7" role="button" tabindex="0" aria-label="Inspect layer 8" transform="translate(1216,428)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L08</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="8" role="button" tabindex="0" aria-label="Inspect layer 9" transform="translate(1216,510)" style="--accent:#67baff;--node-fill:#112740"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L09</text><text class="layer-label" x="15" y="39">SLIDING ATTN</text><text class="layer-desc" x="15" y="54">Window 256</text></g><g class="step-node" data-step="9" role="button" tabindex="0" aria-label="Inspect layer 10" transform="translate(1051,510)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L10</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="10" role="button" tabindex="0" aria-label="Inspect layer 11" transform="translate(886,510)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L11</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="11" role="button" tabindex="0" aria-label="Inspect layer 12" transform="translate(721,510)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L12</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="12" role="button" tabindex="0" aria-label="Inspect layer 13" transform="translate(556,510)" style="--accent:#67baff;--node-fill:#112740"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L13</text><text class="layer-label" x="15" y="39">SLIDING ATTN</text><text class="layer-desc" x="15" y="54">Window 256</text></g><g class="step-node" data-step="13" role="button" tabindex="0" aria-label="Inspect layer 14" transform="translate(391,510)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L14</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="14" role="button" tabindex="0" aria-label="Inspect layer 15" transform="translate(226,510)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L15</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="15" role="button" tabindex="0" aria-label="Inspect layer 16" transform="translate(61,510)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L16</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="16" role="button" tabindex="0" aria-label="Inspect layer 17" transform="translate(61,592)" style="--accent:#67baff;--node-fill:#112740"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L17</text><text class="layer-label" x="15" y="39">SLIDING ATTN</text><text class="layer-desc" x="15" y="54">Window 256</text></g><g class="step-node" data-step="17" role="button" tabindex="0" aria-label="Inspect layer 18" transform="translate(226,592)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L18</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="18" role="button" tabindex="0" aria-label="Inspect layer 19" transform="translate(391,592)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L19</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="19" role="button" tabindex="0" aria-label="Inspect layer 20" transform="translate(556,592)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L20</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="20" role="button" tabindex="0" aria-label="Inspect layer 21" transform="translate(721,592)" style="--accent:#67baff;--node-fill:#112740"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L21</text><text class="layer-label" x="15" y="39">SLIDING ATTN</text><text class="layer-desc" x="15" y="54">Window 256</text></g><g class="step-node" data-step="21" role="button" tabindex="0" aria-label="Inspect layer 22" transform="translate(886,592)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L22</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><g class="step-node" data-step="22" role="button" tabindex="0" aria-label="Inspect layer 23" transform="translate(1051,592)" style="--accent:#d6a0ff;--node-fill:#261d40"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L23</text><text class="layer-label" x="15" y="39">GLOBAL ATTN</text><text class="layer-desc" x="15" y="54">Partial RoPE</text></g><g class="step-node" data-step="23" role="button" tabindex="0" aria-label="Inspect layer 24" transform="translate(1216,592)" style="--accent:#52efd0;--node-fill:#102d35"><rect class="node-base" width="137" height="62" rx="17"/><text class="layer-no" x="15" y="22">L24</text><text class="layer-label" x="15" y="39">GATED CONV</text><text class="layer-desc" x="15" y="54">Kernel 7</text></g><path class="link trunk" d="M690 697V727"/><g class="core" transform="translate(277,727)"><rect class="node-base" width="338" height="67" rx="18"/><g class="icon-bubble"><circle cx="38" cy="33" r="21"/><use href="#ico-layers" x="26" y="21" width="24" height="24"/></g><text x="80" y="27" class="top-label">Final norm + LM head</text><text x="80" y="48" class="top-sub">Autoregressive prediction</text></g><path class="link trunk" d="M617 759H766"/><g class="core" transform="translate(770,727)"><rect class="node-base" width="336" height="67" rx="18"/><g class="icon-bubble"><circle cx="38" cy="33" r="21"/><use href="#ico-answer" x="26" y="21" width="24" height="24"/></g><text x="80" y="27" class="top-label">Next token / text</text><text x="80" y="48" class="top-sub">Sample, append, repeat</text></g><rect x="52" y="825" width="1276" height="144" rx="23" fill="#101f3b" stroke="#426b9c" stroke-width="1.6" filter="url(#softShadow)"/><text x="86" y="858" class="section-label">SELECTED LAYER</text><text id="selected-title" x="86" y="891" class="top-label">Layer 01 · Gated short convolution</text><text id="selected-detail" x="86" y="920" class="top-sub">Kernel 7 · bounded recurrent state</text><text x="86" y="950" class="top-sub" style="font-size:12px;fill:#93adc9">Layer order follows the official Lfm3Config default rule; compare against pinned checkpoint config.json before release.</text></g><g id="pending-view" style="display:none"><rect x="85" y="300" width="1210" height="570" rx="26" fill="#101f3b" stroke="#4a719d" stroke-width="2"/><text id="pending-name" x="690" y="487" text-anchor="middle" class="header">Architecture pending</text><text x="690" y="539" text-anchor="middle" class="pipeline-sub">Reference configuration &amp; implementation audit needed</text><text x="690" y="582" text-anchor="middle" class="top-sub">No speculative internal blocks will be presented as verified.</text><text x="690" y="629" text-anchor="middle" class="top-sub">Choose LFM3-1.7B to inspect the first evidence-backed 24-layer sequence.</text></g></svg><div class="controls" aria-label="Architecture explorer controls">
+  <a href="PrismLabs_Architecture_Extended_P7.html">← Overview</a>
+  <button id="atlas-play" type="button">Pause animation</button>
+  <button id="atlas-step" type="button">Next layer</button>
+  <button id="atlas-reset" type="button">Reset</button>
+  <span id="atlas-live-status" role="status" aria-live="polite">LFM3-1.7B · Layer 01/24</span>
+</div></main><script>
+(()=>{
+  'use strict';
+  const models={text:'LFM3-1.7B',vision:'LFM3-VL-2B',audio:'LFM3-Audio-2B',omni:'LFM3-Omni-2B',d1:'d1-2B',d1omni:'d1-Omni-2B'};
+  const schedule=Array.from({length:24},(_,i)=>i%4===2?'full_attention':(i%4===0&&i>0?'sliding_attention':'conv'));
+  const labels={conv:'Gated short convolution',sliding_attention:'Sliding-window attention',full_attention:'Global attention'};
+  const detail={conv:'Kernel size 7 · bounded recurrent state',sliding_attention:'Window size 256 tokens · full RoPE',full_attention:'Global context · head-wise gate · partial RoPE'};
+  const reducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let step=0, selected='text', play=!reducedMotion, timer=null;
+  const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+  function refresh(){
+    $$('.navnode').forEach(n=>n.classList.toggle('active',n.dataset.model===selected));
+    $('#text-view').style.display=selected==='text'?'':'none';
+    $('#pending-view').style.display=selected==='text'?'none':'';
+    if(selected!=='text'){$('#pending-name').textContent=models[selected]+' · Architecture pending'}
+    $$('.step-node').forEach(n=>n.classList.toggle('active',selected==='text'&&Number(n.dataset.step)===step));
+    $('#selected-title').textContent=`Layer ${String(step+1).padStart(2,'0')} · ${labels[schedule[step]]}`;
+    $('#selected-detail').textContent=detail[schedule[step]];
+    $('#atlas-live-status').textContent=selected==='text'?`LFM3-1.7B · Layer ${String(step+1).padStart(2,'0')}/24`:`${models[selected]} · audit pending`;
+    $('#atlas-play').textContent=play?'Pause animation':'Play animation';
+    // Page URL is an accessible anchor directly to each of the six model pages.
+  }
+  function stop(){if(timer!==null){window.clearInterval(timer);timer=null}}
+  function start(){stop();if(play&&selected==='text'&&!reducedMotion){timer=window.setInterval(()=>{step=(step+1)%24;refresh()},1100)}}
+  function pickModel(id,updateHash=true){if(!(id in models))return;selected=id;step=0;refresh();start();if(updateHash)window.location.hash=id}
+  function pickLayer(n){step=n;refresh()}
+  function bindAccessible(nodes,fn){nodes.forEach(n=>{
+    n.addEventListener('click',()=>fn(n));
+    n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn(n)}});
+  })}
+  bindAccessible($$('.navnode'),n=>pickModel(n.dataset.model));
+  bindAccessible($$('.step-node'),n=>pickLayer(Number(n.dataset.step)));
+  $('#atlas-play').addEventListener('click',()=>{play=!play;refresh();start()});
+  $('#atlas-step').addEventListener('click',()=>{play=false;step=(step+1)%24;refresh();start()});
+  $('#atlas-reset').addEventListener('click',()=>{selected='text';step=0;play=!reducedMotion;refresh();start();window.location.hash='text'});
+  window.addEventListener('hashchange',()=>pickModel(window.location.hash.slice(1),false));
+  pickModel(models[window.location.hash.slice(1)]?window.location.hash.slice(1):'text',false);
+})();
+</script></body></html>

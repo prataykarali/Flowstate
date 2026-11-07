@@ -1,6 +1,7 @@
 
 """Offline P6.3 tests: no llama-server is started."""
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -8,6 +9,7 @@ from unittest.mock import Mock, patch
 from urllib.error import HTTPError, URLError
 
 from prismlab.core.lifecycle import LifecycleManager, RuntimeSpec
+from prismlab.on_demand import close_warm_managers, warm_manager
 
 
 class Response:
@@ -37,6 +39,20 @@ CMD_SPEC = RuntimeSpec(
 
 
 class TestLifecycle(unittest.TestCase):
+
+    def test_warm_manager_reuses_same_runtime_spec(self):
+        first = warm_manager("lifecycle-test", [CMD_SPEC])
+        self.assertIs(warm_manager("lifecycle-test", [CMD_SPEC]), first)
+        close_warm_managers()
+
+    def test_single_active_mode_closes_other_runtime_group(self):
+        with patch.dict(os.environ, {"PRISMLAB_SINGLE_ACTIVE_MODEL": "1"}):
+            first = warm_manager("text", [CMD_SPEC])
+            with patch.object(first, "close") as close:
+                warm_manager("multimodal", [CMD_SPEC])
+                close.assert_called_once()
+            self.assertIsNot(warm_manager("text", [CMD_SPEC]), first)
+        close_warm_managers()
 
     def test_reject_nonlocal_address(self):
         with self.assertRaises(ValueError):
@@ -169,6 +185,23 @@ class TestLifecycle(unittest.TestCase):
             ):
                 manager.start("vision")
 
+            manager.close()
+
+    @patch("prismlab.core.lifecycle.subprocess.Popen")
+    @patch("prismlab.core.lifecycle.urlopen", side_effect=URLError("refused"))
+    def test_switches_only_owned_model_on_shared_port(self, mock_urlopen, mock_popen):
+        first = Mock()
+        second = Mock()
+        first.poll.return_value = None
+        second.poll.return_value = None
+        mock_popen.side_effect = [first, second]
+        vision = RuntimeSpec("vision", CMD_SPEC.base_url, "lfm3-vision", ("llama-server", "--port", "8080"))
+        with tempfile.TemporaryDirectory() as tmp:
+            manager = LifecycleManager([CMD_SPEC, vision], log_dir=tmp, max_managed=1)
+            manager.start("text")
+            self.assertEqual(manager.start("vision"), "launched_not_yet_ready")
+            first.terminate.assert_called_once()
+            self.assertEqual(mock_popen.call_count, 2)
             manager.close()
 
 

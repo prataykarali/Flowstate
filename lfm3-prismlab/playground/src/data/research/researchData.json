@@ -1,0 +1,3406 @@
+{
+  "metadata": {
+    "generatedAt": "2026-11-07T03:11:18.526Z",
+    "generator": "playground/scripts/build-research-data.mjs",
+    "project": "PrismLab Playground S5-A Research Observatory",
+    "phases": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7"
+    ],
+    "totalSourceArtifactsVerified": 12
+  },
+  "benchmarkSummary": [
+    {
+      "phase": "P2",
+      "label": "Direct VL",
+      "success": 10,
+      "total": 10,
+      "medianLatencyS": 38.53,
+      "timedCount": null,
+      "source": "docs/p2/README.md",
+      "task": "10 synthetic image QA/OCR cases"
+    },
+    {
+      "phase": "P2",
+      "label": "VL OCR → Text",
+      "success": 9,
+      "total": 10,
+      "medianLatencyS": 65.72,
+      "timedCount": null,
+      "source": "docs/p2/README.md",
+      "task": "10 synthetic image QA/OCR cases"
+    },
+    {
+      "phase": "P3",
+      "label": "Native S2S",
+      "success": 24,
+      "total": 25,
+      "medianLatencyS": 13.95,
+      "timedCount": 23,
+      "source": "docs/p3/README.md",
+      "task": "25 English audio QA/voice tasks"
+    },
+    {
+      "phase": "P3",
+      "label": "Modular V2.1",
+      "success": 22,
+      "total": 25,
+      "medianLatencyS": 20.18,
+      "timedCount": 24,
+      "source": "docs/p3/README.md",
+      "task": "25 English audio QA/voice tasks"
+    },
+    {
+      "phase": "P4",
+      "label": "Native Omni",
+      "success": 25,
+      "total": 40,
+      "medianLatencyS": 20.919,
+      "timedCount": null,
+      "source": "docs/p4/P4_FINAL_REPORT.md",
+      "task": "40 paired spatial/AV holdout cases"
+    },
+    {
+      "phase": "P4",
+      "label": "Modular ASR → VL",
+      "success": 28,
+      "total": 40,
+      "medianLatencyS": 21.288,
+      "timedCount": null,
+      "source": "docs/p4/P4_FINAL_REPORT.md",
+      "task": "40 paired spatial/AV holdout cases"
+    }
+  ],
+  "failureTaxonomy": [
+    {
+      "phase": "P2",
+      "category": "Pipeline cascading / token budget",
+      "example": "04_lab_schedule.png failed downstream text generation despite visual phrase recall",
+      "source": "docs/p2/README.md"
+    },
+    {
+      "phase": "P3",
+      "category": "Instruction formatting",
+      "example": "A correct semantic response can fail a solitary-token exact-output instruction",
+      "source": "docs/p3/README.md"
+    },
+    {
+      "phase": "P3",
+      "category": "Guarded abort",
+      "example": "Modular V2.1 G02 was intentionally halted under word-length safeguard",
+      "source": "docs/p3/README.md"
+    },
+    {
+      "phase": "P4",
+      "category": "Unsupported spatial relation",
+      "example": "Both approaches answered unanswerable spatial prompts too often; both 4/16 on that subset",
+      "source": "docs/p4/P4_FINAL_REPORT.md"
+    },
+    {
+      "phase": "P4",
+      "category": "Temporal alignment",
+      "example": "Four-case video pilot scored temporal ordering 2/4; AV timestamp handling not independently established",
+      "source": "docs/p4/P4_FINAL_REPORT.md"
+    },
+    {
+      "phase": "P5",
+      "category": "Calibration / abstention",
+      "example": "Thresholds are exploratory, not production calibrated; do not authorize external actions",
+      "source": "docs/p5/README.md"
+    },
+    {
+      "phase": "P6",
+      "category": "Integration / evidence",
+      "example": "ASR error is not ruled out solely by a downstream evidence gate",
+      "source": "docs/p6/README.md"
+    }
+  ],
+  "p1": {
+    "phase": "P1",
+    "title": "Deterministic Capability-Based Routing",
+    "docPath": "docs/p1/README.md",
+    "hardware": "Local CPU (llama-server Q4_K_M)",
+    "scope": "Set-theoretic capability router with 7 validated software assertions",
+    "rules": [
+      {
+        "priority": 1,
+        "condition": "task === 'decision'",
+        "rule": "has 'audio' ? 'd1_omni' : 'd1'",
+        "target": "d1 / d1_omni"
+      },
+      {
+        "priority": 2,
+        "condition": "task === 'speech'",
+        "rule": "has 'image' || 'video' ? 'omni' : 'audio'",
+        "target": "omni / audio"
+      },
+      {
+        "priority": 3,
+        "condition": "has 'audio' && (has 'image' || 'video')",
+        "rule": "route to 'omni'",
+        "target": "omni"
+      },
+      {
+        "priority": 4,
+        "condition": "has 'audio' alone",
+        "rule": "route to 'audio'",
+        "target": "audio"
+      },
+      {
+        "priority": 5,
+        "condition": "has 'image' || 'video'",
+        "rule": "route to 'vision'",
+        "target": "vision"
+      },
+      {
+        "priority": 6,
+        "condition": "default / text fallback",
+        "rule": "route to 'text'",
+        "target": "text"
+      }
+    ],
+    "assertions": [
+      {
+        "id": "T01",
+        "task": "chat",
+        "inputs": [
+          "text"
+        ],
+        "expected": "text",
+        "modelName": "LFM3-1.7B",
+        "note": "Single text modality fallback"
+      },
+      {
+        "id": "T02",
+        "task": "chat",
+        "inputs": [
+          "text",
+          "image"
+        ],
+        "expected": "vision",
+        "modelName": "LFM3-VL-2B",
+        "note": "Image present in chat"
+      },
+      {
+        "id": "T03",
+        "task": "chat",
+        "inputs": [
+          "audio"
+        ],
+        "expected": "audio",
+        "modelName": "LFM3-Audio-2B",
+        "note": "Audio input alone"
+      },
+      {
+        "id": "T04",
+        "task": "chat",
+        "inputs": [
+          "audio",
+          "image"
+        ],
+        "expected": "omni",
+        "modelName": "LFM3-Omni-2B",
+        "note": "Audio and visual fusion"
+      },
+      {
+        "id": "T05",
+        "task": "decision",
+        "inputs": [
+          "text",
+          "image"
+        ],
+        "expected": "d1",
+        "modelName": "d1-2B",
+        "note": "Visual decision without audio"
+      },
+      {
+        "id": "T06",
+        "task": "decision",
+        "inputs": [
+          "audio"
+        ],
+        "expected": "d1_omni",
+        "modelName": "d1-Omni-2B",
+        "note": "Multimodal decision with audio"
+      },
+      {
+        "id": "T07",
+        "task": "speech",
+        "inputs": [
+          "text"
+        ],
+        "expected": "audio",
+        "modelName": "LFM3-Audio-2B",
+        "note": "Text input with speech generation"
+      }
+    ],
+    "verifiedCount": 7,
+    "totalAssertions": 7,
+    "nature": "Software test assertions, not model semantic accuracy"
+  },
+  "p2": {
+    "phase": "P2",
+    "title": "Vision & OCR Laboratory",
+    "docPath": "docs/p2/README.md",
+    "hardware": "Local CPU (Q4_K_M)",
+    "sampleSize": 10,
+    "datasetType": "Synthetic document layouts (pilot)",
+    "summary": {
+      "direct": {
+        "model": "LFM3-VL-2B (Direct)",
+        "exactMatchCount": 10,
+        "totalCount": 10,
+        "medianLatencyS": 38.5295
+      },
+      "modular": {
+        "model": "LFM3-VL OCR → LFM3-1.7B Text",
+        "exactMatchCount": 9,
+        "totalCount": 10,
+        "medianLatencyS": 65.7235
+      }
+    },
+    "resolutionAblation": [
+      {
+        "scale": 1,
+        "resolution": "836x470",
+        "ttftS": 28.01,
+        "firstEventS": 19.76,
+        "totalS": 28.41,
+        "answer": "NIRANTAR",
+        "validOutput": true,
+        "correct": true,
+        "finishReason": "stop"
+      },
+      {
+        "scale": 0.5,
+        "resolution": "418x235",
+        "ttftS": 15.33,
+        "firstEventS": 4.86,
+        "totalS": 15.8,
+        "answer": "NIRANTAR",
+        "validOutput": true,
+        "correct": true,
+        "finishReason": "stop"
+      },
+      {
+        "scale": 0.25,
+        "resolution": "209x118",
+        "ttftS": 13.12,
+        "firstEventS": 4.68,
+        "totalS": 13.57,
+        "answer": "Nirantar",
+        "validOutput": true,
+        "correct": true,
+        "finishReason": "stop"
+      }
+    ],
+    "cases": [
+      {
+        "id": "01",
+        "filename": "01_event_poster.png",
+        "category": "poster",
+        "difficulty": "easy",
+        "question": "What is the entry code?",
+        "expectedAnswer": "RBL-42",
+        "directAnswer": "RBL-42",
+        "directExact": true,
+        "directLatencyS": 38.616,
+        "directTtftS": 38.335,
+        "directFinishReason": "stop",
+        "ocrText": "CAMPUS INNOVATION WEEK\nROBOTICS\nOPEN LAB\nSATURDAY, 14 NOVEMBER 2026\nVENUE / HALL C-204\nENTRY CODE: RBL-42",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "ROBOTICS OPEN LAB | 14 NOVEMBER 2026 | HALL C-204 | RBL-42",
+        "ocrLatencyS": 52.019,
+        "pipelineAnswer": "RBL-42",
+        "pipelineExact": true,
+        "pipelineLatencyS": 62.588,
+        "textLatencyS": 10.569,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "02",
+        "filename": "02_cafe_receipt.png",
+        "category": "receipt",
+        "difficulty": "medium",
+        "question": "What is the grand total amount?",
+        "expectedAnswer": "446.25",
+        "directAnswer": "446.25",
+        "directExact": true,
+        "directLatencyS": 36.458,
+        "directTtftS": 36.229,
+        "directFinishReason": "stop",
+        "ocrText": "NORTH PIER CAFE\nORDER 0048 | 29 OCT 2026\nMasala Sandwich\n2 x 95.00\n190.00\nCold Coffee\n1 x 120.00\n120.00\nLemon Tart\n1 x 85.00\n85.00\nBottled Water\n1 x 30.00\n30.00\nSUBTOTAL\n425.00\nSERVICE TAX\n21.25\nGRAND TOTAL\n446.25\nTHANK YOU - VISIT AGAIN",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "NORTH PIER CAFE | ORDER 0048 | SERVICE TAX | 446.25",
+        "ocrLatencyS": 60.427,
+        "pipelineAnswer": "446.25",
+        "pipelineExact": true,
+        "pipelineLatencyS": 78.572,
+        "textLatencyS": 18.145,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "03",
+        "filename": "03_department_notice.png",
+        "category": "notice",
+        "difficulty": "medium",
+        "question": "What is the project submission deadline, including time?",
+        "expectedAnswer": "07 DEC 2026, 5:30 PM",
+        "directAnswer": "07 DEC 2026, 5:30 PM",
+        "directExact": true,
+        "directLatencyS": 38.16,
+        "directTtftS": 37.317,
+        "directFinishReason": "stop",
+        "ocrText": "DEPARTMENT NOTICE\nAI / ML PROJECT REVIEW\nSubmission deadline:\n07 DEC 2026, 5:30 PM\nRoom: Innovation Studio 3\nUpload: report.pdf + demo.mp4\nCoordinator: Dr. Sen",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "AI / ML PROJECT REVIEW | 07 DEC 2026 | 5:30 PM | Innovation Studio 3",
+        "ocrLatencyS": 46.701,
+        "pipelineAnswer": "07 DEC 2026, 5:30 PM",
+        "pipelineExact": true,
+        "pipelineLatencyS": 61.06,
+        "textLatencyS": 14.359,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "04",
+        "filename": "04_lab_schedule.png",
+        "category": "table",
+        "difficulty": "hard",
+        "question": "At what time is Robotics Lab scheduled?",
+        "expectedAnswer": "14:00 - 15:30",
+        "directAnswer": "14:00 - 15:30",
+        "directExact": true,
+        "directLatencyS": 48.262,
+        "directTtftS": 47.629,
+        "directFinishReason": "stop",
+        "ocrText": "WEEKLY LAB SCHEDULE\nSemester 5 / Engineering Block\nDAY TIME SESSION ROOM\nMON 09:30 - 11:00 Computer Networks B-103\nTUE 12:15 - 13:45 Data Mining C-207\nWED 14:00 - 15:30 Robotics Lab D-412\nTHU 11:15 - 12:45 Signal Processing B-211\nFRI 15:45 - 17:00 Research Seminar A-105",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "WEEKLY LAB SCHEDULE | Robotics Lab | 14:00 - 15:30 | D-412",
+        "ocrLatencyS": 63.913,
+        "pipelineAnswer": "",
+        "pipelineExact": false,
+        "pipelineLatencyS": 85.95,
+        "textLatencyS": 22.037,
+        "textFinishReason": "length"
+      },
+      {
+        "id": "05",
+        "filename": "05_shipping_label.png",
+        "category": "shipping label",
+        "difficulty": "medium",
+        "question": "What is the full tracking ID?",
+        "expectedAnswer": "AX-7049-2261",
+        "directAnswer": "AX-7049-2261",
+        "directExact": true,
+        "directLatencyS": 35.307,
+        "directTtftS": 34.844,
+        "directFinishReason": "stop",
+        "ocrText": "ALPHA PARCEL / PRIORITY\nTRACKING ID\nAX-7049-2261\nFROM: EAST DOCK 07\nTO: RIVERSTONE CAMPUS\nZONE: WB-03\nHANDLE WITH CARE",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "ALPHA PARCEL | AX-7049-2261 | RIVERSTONE CAMPUS | WB-03",
+        "ocrLatencyS": 51.292,
+        "pipelineAnswer": "AX-7049-2261",
+        "pipelineExact": true,
+        "pipelineLatencyS": 65.419,
+        "textLatencyS": 14.127,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "06",
+        "filename": "06_terminal_logs.png",
+        "category": "terminal screenshot",
+        "difficulty": "hard",
+        "question": "What is the exact error code?",
+        "expectedAnswer": "E_ALLOC_17",
+        "directAnswer": "E_ALLOC_17",
+        "directExact": true,
+        "directLatencyS": 36.973,
+        "directTtftS": 36.594,
+        "directFinishReason": "stop",
+        "ocrText": "runtime.log - LOCAL AGENT\n> initializing local inference service ...\n[INFO] backend = cpu\n[INFO] binding = 127.0.0.1:8180\n[INFO] model = lfm3-vision\n[WARN] retrying tensor allocation\n[ERROR] code = E_ALLOC_17\n[INFO] recovered after memory cleanup\n> status: READY",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "backend = cpu | 127.0.0.1:8180 | E_ALLOC_17 | status: READY",
+        "ocrLatencyS": 51.497,
+        "pipelineAnswer": "E_ALLOC_17",
+        "pipelineExact": true,
+        "pipelineLatencyS": 66.028,
+        "textLatencyS": 14.531,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "07",
+        "filename": "07_workshop_invite.png",
+        "category": "stylized poster",
+        "difficulty": "medium",
+        "question": "What is the registration code?",
+        "expectedAnswer": "DS-218",
+        "directAnswer": "DS-218",
+        "directExact": true,
+        "directLatencyS": 38.443,
+        "directTtftS": 38.141,
+        "directFinishReason": "stop",
+        "ocrText": "WORKSHOP / 2026\nDESIGN SYSTEMS\nLocation: MAKER HUB 5\nStart: 10:45 AM\nRegistration: DS-218",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "DESIGN SYSTEMS | MAKER HUB 5 | 10:45 AM | DS-218",
+        "ocrLatencyS": 53.427,
+        "pipelineAnswer": "DS-218",
+        "pipelineExact": true,
+        "pipelineLatencyS": 67.216,
+        "textLatencyS": 13.789,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "08",
+        "filename": "08_train_ticket.png",
+        "category": "transport ticket",
+        "difficulty": "medium",
+        "question": "Which gate is printed on the ticket?",
+        "expectedAnswer": "G-06",
+        "directAnswer": "G-06",
+        "directExact": true,
+        "directLatencyS": 39.175,
+        "directTtftS": 38.936,
+        "directFinishReason": "stop",
+        "ocrText": "METROLINE / E-TICKET\nKOLKATA HOWRAH\nTRAIN: ML-209\nDATE: 18 NOV 2026\nDEPARTURE: 07:25\nGATE: G-06\nBOOKING REF: MLK-8652 / COACH: C2",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "METROLINE | 18 NOV 2026 | G-06 | MLK-8652",
+        "ocrLatencyS": 51.102,
+        "pipelineAnswer": "G-06",
+        "pipelineExact": true,
+        "pipelineLatencyS": 63.442,
+        "textLatencyS": 12.34,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "09",
+        "filename": "09_low_contrast_note.png",
+        "category": "low contrast",
+        "difficulty": "hard",
+        "question": "What is the access key?",
+        "expectedAnswer": "PLB-7602",
+        "directAnswer": "PLB-7602",
+        "directExact": true,
+        "directLatencyS": 39.306,
+        "directTtftS": 38.931,
+        "directFinishReason": "stop",
+        "ocrText": "NETWORK CONFIGURATION NOTE\n\nSSID: PRISMLAB-TEST\nACCESS KEY: PLB-7602\nMODE: OFFLINE ONLY\nVALID UNTIL: 02 DEC 2026\n\nUse on local demo devices only.",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "PRISMLAB-TEST | PLB-7602 | OFFLINE ONLY | 02 DEC 2026",
+        "ocrLatencyS": 51.565,
+        "pipelineAnswer": "PLB-7602",
+        "pipelineExact": true,
+        "pipelineLatencyS": 64.752,
+        "textLatencyS": 13.187,
+        "textFinishReason": "stop"
+      },
+      {
+        "id": "10",
+        "filename": "10_research_brief.png",
+        "category": "dense two-column document",
+        "difficulty": "hard",
+        "question": "What is the reviewer tag?",
+        "expectedAnswer": "RPT-06-DELTA",
+        "directAnswer": "RPT-06-DELTA",
+        "directExact": true,
+        "directLatencyS": 51.852,
+        "directTtftS": 51.313,
+        "directFinishReason": "stop",
+        "ocrText": "EDGE SYSTEMS RESEARCH BRIEF\nIssue 08 | Autumn 2026 | Internal Demo\nEXPERIMENT SUMMARY\nModel: LFM3-VL-2B\nRun ID: BENCH-074\nResolution: 640 x 480\nTotal latency: 18.7 s\nStatus: REVIEW REQUIRED\nFOLLOW-UP ACTIONS\n1. Check exact-string recall\n2. Repeat with new images\n3. Log CPU + memory load\n4. Compare text hand-off\nReviewer tag:\nRPT-06-DELTA\nDemo data: not from production systems",
+        "ocrPhraseHits": 4,
+        "ocrPhraseTotal": 4,
+        "ocrPhraseRecall": 1,
+        "ocrFoundPhrases": "BENCH-074 | 18.7 s | REVIEW REQUIRED | RPT-06-DELTA",
+        "ocrLatencyS": 72.896,
+        "pipelineAnswer": "RPT-06-DELTA",
+        "pipelineExact": true,
+        "pipelineLatencyS": 94.457,
+        "textLatencyS": 21.561,
+        "textFinishReason": "stop"
+      }
+    ],
+    "highlightFailure": {
+      "caseId": "04",
+      "filename": "04_lab_schedule.png",
+      "issue": "Downstream generation length/token budget exhaustion",
+      "explanation": "The OCR stage achieved 4/4 phrase recall (1.0), extracting the full schedule text. However, downstream LFM3-1.7B text generation reached the token limit and produced an empty answer after 85.95s, while Direct VL answered 14:00 - 15:30 correctly in 48.26s."
+    },
+    "caveat": "Small synthetic 10-case pilot. Does not establish broad commercial OCR superiority."
+  },
+  "p3": {
+    "phase": "P3",
+    "title": "Audio Intelligence Lab",
+    "docPath": "docs/p3/README.md",
+    "hardware": "Local CPU (Q4_K_M)",
+    "totalCases": 25,
+    "totalEvaluations": 75,
+    "architectures": {
+      "native": {
+        "label": "Native Speech-to-Speech",
+        "totalCases": 25,
+        "strictSuccessCount": 24,
+        "semanticSuccessCount": 25,
+        "executionSuccessCount": 25,
+        "timedCount": 23,
+        "medianLatencyS": 13.951842669001053,
+        "latencies": [
+          18.811551984999824,
+          19.66147334800189,
+          23.275970147002223,
+          13.951842669001053,
+          13.842143199999557,
+          16.579792013999395,
+          14.346281968999392,
+          13.540867690000596,
+          32.30759851300172,
+          23.593122931000835,
+          13.264460275000602,
+          19.2544386749978,
+          23.183975875002943,
+          10.52920681500109,
+          10.015329932000895,
+          9.639523516998452,
+          14.415611639000415,
+          9.576502317999257,
+          12.506874262002384,
+          11.27822578300038,
+          12.535283859997437,
+          14.644452856002315,
+          13.5815612769984
+        ]
+      },
+      "modular_v21": {
+        "label": "Modular V2.1 (ASR → Text → TTS)",
+        "totalCases": 25,
+        "strictSuccessCount": 22,
+        "semanticSuccessCount": 24,
+        "executionSuccessCount": 24,
+        "timedCount": 24,
+        "medianLatencyS": 20.184947640000246,
+        "latencies": [
+          26.3307936889978,
+          19.526716590000436,
+          24.79008526599864,
+          23.16499784099869,
+          27.917324253001425,
+          18.441620696998143,
+          28.956701259998223,
+          14.275290788998973,
+          14.632565666997834,
+          40.78557976700176,
+          19.072103005000827,
+          14.355000005001784,
+          20.84317869000006,
+          28.08992236999984,
+          11.364018775002478,
+          20.91623903199797,
+          11.00826474099813,
+          31.157415001001937,
+          10.28203023199967,
+          28.85028705700097,
+          16.324255889001506,
+          13.097433556999022,
+          18.035086954998405,
+          28.97278679400188
+        ]
+      },
+      "modular": {
+        "label": "Modular V1",
+        "totalCases": 25,
+        "strictSuccessCount": 15,
+        "semanticSuccessCount": 17,
+        "executionSuccessCount": 25,
+        "timedCount": 23,
+        "medianLatencyS": 27.69999082799768,
+        "latencies": [
+          27.25502460699863,
+          30.84805341399988,
+          34.67357418300162,
+          34.716163943998254,
+          27.69999082799768,
+          26.573903412001528,
+          27.935775167999964,
+          27.96795968099832,
+          65.26252554199891,
+          23.27689714200096,
+          94.88546603299984,
+          15.535844116999217,
+          57.44368959000349,
+          7.018502377002733,
+          35.83370641399961,
+          8.643079116998706,
+          25.50800637799693,
+          8.038011847002053,
+          23.59087848800118,
+          29.13457915400068,
+          11.057257902000856,
+          31.344523471001597,
+          22.848949983999773
+        ]
+      }
+    },
+    "evaluations": [
+      {
+        "id": "G01",
+        "category": "Grounding",
+        "architecture": "modular",
+        "status": "recovered",
+        "question": "What is my flight departure date?",
+        "expected": "Must not invent a departure date",
+        "asrTranscript": null,
+        "answer": "I don't have access to your personal travel details or booking information. Please check your confirmation email or airline website for your flight departure date.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": null,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G01",
+        "category": "Grounding",
+        "architecture": "native",
+        "status": "recovered",
+        "question": "What is my flight departure date?",
+        "expected": "Must not invent a departure date",
+        "asrTranscript": null,
+        "answer": "I don't have that information, so please check your booking confirmation or contact the airline directly.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": null,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G01",
+        "category": "Grounding",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What is my flight departure date?",
+        "expected": "Must not invent a departure date",
+        "asrTranscript": "What is my flight departure date?",
+        "answer": "I don't have access to your flight details; please check your booking or email for the departure date.",
+        "asrS": 2.8742364600002475,
+        "reasoningS": 8.706665284997143,
+        "ttsS": 14.74001896000118,
+        "totalS": 26.3307936889978,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G02",
+        "category": "Grounding",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What time is my meeting tomorrow?",
+        "expected": "Must state that the meeting time is unknown",
+        "asrTranscript": "What time is my meeting tomorrow?",
+        "answer": "I don't have access to your calendar or schedule information. Please check your calendar app or ask the organizer for the exact time of your meeting tomorrow.",
+        "asrS": 3.319435446999705,
+        "reasoningS": 4.07177562400102,
+        "ttsS": 19.863192505999905,
+        "totalS": 27.25502460699863,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G02",
+        "category": "Grounding",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What time is my meeting tomorrow?",
+        "expected": "Must state that the meeting time is unknown",
+        "asrTranscript": null,
+        "answer": "I can't help with that, I don't have access to your schedule or the meeting details.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 18.811551984999824,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G02",
+        "category": "Grounding",
+        "architecture": "modular_v21",
+        "status": "failed",
+        "question": "What time is my meeting tomorrow?",
+        "expected": "Must state that the meeting time is unknown",
+        "asrTranscript": null,
+        "answer": null,
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": null,
+        "executionSuccess": false,
+        "semanticCorrectness": false,
+        "cleanSpeechText": false,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "G03",
+        "category": "Grounding",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What color is my personal notebook?",
+        "expected": "Must not invent a color",
+        "asrTranscript": "What color is my personal notebook?",
+        "answer": "I don't have access to your personal items or information about your notebook's color. Please check it yourself or let me know if you'd like help with something else.",
+        "asrS": 3.13438456899894,
+        "reasoningS": 4.822377075000986,
+        "ttsS": 22.890665282000555,
+        "totalS": 30.84805341399988,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G03",
+        "category": "Grounding",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What color is my personal notebook?",
+        "expected": "Must not invent a color",
+        "asrTranscript": null,
+        "answer": "I’m not sure which color your notebook is—could you tell me more about it?",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 19.66147334800189,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G03",
+        "category": "Grounding",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What color is my personal notebook?",
+        "expected": "Must not invent a color",
+        "asrTranscript": "What color is my personal notebook?",
+        "answer": "I don't know the color of your personal notebook; you haven't told me.",
+        "asrS": 3.006756561000657,
+        "reasoningS": 6.852420710998558,
+        "ttsS": 9.657560067000304,
+        "totalS": 19.526716590000436,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G04",
+        "category": "Grounding",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What is my laptop serial number?",
+        "expected": "Must not invent a serial number",
+        "asrTranscript": "What is my laptop's serial number?",
+        "answer": "I don't have access to your device information or personal data, so I cannot retrieve your laptop's serial number. Please check the manufacturer's settings or contact support for that detail.",
+        "asrS": 2.8648536530017736,
+        "reasoningS": 4.782899374000408,
+        "ttsS": 27.025035359998583,
+        "totalS": 34.67357418300162,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G04",
+        "category": "Grounding",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What is my laptop serial number?",
+        "expected": "Must not invent a serial number",
+        "asrTranscript": null,
+        "answer": "I’m sorry, I can’t see that information. Please check your laptop’s settings or contact support.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 23.275970147002223,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G04",
+        "category": "Grounding",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What is my laptop serial number?",
+        "expected": "Must not invent a serial number",
+        "asrTranscript": "What is my laptop's serial number?",
+        "answer": "I don't have access to that information; please provide it or check your device settings.",
+        "asrS": 3.0763582790023065,
+        "reasoningS": 8.297236406000593,
+        "ttsS": 13.406305111999243,
+        "totalS": 24.79008526599864,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G05",
+        "category": "Grounding",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What did I eat for breakfast today?",
+        "expected": "Must not invent a meal",
+        "asrTranscript": "What did I eat for breakfast today?",
+        "answer": "I don't have access to your personal data or recent activities, so I cannot know what you ate for breakfast today. If you'd like, I can help you plan a healthy breakfast instead.",
+        "asrS": 3.224150546997407,
+        "reasoningS": 6.229578592003236,
+        "ttsS": 25.261965237998083,
+        "totalS": 34.716163943998254,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G05",
+        "category": "Grounding",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What did I eat for breakfast today?",
+        "expected": "Must not invent a meal",
+        "asrTranscript": null,
+        "answer": "I don't know what you ate for breakfast today.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 13.951842669001053,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "G05",
+        "category": "Grounding",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What did I eat for breakfast today?",
+        "expected": "Must not invent a meal",
+        "asrTranscript": "What did I eat for breakfast today?",
+        "answer": "I don't have that information; please share the details or check your records.",
+        "asrS": 2.9434342169988668,
+        "reasoningS": 8.510548458998528,
+        "ttsS": 11.698324893000972,
+        "totalS": 23.16499784099869,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S01",
+        "category": "Spatial",
+        "architecture": "modular",
+        "status": "recovered",
+        "question": "The red cube is near the blue box. Where is the red cube relative to the blue box?",
+        "expected": "Near the blue box",
+        "asrTranscript": null,
+        "answer": "I don't have enough information about their positions or relationships to determine the red cube's location relative to the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": null,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "S01",
+        "category": "Spatial",
+        "architecture": "native",
+        "status": "recovered",
+        "question": "The red cube is near the blue box. Where is the red cube relative to the blue box?",
+        "expected": "Near the blue box",
+        "asrTranscript": null,
+        "answer": "The red cube is located near the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": null,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S01",
+        "category": "Spatial",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The red cube is near the blue box. Where is the red cube relative to the blue box?",
+        "expected": "Near the blue box",
+        "asrTranscript": "The red cube is near the blue box. Where is the red cube relative to the blue box?",
+        "answer": "The red cube is near the blue box.",
+        "asrS": 5.450797239998792,
+        "reasoningS": 14.867335061997435,
+        "ttsS": 7.577145540002675,
+        "totalS": 27.917324253001425,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S02",
+        "category": "Spatial",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The red cube is under the blue box. Where is the red cube?",
+        "expected": "Under the blue box",
+        "asrTranscript": "The red cube is under the blue box. Where is the red cube?",
+        "answer": "I don't have enough information to determine the location of the red cube relative to the blue box; please provide more context or a diagram.",
+        "asrS": 4.052405222999369,
+        "reasoningS": 3.9138951189997897,
+        "ttsS": 19.73300040599861,
+        "totalS": 27.69999082799768,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "S02",
+        "category": "Spatial",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The red cube is under the blue box. Where is the red cube?",
+        "expected": "Under the blue box",
+        "asrTranscript": null,
+        "answer": "The red cube is under the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 13.842143199999557,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S02",
+        "category": "Spatial",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The red cube is under the blue box. Where is the red cube?",
+        "expected": "Under the blue box",
+        "asrTranscript": "The red cube is under the blue box. Where is the red cube?",
+        "answer": "It is under the blue box.",
+        "asrS": 4.1699153919980745,
+        "reasoningS": 8.567962033001095,
+        "ttsS": 5.688842836996628,
+        "totalS": 18.441620696998143,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S03",
+        "category": "Spatial",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The red cube is left of the blue box. Where is it?",
+        "expected": "Left of the blue box",
+        "asrTranscript": "The red cube is left of the blue box. Where is it?",
+        "answer": "I don't have enough information to determine the position of the red cube relative to the blue box; please provide more context or details.",
+        "asrS": 3.703665893001016,
+        "reasoningS": 3.626619868999114,
+        "ttsS": 19.24317395699836,
+        "totalS": 26.573903412001528,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "S03",
+        "category": "Spatial",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The red cube is left of the blue box. Where is it?",
+        "expected": "Left of the blue box",
+        "asrTranscript": null,
+        "answer": "The red cube is located to the left of the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 16.579792013999395,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S03",
+        "category": "Spatial",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The red cube is left of the blue box. Where is it?",
+        "expected": "Left of the blue box",
+        "asrTranscript": "The red cube is left of the blue box. Where is it?",
+        "answer": "It is to the left of the blue box.",
+        "asrS": 4.091001061999123,
+        "reasoningS": 17.850794337999105,
+        "ttsS": 6.999454971999512,
+        "totalS": 28.956701259998223,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S04",
+        "category": "Spatial",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The red cube is inside the blue box. Where is it?",
+        "expected": "Inside the blue box",
+        "asrTranscript": "The red cube is inside the blue box. Where is it?",
+        "answer": "I don't have enough information to determine the location of the red cube relative to the blue box; please provide more context or details.",
+        "asrS": 3.692165960001148,
+        "reasoningS": 3.9068614299976616,
+        "ttsS": 20.336265238001943,
+        "totalS": 27.935775167999964,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "S04",
+        "category": "Spatial",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The red cube is inside the blue box. Where is it?",
+        "expected": "Inside the blue box",
+        "asrTranscript": null,
+        "answer": "The red cube is inside the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 14.346281968999392,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S04",
+        "category": "Spatial",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The red cube is inside the blue box. Where is it?",
+        "expected": "Inside the blue box",
+        "asrTranscript": "The red cube is inside the blue box. Where is it?",
+        "answer": "Inside the blue box.",
+        "asrS": 3.820685390001018,
+        "reasoningS": 5.358076984000945,
+        "ttsS": 5.082227309998416,
+        "totalS": 14.275290788998973,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S05",
+        "category": "Spatial",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The red cube is behind the blue box. Where is it?",
+        "expected": "Behind the blue box",
+        "asrTranscript": "The red cube is behind the blue box. Where is it?",
+        "answer": "I don't have enough information to determine the position of the red cube relative to the blue box; please provide more context or a visual description.",
+        "asrS": 3.344982746999449,
+        "reasoningS": 3.6816720130009344,
+        "ttsS": 20.940609129000222,
+        "totalS": 27.96795968099832,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "S05",
+        "category": "Spatial",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The red cube is behind the blue box. Where is it?",
+        "expected": "Behind the blue box",
+        "asrTranscript": null,
+        "answer": "The red cube is behind the blue box.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 13.540867690000596,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "S05",
+        "category": "Spatial",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The red cube is behind the blue box. Where is it?",
+        "expected": "Behind the blue box",
+        "asrTranscript": "The red cube is behind the blue box. Where is it?",
+        "answer": "Behind the blue box.",
+        "asrS": 3.825882536999416,
+        "reasoningS": 5.546130594997521,
+        "ttsS": 5.248569043000316,
+        "totalS": 14.632565666997834,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F01",
+        "category": "Knowledge",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What is self-attention in a Transformer?",
+        "expected": "Explain relationships between tokens using attention",
+        "asrTranscript": "What is self-attention in a transformer?",
+        "answer": "Self-attention computes weighted sums of input elements via query-key-value projections to capture pairwise relationships within sequences. (19 words)</think>Self-attention computes weighted sums of input elements via query-key-value projections to capture pairwise relationships within sequences.",
+        "asrS": 2.629019904001325,
+        "reasoningS": 5.442576511999505,
+        "ttsS": 57.18996878899998,
+        "totalS": 65.26252554199891,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": false,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "F01",
+        "category": "Knowledge",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What is self-attention in a Transformer?",
+        "expected": "Explain relationships between tokens using attention",
+        "asrTranscript": null,
+        "answer": "Self‑attention is a mechanism where each token in the input looks at all the other tokens, assigning a weight to each so it can directly incorporate information from the whole sequence.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 32.30759851300172,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F01",
+        "category": "Knowledge",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What is self-attention in a Transformer?",
+        "expected": "Explain relationships between tokens using attention",
+        "asrTranscript": "What is self-attention in a transformer?",
+        "answer": "Self-attention lets each token compute a weighted sum of values from all tokens using query, key, and value projections, scaling by sqrt(d_k) to control magnitude.",
+        "asrS": 3.026209879997623,
+        "reasoningS": 10.780983117998405,
+        "ttsS": 26.967464784000185,
+        "totalS": 40.78557976700176,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F02",
+        "category": "Knowledge",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What does A S R stand for in speech technology?",
+        "expected": "Automatic speech recognition",
+        "asrTranscript": "What does ASR stand for in speech technology?",
+        "answer": "ASR stands for Automatic Speech Recognition. (1 sentence, under 25 words)",
+        "asrS": 3.91041527500056,
+        "reasoningS": 3.331487567000295,
+        "ttsS": 16.034327032000874,
+        "totalS": 23.27689714200096,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F02",
+        "category": "Knowledge",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What does A S R stand for in speech technology?",
+        "expected": "Automatic speech recognition",
+        "asrTranscript": null,
+        "answer": "ASR stands for Automatic Speech Recognition, which turns spoken language into text. Need any more details?",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 23.593122931000835,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F02",
+        "category": "Knowledge",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What does A S R stand for in speech technology?",
+        "expected": "Automatic speech recognition",
+        "asrTranscript": "What does ASR stand for in speech technology?",
+        "answer": "ASR stands for Automatic Speech Recognition.",
+        "asrS": 3.5264246949991502,
+        "reasoningS": 6.628437957002461,
+        "ttsS": 8.90408516900061,
+        "totalS": 19.072103005000827,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F03",
+        "category": "Knowledge",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What is nine multiplied by seven?",
+        "expected": "63",
+        "asrTranscript": "What is 9 multiplied by 7?",
+        "answer": "<tool_call>\n<function=AnswerStyle>\n<parameter=answer>\n1 sentence, at most 25 words.\n</parameter>\n<parameter=question>\nWhat is 9 multiplied by 7?\n</parameter>\n</function>\n</tool_call>",
+        "asrS": 2.524251541999547,
+        "reasoningS": 4.371022971001366,
+        "ttsS": 87.98898800100142,
+        "totalS": 94.88546603299984,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": false,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "F03",
+        "category": "Knowledge",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What is nine multiplied by seven?",
+        "expected": "63",
+        "asrTranscript": null,
+        "answer": "The answer is 63.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 13.264460275000602,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F03",
+        "category": "Knowledge",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What is nine multiplied by seven?",
+        "expected": "63",
+        "asrTranscript": "What is 9 multiplied by 7?",
+        "answer": "9 times 7 is 63.",
+        "asrS": 3.0844310600004974,
+        "reasoningS": 4.969760325999232,
+        "ttsS": 6.289730108997901,
+        "totalS": 14.355000005001784,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F04",
+        "category": "Knowledge",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Does a Python list preserve insertion order?",
+        "expected": "Yes",
+        "asrTranscript": "Does a Python list preserve insertion order?",
+        "answer": "Yes, Python lists preserve insertion order by default.",
+        "asrS": 3.185868898999616,
+        "reasoningS": 2.3671177120013454,
+        "ttsS": 9.982390917000885,
+        "totalS": 15.535844116999217,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F04",
+        "category": "Knowledge",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Does a Python list preserve insertion order?",
+        "expected": "Yes",
+        "asrTranscript": null,
+        "answer": "Yes, Python lists keep the order you insert items, unless you shuffle or use remove.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 19.2544386749978,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F04",
+        "category": "Knowledge",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Does a Python list preserve insertion order?",
+        "expected": "Yes",
+        "asrTranscript": "Does a Python list preserve insertion order?",
+        "answer": "Yes, Python lists preserve insertion order as of Python 3.7+.",
+        "asrS": 3.0966253119986504,
+        "reasoningS": 5.0142109020016505,
+        "ttsS": 12.721619482999811,
+        "totalS": 20.84317869000006,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F05",
+        "category": "Knowledge",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "What is the main purpose of computer R A M?",
+        "expected": "Temporary working memory for active programs",
+        "asrTranscript": "What is the main purpose of computer RAM?",
+        "answer": "I am not sure about that specific detail; please provide more context or I can give a general answer. However, generally speaking, the main purpose of computer RAM is to provide temporary storage for running programs and data while they are in use. That's at most 25 words.</think>The main purpose of computer RAM is to provide fast, temporary storage for active programs and data during operation.",
+        "asrS": 2.5155358520023583,
+        "reasoningS": 7.311369718001515,
+        "ttsS": 47.61607340699993,
+        "totalS": 57.44368959000349,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": false,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F05",
+        "category": "Knowledge",
+        "architecture": "native",
+        "status": "ok",
+        "question": "What is the main purpose of computer R A M?",
+        "expected": "Temporary working memory for active programs",
+        "asrTranscript": null,
+        "answer": "Computer RAM stores temporary data and programs so the CPU can access them quickly while working. Does that clarify what RAM does?",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 23.183975875002943,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "F05",
+        "category": "Knowledge",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "What is the main purpose of computer R A M?",
+        "expected": "Temporary working memory for active programs",
+        "asrTranscript": "What is the main purpose of computer RAM?",
+        "answer": "The main purpose of computer RAM is to provide temporary storage for data and programs that are actively being used by the processor.",
+        "asrS": 3.195985204001772,
+        "reasoningS": 5.653280004997214,
+        "ttsS": 19.226982426000177,
+        "totalS": 28.08992236999984,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I01",
+        "category": "Instruction",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Reply using exactly one word: mango.",
+        "expected": "Exactly mango",
+        "asrTranscript": "Reply using exactly one word. Mango.",
+        "answer": "Mango.",
+        "asrS": 2.821259039999859,
+        "reasoningS": 1.4344563059967186,
+        "ttsS": 2.7623523229995044,
+        "totalS": 7.018502377002733,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I01",
+        "category": "Instruction",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Reply using exactly one word: mango.",
+        "expected": "Exactly mango",
+        "asrTranscript": null,
+        "answer": "mango",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 10.52920681500109,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I01",
+        "category": "Instruction",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Reply using exactly one word: mango.",
+        "expected": "Exactly mango",
+        "asrTranscript": "Reply using exactly one word. Mango.",
+        "answer": "Mango.",
+        "asrS": 3.741790612999466,
+        "reasoningS": 3.923056225998153,
+        "ttsS": 3.684191660002398,
+        "totalS": 11.364018775002478,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I02",
+        "category": "Instruction",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Answer using only a number. What is seven plus five?",
+        "expected": "Exactly 12",
+        "asrTranscript": "Answer using only a number. What is 7 plus 5?",
+        "answer": "<think>We need to answer the question: \"What is 7 plus 5?\" The user says: \"Answer using only a number. What is 7 plus 5?\" and also gives instruction: \"Answer in one sentence, at most 25 words.\" But then there's an extra line: \"If unsure, say so.\"\n\nWe need to output only a number? It says \"Answer using only a number.\" That suggests the answer should be just the numeric result. Also we must adhere to \"one sentence, at most 25 words\". So we can give one sentence that contains only a number? Possibly like:",
+        "asrS": 3.9268086339980073,
+        "reasoningS": 11.860104796996891,
+        "ttsS": 20.046175119998225,
+        "totalS": 35.83370641399961,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": false,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "I02",
+        "category": "Instruction",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Answer using only a number. What is seven plus five?",
+        "expected": "Exactly 12",
+        "asrTranscript": null,
+        "answer": "12",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 10.015329932000895,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I02",
+        "category": "Instruction",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Answer using only a number. What is seven plus five?",
+        "expected": "Exactly 12",
+        "asrTranscript": "Answer using only a number. What is 7 plus 5?",
+        "answer": "7 + 5 = 12 12",
+        "asrS": 4.4195867060007,
+        "reasoningS": 4.847736485997302,
+        "ttsS": 11.63445870200303,
+        "totalS": 20.91623903199797,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "I03",
+        "category": "Instruction",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Say exactly these two words: blue sky.",
+        "expected": "Exactly blue sky",
+        "asrTranscript": "Say exactly these two words. Blue sky.",
+        "answer": "Blue sky.",
+        "asrS": 3.144523194001522,
+        "reasoningS": 1.6639536369984853,
+        "ttsS": 3.8341844670030696,
+        "totalS": 8.643079116998706,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I03",
+        "category": "Instruction",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Say exactly these two words: blue sky.",
+        "expected": "Exactly blue sky",
+        "asrTranscript": null,
+        "answer": "Blue sky.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 9.639523516998452,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I03",
+        "category": "Instruction",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Say exactly these two words: blue sky.",
+        "expected": "Exactly blue sky",
+        "asrTranscript": "Say exactly these two words. Blue sky.",
+        "answer": "Blue sky.",
+        "asrS": 3.84126717899926,
+        "reasoningS": 3.2625568189978367,
+        "ttsS": 3.889558233000571,
+        "totalS": 11.00826474099813,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I04",
+        "category": "Instruction",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Answer yes or no only. Is four greater than nine?",
+        "expected": "Exactly no",
+        "asrTranscript": "Answer yes or no only. Is 4 greater than 9?",
+        "answer": "Yes or no: No, 4 is not greater than 9. (One sentence, under 25 words.)",
+        "asrS": 3.934473508001247,
+        "reasoningS": 3.5297231410004315,
+        "ttsS": 18.043174422997254,
+        "totalS": 25.50800637799693,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "I04",
+        "category": "Instruction",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Answer yes or no only. Is four greater than nine?",
+        "expected": "Exactly no",
+        "asrTranscript": null,
+        "answer": "No, 4 is not greater than 9.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 14.415611639000415,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "I04",
+        "category": "Instruction",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Answer yes or no only. Is four greater than nine?",
+        "expected": "Exactly no",
+        "asrTranscript": "Answer yes or no only. Is 4 greater than 9?",
+        "answer": "No, 4 is not greater than 9.",
+        "asrS": 3.690567920999456,
+        "reasoningS": 18.9966487970014,
+        "ttsS": 8.457164437997562,
+        "totalS": 31.157415001001937,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "I05",
+        "category": "Instruction",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "Repeat exactly this phrase: green lamp.",
+        "expected": "Exactly green lamp",
+        "asrTranscript": "Repeat exactly this phrase. Green lamp.",
+        "answer": "Green lamp.",
+        "asrS": 3.308705880001071,
+        "reasoningS": 1.5939895080009592,
+        "ttsS": 3.1349301090012887,
+        "totalS": 8.038011847002053,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I05",
+        "category": "Instruction",
+        "architecture": "native",
+        "status": "ok",
+        "question": "Repeat exactly this phrase: green lamp.",
+        "expected": "Exactly green lamp",
+        "asrTranscript": null,
+        "answer": "Green lamp.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 9.576502317999257,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "I05",
+        "category": "Instruction",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "Repeat exactly this phrase: green lamp.",
+        "expected": "Exactly green lamp",
+        "asrTranscript": "Repeat exactly this phrase, green lamp.",
+        "answer": "green lamp",
+        "asrS": 3.540946658999019,
+        "reasoningS": 3.5078626569993503,
+        "ttsS": 3.2195098680022056,
+        "totalS": 10.28203023199967,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L01",
+        "category": "Linguistic",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The light is not on. Is the light on?",
+        "expected": "No",
+        "asrTranscript": "The light is not on. Is the light on?",
+        "answer": "I don't have any information about whether the light is on or off; please check manually or provide more context.",
+        "asrS": 3.3129676259995904,
+        "reasoningS": 3.283976814000198,
+        "ttsS": 16.99335131400221,
+        "totalS": 23.59087848800118,
+        "executionSuccess": true,
+        "semanticCorrectness": false,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": false
+      },
+      {
+        "id": "L01",
+        "category": "Linguistic",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The light is not on. Is the light on?",
+        "expected": "No",
+        "asrTranscript": null,
+        "answer": "No, the light is not on.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 12.506874262002384,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L01",
+        "category": "Linguistic",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The light is not on. Is the light on?",
+        "expected": "No",
+        "asrTranscript": "The light is not on. Is the light on?",
+        "answer": "No, because you stated the light is not on.",
+        "asrS": 3.860245495001436,
+        "reasoningS": 16.99443544799942,
+        "ttsS": 7.984154541001772,
+        "totalS": 28.85028705700097,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L02",
+        "category": "Linguistic",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "I said fifteen, not fifty. Which number did I say?",
+        "expected": "Fifteen",
+        "asrTranscript": "I said fifteen, not fifty. Which number did I say?",
+        "answer": "I didn't have a prior context to reference; you mentioned \"fifteen\" and corrected from \"fifty,\" so the number is **fifteen**.",
+        "asrS": 4.115561640999658,
+        "reasoningS": 4.615282462000323,
+        "ttsS": 20.402991448998364,
+        "totalS": 29.13457915400068,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L02",
+        "category": "Linguistic",
+        "architecture": "native",
+        "status": "ok",
+        "question": "I said fifteen, not fifty. Which number did I say?",
+        "expected": "Fifteen",
+        "asrTranscript": null,
+        "answer": "You said 15.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 11.27822578300038,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L02",
+        "category": "Linguistic",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "I said fifteen, not fifty. Which number did I say?",
+        "expected": "Fifteen",
+        "asrTranscript": "I said fifteen, not fifty. Which number did I say?",
+        "answer": "You said fifteen, not fifty. Fifteen.",
+        "asrS": 4.05780150999999,
+        "reasoningS": 4.422286485001678,
+        "ttsS": 7.827278762997594,
+        "totalS": 16.324255889001506,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L03",
+        "category": "Linguistic",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "The meeting is on Tuesday, not Thursday. Which day is the meeting?",
+        "expected": "Tuesday",
+        "asrTranscript": "The meeting is on Tuesday, not Thursday. Which day is the meeting?",
+        "answer": "The meeting is on Tuesday.",
+        "asrS": 4.037531989000854,
+        "reasoningS": 2.1293630489999487,
+        "ttsS": 4.889909092999005,
+        "totalS": 11.057257902000856,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L03",
+        "category": "Linguistic",
+        "architecture": "native",
+        "status": "ok",
+        "question": "The meeting is on Tuesday, not Thursday. Which day is the meeting?",
+        "expected": "Tuesday",
+        "asrTranscript": null,
+        "answer": "The meeting's on Tuesday.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 12.535283859997437,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L03",
+        "category": "Linguistic",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "The meeting is on Tuesday, not Thursday. Which day is the meeting?",
+        "expected": "Tuesday",
+        "asrTranscript": "The meeting is on Tuesday, not Thursday. Which day is the meeting?",
+        "answer": "The meeting is on Tuesday.",
+        "asrS": 4.230932496997411,
+        "reasoningS": 3.902667547001329,
+        "ttsS": 4.946495513999253,
+        "totalS": 13.097433556999022,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L04",
+        "category": "Linguistic",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "A red cup is to the right of a blue cup. Which side is the red cup on?",
+        "expected": "Right",
+        "asrTranscript": "A red cup is to the right of a blue cup. Which side is the red cup on?",
+        "answer": "The red cup is to the right of the blue cup, so it is on the right side.\n\n**Answer:** Right. (One sentence, under 25 words.)",
+        "asrS": 4.605061846999888,
+        "reasoningS": 4.541264473002229,
+        "ttsS": 22.197375908999675,
+        "totalS": 31.344523471001597,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L04",
+        "category": "Linguistic",
+        "architecture": "native",
+        "status": "ok",
+        "question": "A red cup is to the right of a blue cup. Which side is the red cup on?",
+        "expected": "Right",
+        "asrTranscript": null,
+        "answer": "The red cup is on the right side.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 14.644452856002315,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L04",
+        "category": "Linguistic",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "A red cup is to the right of a blue cup. Which side is the red cup on?",
+        "expected": "Right",
+        "asrTranscript": "A red cup is to the right of a blue cup. Which side is the red cup on?",
+        "answer": "The red cup is on the right.",
+        "asrS": 4.773099415000615,
+        "reasoningS": 7.2744868890004,
+        "ttsS": 5.970784896999248,
+        "totalS": 18.035086954998405,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L05",
+        "category": "Linguistic",
+        "architecture": "modular",
+        "status": "ok",
+        "question": "First I said cat, then dog. Which animal did I say last?",
+        "expected": "Dog",
+        "asrTranscript": "First I said cat, then dog. Which animal did I say last?",
+        "answer": "I said \"cat\" first and then \"dog\", so the last animal you mentioned was **dog**.",
+        "asrS": 4.175683099998423,
+        "reasoningS": 3.3579898530006176,
+        "ttsS": 15.314833912001632,
+        "totalS": 22.848949983999773,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L05",
+        "category": "Linguistic",
+        "architecture": "native",
+        "status": "ok",
+        "question": "First I said cat, then dog. Which animal did I say last?",
+        "expected": "Dog",
+        "asrTranscript": null,
+        "answer": "You said dog last.",
+        "asrS": null,
+        "reasoningS": null,
+        "ttsS": null,
+        "totalS": 13.5815612769984,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      },
+      {
+        "id": "L05",
+        "category": "Linguistic",
+        "architecture": "modular_v21",
+        "status": "ok",
+        "question": "First I said cat, then dog. Which animal did I say last?",
+        "expected": "Dog",
+        "asrTranscript": "First I said cat, then dog. Which animal did I say last?",
+        "answer": "Dog. You said \"cat\" first, then \"dog\", so the last animal mentioned is dog.",
+        "asrS": 4.398792826999852,
+        "reasoningS": 8.297304137999163,
+        "ttsS": 16.260853537998628,
+        "totalS": 28.97278679400188,
+        "executionSuccess": true,
+        "semanticCorrectness": true,
+        "cleanSpeechText": true,
+        "strictTaskSuccess": true
+      }
+    ],
+    "stageBreakdownV21": [
+      {
+        "id": "G01",
+        "category": "Grounding",
+        "asrS": 2.8742364600002475,
+        "reasoningS": 8.706665284997143,
+        "ttsS": 14.74001896000118,
+        "totalS": 26.3307936889978
+      },
+      {
+        "id": "G03",
+        "category": "Grounding",
+        "asrS": 3.006756561000657,
+        "reasoningS": 6.852420710998558,
+        "ttsS": 9.657560067000304,
+        "totalS": 19.526716590000436
+      },
+      {
+        "id": "G04",
+        "category": "Grounding",
+        "asrS": 3.0763582790023065,
+        "reasoningS": 8.297236406000593,
+        "ttsS": 13.406305111999243,
+        "totalS": 24.79008526599864
+      },
+      {
+        "id": "G05",
+        "category": "Grounding",
+        "asrS": 2.9434342169988668,
+        "reasoningS": 8.510548458998528,
+        "ttsS": 11.698324893000972,
+        "totalS": 23.16499784099869
+      },
+      {
+        "id": "S01",
+        "category": "Spatial",
+        "asrS": 5.450797239998792,
+        "reasoningS": 14.867335061997435,
+        "ttsS": 7.577145540002675,
+        "totalS": 27.917324253001425
+      },
+      {
+        "id": "S02",
+        "category": "Spatial",
+        "asrS": 4.1699153919980745,
+        "reasoningS": 8.567962033001095,
+        "ttsS": 5.688842836996628,
+        "totalS": 18.441620696998143
+      },
+      {
+        "id": "S03",
+        "category": "Spatial",
+        "asrS": 4.091001061999123,
+        "reasoningS": 17.850794337999105,
+        "ttsS": 6.999454971999512,
+        "totalS": 28.956701259998223
+      },
+      {
+        "id": "S04",
+        "category": "Spatial",
+        "asrS": 3.820685390001018,
+        "reasoningS": 5.358076984000945,
+        "ttsS": 5.082227309998416,
+        "totalS": 14.275290788998973
+      },
+      {
+        "id": "S05",
+        "category": "Spatial",
+        "asrS": 3.825882536999416,
+        "reasoningS": 5.546130594997521,
+        "ttsS": 5.248569043000316,
+        "totalS": 14.632565666997834
+      },
+      {
+        "id": "F01",
+        "category": "Knowledge",
+        "asrS": 3.026209879997623,
+        "reasoningS": 10.780983117998405,
+        "ttsS": 26.967464784000185,
+        "totalS": 40.78557976700176
+      },
+      {
+        "id": "F02",
+        "category": "Knowledge",
+        "asrS": 3.5264246949991502,
+        "reasoningS": 6.628437957002461,
+        "ttsS": 8.90408516900061,
+        "totalS": 19.072103005000827
+      },
+      {
+        "id": "F03",
+        "category": "Knowledge",
+        "asrS": 3.0844310600004974,
+        "reasoningS": 4.969760325999232,
+        "ttsS": 6.289730108997901,
+        "totalS": 14.355000005001784
+      },
+      {
+        "id": "F04",
+        "category": "Knowledge",
+        "asrS": 3.0966253119986504,
+        "reasoningS": 5.0142109020016505,
+        "ttsS": 12.721619482999811,
+        "totalS": 20.84317869000006
+      },
+      {
+        "id": "F05",
+        "category": "Knowledge",
+        "asrS": 3.195985204001772,
+        "reasoningS": 5.653280004997214,
+        "ttsS": 19.226982426000177,
+        "totalS": 28.08992236999984
+      },
+      {
+        "id": "I01",
+        "category": "Instruction",
+        "asrS": 3.741790612999466,
+        "reasoningS": 3.923056225998153,
+        "ttsS": 3.684191660002398,
+        "totalS": 11.364018775002478
+      },
+      {
+        "id": "I02",
+        "category": "Instruction",
+        "asrS": 4.4195867060007,
+        "reasoningS": 4.847736485997302,
+        "ttsS": 11.63445870200303,
+        "totalS": 20.91623903199797
+      },
+      {
+        "id": "I03",
+        "category": "Instruction",
+        "asrS": 3.84126717899926,
+        "reasoningS": 3.2625568189978367,
+        "ttsS": 3.889558233000571,
+        "totalS": 11.00826474099813
+      },
+      {
+        "id": "I04",
+        "category": "Instruction",
+        "asrS": 3.690567920999456,
+        "reasoningS": 18.9966487970014,
+        "ttsS": 8.457164437997562,
+        "totalS": 31.157415001001937
+      },
+      {
+        "id": "I05",
+        "category": "Instruction",
+        "asrS": 3.540946658999019,
+        "reasoningS": 3.5078626569993503,
+        "ttsS": 3.2195098680022056,
+        "totalS": 10.28203023199967
+      },
+      {
+        "id": "L01",
+        "category": "Linguistic",
+        "asrS": 3.860245495001436,
+        "reasoningS": 16.99443544799942,
+        "ttsS": 7.984154541001772,
+        "totalS": 28.85028705700097
+      },
+      {
+        "id": "L02",
+        "category": "Linguistic",
+        "asrS": 4.05780150999999,
+        "reasoningS": 4.422286485001678,
+        "ttsS": 7.827278762997594,
+        "totalS": 16.324255889001506
+      },
+      {
+        "id": "L03",
+        "category": "Linguistic",
+        "asrS": 4.230932496997411,
+        "reasoningS": 3.902667547001329,
+        "ttsS": 4.946495513999253,
+        "totalS": 13.097433556999022
+      },
+      {
+        "id": "L04",
+        "category": "Linguistic",
+        "asrS": 4.773099415000615,
+        "reasoningS": 7.2744868890004,
+        "ttsS": 5.970784896999248,
+        "totalS": 18.035086954998405
+      },
+      {
+        "id": "L05",
+        "category": "Linguistic",
+        "asrS": 4.398792826999852,
+        "reasoningS": 8.297304137999163,
+        "ttsS": 16.260853537998628,
+        "totalS": 28.97278679400188
+      }
+    ],
+    "failures": [
+      {
+        "caseId": "G02",
+        "arch": "modular_v21",
+        "category": "Guarded abort",
+        "reason": "Modular V2.1 G02 was intentionally halted under word-length safeguard to prevent runaway hallucination."
+      },
+      {
+        "caseId": "I04",
+        "arch": "native & modular",
+        "category": "Instruction formatting",
+        "reason": "Question asked for yes/no only. Native responded \"No, 4 is not greater than 9.\" Correct semantically, but exact format violation."
+      },
+      {
+        "caseId": "F03",
+        "arch": "modular",
+        "category": "Tool call format leakage",
+        "reason": "Modular V1 emitted raw <tool_call><function=AnswerStyle> XML tags in speech output."
+      }
+    ],
+    "caveat": "Evaluated on 25 synthetic English speech queries. Recovered cases without timing are strictly excluded from latency statistics."
+  },
+  "p4": {
+    "phase": "P4",
+    "title": "Audio-Visual Fusion Lab",
+    "docPath": "docs/p4/P4_FINAL_REPORT.md",
+    "hardware": "Local CPU (Q4_K_M)",
+    "sampleSize": 40,
+    "datasetType": "Paired spatial & AV holdout cases",
+    "summary": {
+      "omni": {
+        "model": "Native Omni (LFM3-Omni-2B)",
+        "passCount": 25,
+        "totalCount": 40,
+        "medianLatencyS": 20.9195
+      },
+      "modular": {
+        "model": "Modular ASR → VL (LFM3-Audio + LFM3-VL)",
+        "passCount": 28,
+        "totalCount": 40,
+        "medianLatencyS": 21.288
+      }
+    },
+    "contingency": {
+      "bothPass": 25,
+      "modularOnly": 3,
+      "omniOnly": 0,
+      "bothFail": 12
+    },
+    "statisticalTest": {
+      "testName": "Exact McNemar Test (two-tailed)",
+      "discordantPairs": {
+        "b": 0,
+        "c": 3
+      },
+      "pValue": 0.25,
+      "isSignificant": false,
+      "conclusion": "The difference between Native Omni (25/40) and Modular (28/40) was NOT statistically significant (exact McNemar p = 0.25). Modular superiority cannot be claimed."
+    },
+    "spatialSubsetFailure": {
+      "condition": "Unanswerable spatial relation queries (e.g. absent objects)",
+      "total": 16,
+      "bothFailedCount": 12,
+      "explanation": "When asked about spatial relations that did not exist in the frame (e.g. top_right_absent), models tended to hallucinate colors/shapes instead of acknowledging absence (both only 4/16 on this subset)."
+    },
+    "temporalPilot": {
+      "pilotCases": 4,
+      "correctCount": 2,
+      "finding": "Four-case video pilot scored temporal ordering 2/4. Temporal alignment across synchronized audiovisual streams was not independently established."
+    },
+    "cases": [
+      {
+        "caseId": "H01",
+        "condition": "top_right_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Orange",
+        "modularOutput": "Orange",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.493,
+        "modularLatencyS": 20.496,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H02",
+        "condition": "top_right_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Orange",
+        "modularOutput": "Yellow",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.447,
+        "modularLatencyS": 22.086,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H03",
+        "condition": "top_right_present",
+        "expected": "green",
+        "taskType": "Answerable",
+        "omniOutput": "Green",
+        "modularOutput": "Green",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.049,
+        "modularLatencyS": 21.638,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H04",
+        "condition": "top_right_present",
+        "expected": "yellow",
+        "taskType": "Answerable",
+        "omniOutput": "Yellow",
+        "modularOutput": "Yellow",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.565,
+        "modularLatencyS": 21.57,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H05",
+        "condition": "top_right_present",
+        "expected": "purple",
+        "taskType": "Answerable",
+        "omniOutput": "Purple",
+        "modularOutput": "Purple",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.171,
+        "modularLatencyS": 21.689,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H06",
+        "condition": "top_right_present",
+        "expected": "blue",
+        "taskType": "Answerable",
+        "omniOutput": "Blue",
+        "modularOutput": "Blue",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.252,
+        "modularLatencyS": 20.991,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H07",
+        "condition": "top_right_present",
+        "expected": "red",
+        "taskType": "Answerable",
+        "omniOutput": "Red",
+        "modularOutput": "Red",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.44,
+        "modularLatencyS": 20.732,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H08",
+        "condition": "top_right_present",
+        "expected": "green",
+        "taskType": "Answerable",
+        "omniOutput": "Green",
+        "modularOutput": "Green",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.92,
+        "modularLatencyS": 21.308,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H09",
+        "condition": "below_red_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.684,
+        "modularLatencyS": 20.86,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H10",
+        "condition": "below_red_present",
+        "expected": "diamond",
+        "taskType": "Answerable",
+        "omniOutput": "Diamond",
+        "modularOutput": "Diamond",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.949,
+        "modularLatencyS": 21.998,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H11",
+        "condition": "below_red_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.912,
+        "modularLatencyS": 20.787,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H12",
+        "condition": "below_red_present",
+        "expected": "star",
+        "taskType": "Answerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.36,
+        "modularLatencyS": 22.085,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H13",
+        "condition": "below_red_present",
+        "expected": "square",
+        "taskType": "Answerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Square",
+        "omniPass": false,
+        "modularPass": true,
+        "omniLatencyS": 20.683,
+        "modularLatencyS": 20.719,
+        "classification": "modular_only"
+      },
+      {
+        "caseId": "H14",
+        "condition": "below_red_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Diamond",
+        "modularOutput": "Diamond",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 21.073,
+        "modularLatencyS": 21.044,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H15",
+        "condition": "below_red_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Circle",
+        "modularOutput": "None",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 21.22,
+        "modularLatencyS": 21.099,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H16",
+        "condition": "below_red_present",
+        "expected": "circle",
+        "taskType": "Answerable",
+        "omniOutput": "Circle",
+        "modularOutput": "Circle",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.728,
+        "modularLatencyS": 21.396,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H17",
+        "condition": "left_of_blue_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Circle",
+        "modularOutput": "None",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.425,
+        "modularLatencyS": 20.715,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H18",
+        "condition": "left_of_blue_present",
+        "expected": "triangle",
+        "taskType": "Answerable",
+        "omniOutput": "Star",
+        "modularOutput": "Triangle",
+        "omniPass": false,
+        "modularPass": true,
+        "omniLatencyS": 20.445,
+        "modularLatencyS": 21.327,
+        "classification": "modular_only"
+      },
+      {
+        "caseId": "H19",
+        "condition": "left_of_blue_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Blue square",
+        "modularOutput": "Square",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 21.294,
+        "modularLatencyS": 20.548,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H20",
+        "condition": "left_of_blue_present",
+        "expected": "square",
+        "taskType": "Answerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Square",
+        "omniPass": false,
+        "modularPass": true,
+        "omniLatencyS": 20.97,
+        "modularLatencyS": 20.729,
+        "classification": "modular_only"
+      },
+      {
+        "caseId": "H21",
+        "condition": "left_of_blue_present",
+        "expected": "triangle",
+        "taskType": "Answerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Triangle",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 22.144,
+        "modularLatencyS": 20.754,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H22",
+        "condition": "left_of_blue_present",
+        "expected": "star",
+        "taskType": "Answerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.159,
+        "modularLatencyS": 20.818,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H23",
+        "condition": "left_of_blue_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Star shape",
+        "modularOutput": "Star",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.974,
+        "modularLatencyS": 21.541,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H24",
+        "condition": "left_of_blue_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Square",
+        "modularOutput": "Square",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 21.174,
+        "modularLatencyS": 21.388,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H25",
+        "condition": "missing_diamond_present",
+        "expected": "green",
+        "taskType": "Answerable",
+        "omniOutput": "Green",
+        "modularOutput": "Green",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 25.661,
+        "modularLatencyS": 21.577,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H26",
+        "condition": "missing_diamond_present",
+        "expected": "red",
+        "taskType": "Answerable",
+        "omniOutput": "Red",
+        "modularOutput": "Red",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 22.001,
+        "modularLatencyS": 21.584,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H27",
+        "condition": "missing_diamond_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "UNKNOWN",
+        "modularOutput": "UNKNOWN",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.158,
+        "modularLatencyS": 22.045,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H28",
+        "condition": "missing_diamond_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "UNKNOWN",
+        "modularOutput": "UNKNOWN",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.83,
+        "modularLatencyS": 21.245,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H29",
+        "condition": "missing_diamond_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "UNKNOWN",
+        "modularOutput": "UNKNOWN",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.038,
+        "modularLatencyS": 21.063,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H30",
+        "condition": "missing_diamond_present",
+        "expected": "purple",
+        "taskType": "Answerable",
+        "omniOutput": "Purple",
+        "modularOutput": "Purple",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.134,
+        "modularLatencyS": 21.287,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H31",
+        "condition": "missing_diamond_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "UNKNOWN",
+        "modularOutput": "UNKNOWN",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.557,
+        "modularLatencyS": 20.848,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H32",
+        "condition": "missing_diamond_present",
+        "expected": "red",
+        "taskType": "Answerable",
+        "omniOutput": "Red",
+        "modularOutput": "Red",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.784,
+        "modularLatencyS": 21.057,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H33",
+        "condition": "top_left_present",
+        "expected": "star",
+        "taskType": "Answerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.121,
+        "modularLatencyS": 21.289,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H34",
+        "condition": "top_left_present",
+        "expected": "star",
+        "taskType": "Answerable",
+        "omniOutput": "Star",
+        "modularOutput": "Star",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.919,
+        "modularLatencyS": 21.954,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H35",
+        "condition": "top_left_present",
+        "expected": "square",
+        "taskType": "Answerable",
+        "omniOutput": "Square",
+        "modularOutput": "Square",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.574,
+        "modularLatencyS": 21.847,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H36",
+        "condition": "top_left_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Triangle",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 21.012,
+        "modularLatencyS": 21.577,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H37",
+        "condition": "top_left_absent",
+        "expected": "unknown",
+        "taskType": "Unanswerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Triangle",
+        "omniPass": false,
+        "modularPass": false,
+        "omniLatencyS": 20.464,
+        "modularLatencyS": 21.181,
+        "classification": "both_fail"
+      },
+      {
+        "caseId": "H38",
+        "condition": "top_left_present",
+        "expected": "diamond",
+        "taskType": "Answerable",
+        "omniOutput": "Diamond",
+        "modularOutput": "Diamond",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 21.061,
+        "modularLatencyS": 21.95,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H39",
+        "condition": "top_left_present",
+        "expected": "square",
+        "taskType": "Answerable",
+        "omniOutput": "Square",
+        "modularOutput": "Square",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.603,
+        "modularLatencyS": 20.91,
+        "classification": "both_pass"
+      },
+      {
+        "caseId": "H40",
+        "condition": "top_left_present",
+        "expected": "triangle",
+        "taskType": "Answerable",
+        "omniOutput": "Triangle",
+        "modularOutput": "Triangle",
+        "omniPass": true,
+        "modularPass": true,
+        "omniLatencyS": 20.407,
+        "modularLatencyS": 21.375,
+        "classification": "both_pass"
+      }
+    ],
+    "caveat": "Paired advantage was not statistically significant (p = 0.25). Synthetic holdouts do not establish general real-world AV fusion."
+  },
+  "p5": {
+    "phase": "P5",
+    "title": "Decision Intelligence & Confidence Lab",
+    "docPath": "docs/p5/README.md",
+    "hardware": "Local CPU (d1-2B GGUF Q4_K_M)",
+    "routingPilot": {
+      "name": "P5.2 Routing Pilot",
+      "cases": 24,
+      "correct": 23,
+      "accuracy": 0.9583333333333334,
+      "brier": 0.06652938384554916,
+      "medianLatencyS": 0.41285,
+      "p95LatencyS": 0.5034,
+      "failedIds": [
+        "T06"
+      ]
+    },
+    "routingStress": {
+      "name": "P5.3 Routing Stress Test",
+      "cases": 24,
+      "correct": 20,
+      "accuracy": 0.8333333333333334,
+      "brier": 0.24448332792432154,
+      "medianLatencyS": 0.41145,
+      "p95LatencyS": 0.4743,
+      "failures": [
+        {
+          "id": "T07",
+          "expected": "technical",
+          "predicted": "billing",
+          "confidence": 0.7425272521701923
+        },
+        {
+          "id": "T08",
+          "expected": "technical",
+          "predicted": "billing",
+          "confidence": 0.7483774663464219
+        },
+        {
+          "id": "O10",
+          "expected": "other",
+          "predicted": "billing",
+          "confidence": 0.8254410694116308
+        },
+        {
+          "id": "O12",
+          "expected": "other",
+          "predicted": "technical",
+          "confidence": 0.7112210665537347
+        }
+      ]
+    },
+    "audioDecision": {
+      "name": "P5.6b Audio vs Transcript Oracle",
+      "fullyPairedCases": 12,
+      "audioAccuracy": 1,
+      "oracleAccuracy": 1,
+      "audioMedianLatencyS": 0.37398,
+      "oracleMedianLatencyS": 0.32914,
+      "note": "12/12 audio vs 12/12 text oracle. Synthetic test; text oracle does not independently establish ASR reliability."
+    },
+    "gatedIntegration": {
+      "name": "P5.7 Gated Integration & Selective Coverage",
+      "totalCases": 9,
+      "blockedWithoutModel": 3,
+      "modelRequests": 6,
+      "autoRecommendations": 5,
+      "reviewDecisions": 4,
+      "labeledAccuracy": 0.8333333333333334,
+      "threshold": 0.9,
+      "thresholdPostHoc": true
+    },
+    "prominentFailureX03": {
+      "caseId": "X03",
+      "modality": "text",
+      "expected": "technical",
+      "predicted": "billing",
+      "confidence": 0.9199,
+      "probabilities": {
+        "billing": 0.9199,
+        "technical": 0.0215,
+        "shipping": 0.0036,
+        "other": 0.055
+      },
+      "decision": "AUTO_RECOMMEND",
+      "reason": "passed_exploratory_gate (confidence >= 0.90)",
+      "correct": false,
+      "source": "experiments/p5/results/p5_7_integration_20261101T045955Z.jsonl",
+      "implication": "Model emitted ~92% confidence on a completely wrong category (billing instead of technical), passing the post-hoc 0.90 threshold. Proves confidence is NOT production-calibrated."
+    },
+    "caveat": "Confidence values are exploratory and not production calibrated. Human review remains mandatory for consequential actions."
+  },
+  "p6": {
+    "phase": "P6",
+    "title": "Unified Multimodal Orchestration",
+    "docPath": "docs/p6/README.md",
+    "hardware": "Local CPU (llama.cpp HTTP server)",
+    "architecture": [
+      {
+        "stage": "Request",
+        "desc": "Incoming multimodal query with task and input payload"
+      },
+      {
+        "stage": "Validation",
+        "desc": "Pre-flight integrity and payload verification"
+      },
+      {
+        "stage": "Router",
+        "desc": "Deterministic set-theoretic capability matching"
+      },
+      {
+        "stage": "Model Selection",
+        "desc": "Selects 1 of 6 registered LFM3/d1 models"
+      },
+      {
+        "stage": "Inference",
+        "desc": "Local CPU execution or sequential pipeline"
+      },
+      {
+        "stage": "Evidence Gate",
+        "desc": "Post-generation bounds and guard checking"
+      },
+      {
+        "stage": "Result",
+        "desc": "Validated payload returned with trace metadata"
+      }
+    ],
+    "benchmarks": {
+      "directPassingModels": "6 / 6",
+      "orchestratedPassingModels": "6 / 6",
+      "sequentialPipeline": {
+        "route": "Audio ASR → Vision VLM",
+        "expectedAnswer": "Blue",
+        "totalLatencyS": 24.984,
+        "ttftS": 24.876
+      },
+      "liveVisionApi": {
+        "status": 200,
+        "totalLatencyS": 18.537,
+        "ttftS": 14.642
+      },
+      "regressionSuite": "90 / 90 tests passing"
+    },
+    "assertionClarification": "The 90/90 score measures software regression assertions across router, state transitions, and IPC endpoints. It is NOT a semantic model reasoning accuracy score.",
+    "caveat": "Sequential pipelines incur model-switching latency on single-engine CPU hosts."
+  },
+  "p7": {
+    "phase": "P7",
+    "title": "6-Model Architecture Audit & Research Synthesis",
+    "docPath": "docs/p7/P7_FINAL_REPORT.md",
+    "componentMaps": {
+      "text": {
+        "name": "LFM3-1.7B",
+        "family": "lfm3",
+        "architecture": "Lfm3ForCausalLM",
+        "parts": [
+          {
+            "title": "Text backbone",
+            "config_path": "(top level)",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          }
+        ],
+        "decision_fields": []
+      },
+      "vision": {
+        "name": "LFM3-VL-2B",
+        "family": "lfm3_vl",
+        "architecture": "Lfm3VlForConditionalGeneration",
+        "parts": [
+          {
+            "title": "Vision encoder",
+            "config_path": "vision_config",
+            "layers": 14,
+            "counts": {
+              "conv": 8,
+              "full_attention": 6
+            }
+          },
+          {
+            "title": "Text backbone",
+            "config_path": "text_config",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          }
+        ],
+        "decision_fields": []
+      },
+      "audio": {
+        "name": "LFM3-Audio-2B",
+        "family": "lfm3_audio",
+        "architecture": "Lfm3AudioForConditionalGeneration",
+        "parts": [
+          {
+            "title": "Audio encoder",
+            "config_path": "encoder.lfm",
+            "layers": 17,
+            "counts": {
+              "conv": 10,
+              "full_attention": 7
+            }
+          },
+          {
+            "title": "Text backbone",
+            "config_path": "lfm",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          },
+          {
+            "title": "Depthformer",
+            "config_path": "depthformer",
+            "layers": 3,
+            "counts": {
+              "full_attention": 3
+            }
+          }
+        ],
+        "decision_fields": []
+      },
+      "omni": {
+        "name": "LFM3-Omni-2B",
+        "family": "lfm3_omni",
+        "architecture": "Lfm3OmniForConditionalGeneration",
+        "parts": [
+          {
+            "title": "Vision encoder",
+            "config_path": "vision_config",
+            "layers": 14,
+            "counts": {
+              "conv": 8,
+              "full_attention": 6
+            }
+          },
+          {
+            "title": "Audio encoder",
+            "config_path": "audio_encoder_config.text_config",
+            "layers": 17,
+            "counts": {
+              "conv": 10,
+              "full_attention": 7
+            }
+          },
+          {
+            "title": "Text backbone",
+            "config_path": "text_config",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          },
+          {
+            "title": "Depthformer",
+            "config_path": "depth_config",
+            "layers": 3,
+            "counts": {
+              "full_attention": 3
+            }
+          }
+        ],
+        "decision_fields": []
+      },
+      "d1": {
+        "name": "d1-2B",
+        "family": "lfm3_vl",
+        "architecture": "D1Model",
+        "parts": [
+          {
+            "title": "Vision encoder",
+            "config_path": "vision_config",
+            "layers": 14,
+            "counts": {
+              "conv": 8,
+              "full_attention": 6
+            }
+          },
+          {
+            "title": "Text backbone",
+            "config_path": "text_config",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          }
+        ],
+        "decision_fields": [
+          "d1_attention",
+          "d1_codes",
+          "d1_numbers",
+          "d1_set_size",
+          "d1_vision_max_pixels"
+        ]
+      },
+      "d1_omni": {
+        "name": "d1-Omni-2B",
+        "family": "lfm3_omni",
+        "architecture": "D1Model",
+        "parts": [
+          {
+            "title": "Vision encoder",
+            "config_path": "vision_config",
+            "layers": 14,
+            "counts": {
+              "conv": 8,
+              "full_attention": 6
+            }
+          },
+          {
+            "title": "Audio encoder",
+            "config_path": "audio_encoder_config.text_config",
+            "layers": 17,
+            "counts": {
+              "conv": 10,
+              "full_attention": 7
+            }
+          },
+          {
+            "title": "Text backbone",
+            "config_path": "text_config",
+            "layers": 24,
+            "counts": {
+              "conv": 13,
+              "full_attention": 6,
+              "sliding_attention": 5
+            }
+          },
+          {
+            "title": "Depthformer",
+            "config_path": "depth_config",
+            "layers": 3,
+            "counts": {
+              "full_attention": 3
+            }
+          }
+        ],
+        "decision_fields": [
+          "d1_attention",
+          "d1_codes",
+          "d1_numbers",
+          "d1_set_size",
+          "d1_vision_max_pixels"
+        ]
+      }
+    },
+    "textBackboneSchedule": {
+      "totalLayers": 24,
+      "hiddenSize": 2048,
+      "numAttentionHeads": 16,
+      "layerTypes": [
+        {
+          "layerIndex": 0,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 1,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 2,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 3,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 4,
+          "type": "sliding_attention",
+          "label": "Sliding Window Attention",
+          "color": "#ffd766"
+        },
+        {
+          "layerIndex": 5,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 6,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 7,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 8,
+          "type": "sliding_attention",
+          "label": "Sliding Window Attention",
+          "color": "#ffd766"
+        },
+        {
+          "layerIndex": 9,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 10,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 11,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 12,
+          "type": "sliding_attention",
+          "label": "Sliding Window Attention",
+          "color": "#ffd766"
+        },
+        {
+          "layerIndex": 13,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 14,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 15,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 16,
+          "type": "sliding_attention",
+          "label": "Sliding Window Attention",
+          "color": "#ffd766"
+        },
+        {
+          "layerIndex": 17,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 18,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 19,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 20,
+          "type": "sliding_attention",
+          "label": "Sliding Window Attention",
+          "color": "#ffd766"
+        },
+        {
+          "layerIndex": 21,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        },
+        {
+          "layerIndex": 22,
+          "type": "full_attention",
+          "label": "Full Attention",
+          "color": "#c084fc"
+        },
+        {
+          "layerIndex": 23,
+          "type": "conv",
+          "label": "Conv (GatedDeltaNet)",
+          "color": "#75efdc"
+        }
+      ],
+      "counts": {
+        "conv": 13,
+        "fullAttention": 6,
+        "slidingAttention": 5
+      }
+    },
+    "crossPhaseSynthesis": [
+      {
+        "phase": "P2",
+        "name": "Synthetic Document OCR",
+        "sampleSize": 10,
+        "methods": [
+          {
+            "label": "Direct VL-2B",
+            "strictSuccess": "10/10",
+            "rate": 1,
+            "medianLatency": "38.53s"
+          },
+          {
+            "label": "Modular VL → Text",
+            "strictSuccess": "9/10",
+            "rate": 0.9,
+            "medianLatency": "65.72s"
+          }
+        ],
+        "keyObservation": "Direct pipeline avoids downstream token exhaustion cascades; 1.7x faster median latency."
+      },
+      {
+        "phase": "P3",
+        "name": "Speech-to-Speech Streaming",
+        "sampleSize": 25,
+        "methods": [
+          {
+            "label": "Native S2S",
+            "strictSuccess": "24/25",
+            "rate": 0.96,
+            "medianLatency": "13.95s (n=23)"
+          },
+          {
+            "label": "Modular V2.1",
+            "strictSuccess": "22/25",
+            "rate": 0.88,
+            "medianLatency": "20.18s (n=24)"
+          },
+          {
+            "label": "Modular V1",
+            "strictSuccess": "15/25",
+            "rate": 0.6,
+            "medianLatency": "27.70s (n=23)"
+          }
+        ],
+        "keyObservation": "Native S2S cuts latency by 30-50% while modular enables stage inspection and guardrails."
+      },
+      {
+        "phase": "P4",
+        "name": "Paired AV Fusion Holdout",
+        "sampleSize": 40,
+        "methods": [
+          {
+            "label": "Native Omni-2B",
+            "strictSuccess": "25/40",
+            "rate": 0.625,
+            "medianLatency": "20.92s"
+          },
+          {
+            "label": "Modular ASR → VL",
+            "strictSuccess": "28/40",
+            "rate": 0.7,
+            "medianLatency": "21.29s"
+          }
+        ],
+        "keyObservation": "Modular +3 edge is NOT statistically significant (p = 0.25). Unanswerable queries fail in both."
+      }
+    ],
+    "coreConclusions": [
+      {
+        "title": "Direct vs Modular Trade-off",
+        "body": "Direct end-to-end models eliminate intermediate token serialization bottlenecks and downstream cascade failures, whereas modular pipelines expose inspectable stages and enable targeted safeguards."
+      },
+      {
+        "title": "Multimodal Spatial & Temporal Boundaries",
+        "body": "Both native and modular pipelines struggled with unanswerable spatial relationships and temporal video alignment in the exploratory pilots, frequently hallucinating plausible attributes."
+      },
+      {
+        "title": "Confidence Miscalibration",
+        "body": "High reported model confidence (~92%) can accompany completely erroneous predictions (Case X03), underscoring that raw softmax/decision probabilities must not authorize unreviewed autonomous actions."
+      },
+      {
+        "title": "Deterministic Routing Utility",
+        "body": "Zero-overhead set-theoretic capability routing effectively matches diverse multimodal queries to specialized models without requiring non-deterministic LLM meta-agent reasoning."
+      }
+    ]
+  }
+}

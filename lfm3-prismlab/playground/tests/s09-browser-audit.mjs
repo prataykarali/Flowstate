@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+const chrome=spawn('google-chrome',['--headless=new','--no-sandbox','--disable-gpu','--remote-debugging-port=9334','about:blank'],{stdio:'ignore'});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let ws;
+try {
+ await sleep(1100);
+ const tabs=await(await fetch('http://127.0.0.1:9334/json')).json();
+ ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);
+ await new Promise(r=>ws.addEventListener('open',r,{once:true}));
+ let seq=0;const pending=new Map();const errors=[];
+ ws.addEventListener('message',event=>{const m=JSON.parse(event.data);if(m.id&&pending.has(m.id)){const {resolve,reject}=pending.get(m.id);pending.delete(m.id);m.error?reject(m.error):resolve(m.result)}if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')errors.push(m.params.args.map(x=>x.value||x.description).join(' '));if(m.method==='Network.loadingFailed'&&!m.params.canceled)errors.push(m.params.errorText)});
+ const send=(method,params={})=>new Promise((resolve,reject)=>{const id=++seq;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}))});
+ const evaluate=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(r.exceptionDetails.text);return r.result.value};
+ const visit=async route=>{await send('Page.navigate',{url:`http://127.0.0.1:5173/#${route}`});await sleep(850)};
+ await send('Runtime.enable');await send('Network.enable');await send('Page.enable');
+ for(const route of ['world','playground','trivia','arcade','research','architecture','championship','settings']){await visit(route);assert.ok(await evaluate("document.querySelector('.page-title')?.textContent"),route)}
+ await visit('architecture');
+ assert.equal(await evaluate("document.querySelectorAll('.pipeline-model-node .mascot-card').length"),6);
+ assert.equal(await evaluate("document.querySelectorAll('.pipeline-edge').length"),17);
+ assert.equal(await evaluate("document.querySelectorAll('[id]').length === new Set([...document.querySelectorAll('[id]')].map(x=>x.id)).size"),true);
+ await evaluate("(()=>{const s=document.querySelector('select[aria-label=\"Route example\"]');s.value='document';s.dispatchEvent(new Event('change',{bubbles:true}))})()");await sleep(100);
+ assert.equal(await evaluate("document.querySelector('.pipeline-model-node.is-routed .mascot-name strong')?.textContent"),'Spectra');
+ await evaluate("(()=>{const n=document.querySelector('.pipeline-model-node[data-node=audio] .mascot-card');n.focus();n.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))})()");await sleep(100);
+ assert.equal(await evaluate("document.querySelector('.pipeline-detail h3')?.textContent.includes('Echo')"),true);
+ await evaluate("(()=>{const n=document.querySelector('.pipeline-model-node[data-node=d1] .mascot-card');n.focus();n.dispatchEvent(new KeyboardEvent('keydown',{key:' ',bubbles:true}))})()");await sleep(100);
+ assert.equal(await evaluate("document.querySelector('.pipeline-detail h3')?.textContent.includes('Prism Thinker')"),true);
+ await evaluate("(()=>{const s=document.querySelector('select[aria-label=\"Recorded run\"]');s.value='vision';s.dispatchEvent(new Event('change',{bubbles:true}))})()");await sleep(150);
+ assert.equal(await evaluate("document.querySelector('.pipeline-mode')?.textContent"),'Recorded P6 replay');
+ assert.equal(await evaluate("document.querySelector('.trace-output')===null"),true);
+ await evaluate("document.querySelector('button[aria-label=\"Next trace stage\"]').click()");await sleep(80);
+ assert.equal(await evaluate("document.querySelector('.trace-inspector strong')?.textContent.includes('evidence')"),true);
+ await evaluate("document.querySelectorAll('.trace-steps button')[3].click()");await sleep(80);
+ assert.equal(await evaluate("document.querySelector('.trace-output p')?.textContent"),'ROBOTICS OPEN LAB');
+ assert.equal(await evaluate("document.querySelectorAll('.pipeline-edge.is-active').length > 0"),true);
+ await evaluate("[...document.querySelectorAll('[role=tab]')].find(x=>x.textContent.includes('Internal')).click()");await sleep(100);
+ assert.ok((await evaluate("document.querySelector('.internal-detail iframe')?.getAttribute('src')")).includes('vision_v2.html'));
+ const asset=await fetch('http://127.0.0.1:5173/research/p7/models/vision_v2.html');assert.equal(asset.status,200);assert.ok((await asset.text()).includes('LFM3-VL-2B'));
+ await visit('playground');
+ await evaluate("(()=>{const s=document.querySelector('select');const task=[...document.querySelectorAll('label')].find(x=>x.textContent.trim().startsWith('Task'))?.querySelector('select');if(!task)throw Error('Task selector missing');task.value='decision';task.dispatchEvent(new Event('change',{bubbles:true}));const live=[...document.querySelectorAll('[role=group][aria-label=\"Execution mode\"] button')].find(x=>x.textContent.trim()==='Local Live');if(!live)throw Error('Local Live control missing');live.click()})()");await sleep(120);
+ assert.equal(await evaluate("document.querySelector('input[type=file][accept*=\"audio/wav\"]')!==null"),true);
+ assert.equal(await evaluate("[...document.querySelectorAll('[role=group][aria-label=\"Execution mode\"] button')].find(x=>x.textContent.trim()==='Local Live')?.getAttribute('aria-pressed')"),'true');
+ assert.equal(await evaluate("document.querySelector('.pipeline-model-node.is-routed .mascot-name strong')?.textContent"),'Prism Thinker');
+ await visit('trivia');await evaluate("document.querySelectorAll('.trivia-option')[1].click();document.querySelector('.trivia-actions button').click()");await sleep(100);assert.ok((await evaluate("document.querySelector('.trivia-score')?.textContent")).includes('1/4'));assert.ok(await evaluate("document.querySelector('.trivia-source a')?.href"));
+ await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});await visit('world');assert.equal(await evaluate("document.querySelectorAll('video').length"),0);
+ await visit('architecture');await evaluate("(()=>{const s=document.querySelector('select[aria-label=\"Recorded run\"]');s.value='text';s.dispatchEvent(new Event('change',{bubbles:true}))})()");await sleep(90);assert.equal(await evaluate("document.querySelector('button[aria-label=\"Play trace\"]')?.disabled"),true);
+ await send('Emulation.setEmulatedMedia',{features:[]});await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+ for(const route of ['world','playground','trivia','arcade','research','architecture','championship','settings']){await visit(route);assert.equal(await evaluate("document.documentElement.scrollWidth>innerWidth"),false,`mobile overflow ${route}`);if(route==='architecture'){await evaluate("[...document.querySelectorAll('[role=tab]')].find(x=>x.textContent.includes('Internal')).click()");await sleep(60);assert.equal(await evaluate("getComputedStyle(document.querySelector('.internal-mobile-view')).display !== 'none'"),true);assert.ok((await evaluate("document.querySelector('.internal-mobile-view a')?.getAttribute('href')")).includes('/research/p7/models/'))}}
+ assert.deepEqual(errors,[]);
+ console.log('S0.9 browser audit passed: routes, mascot graph, keyboard, replay stages, architecture asset, trivia, reduced motion, mobile overflow, console/network');
+} finally { ws?.close(); chrome.kill(); }

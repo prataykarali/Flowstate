@@ -39,7 +39,7 @@ def build_vision_payload(prompt: str, image_bytes: bytes, mime: str) -> dict:
         "top_k": 50,
         "min_p": 0.0,
         "repeat_penalty": 1.1,
-        "max_tokens": 384,
+        "max_tokens": 96,
         "stream": False,
         # Deliberately no reasoning_effort/chat_template_kwargs override:
         # use server flags so CPU comparisons have a single control point.

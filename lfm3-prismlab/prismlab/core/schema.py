@@ -35,6 +35,7 @@ class PrismRequest:
     text: str = ""
     media: tuple[MediaRef, ...] = ()
     request_id: str = field(default_factory=lambda: uuid4().hex)
+    decision_question: dict | None = None
 
     def __post_init__(self) -> None:
         if self.task not in TASKS:
@@ -50,6 +51,8 @@ class PrismRequest:
             raise ValueError("At least one input is required")
         if not isinstance(self.request_id, str) or not self.request_id.strip():
             raise ValueError("request_id must be nonempty")
+        if self.decision_question is not None and self.task != "decision":
+            raise ValueError("Decision question requires a decision task")
 
     @property
     def inputs(self) -> frozenset[str]:
@@ -105,6 +108,7 @@ class PrismResult:
     peak_rss_mb: float | None = None
     evidence: tuple[str, ...] = ()
     warnings: tuple[str, ...] = ()
+    finish_reason: str | None = None
 
     def __post_init__(self) -> None:
         if self.status not in STATUSES:

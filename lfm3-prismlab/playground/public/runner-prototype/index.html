@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrismLab Animated Mascots</title>
+  <script type="module" crossorigin src="/runner-prototype/assets/index-LGPWVTd9.js"></script>
+  <link rel="stylesheet" crossorigin href="/runner-prototype/assets/index-slxYQtXh.css">
+</head>
+<body>
+  <main class="mascot-gallery-container">
+    <!-- Top Header Bar with Logo and Info Badges -->
+    <header class="gallery-header">
+      <div class="header-badge header-badge-left">
+        <span>Eyes follow cursor (subtle)</span>
+        <span class="badge-sparkle"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0abfc" stroke-width="2"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#f0abfc" fill-opacity="0.5"/></svg></span>
+      </div>
+
+      <div class="prismlab-brand">
+        <div class="brand-logo-icon">
+          <!-- Luminous Prism SVG with orbital ring -->
+          <svg width="42" height="42" viewBox="0 0 50 50">
+            <defs>
+              <linearGradient id="brand-prism-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fae8ff" />
+                <stop offset="50%" stop-color="#c084fc" />
+                <stop offset="100%" stop-color="#7c3aed" />
+              </linearGradient>
+            </defs>
+            <!-- Orbiting Ring -->
+            <ellipse cx="25" cy="25" rx="22" ry="7" fill="none" stroke="#e879f9" stroke-width="1.3" opacity="0.85" transform="rotate(-20 25 25)" stroke-dasharray="85 15" />
+            <!-- Prism Triangle -->
+            <polygon points="25,6 41,38 9,38" fill="url(#brand-prism-grad)" stroke="#ffffff" stroke-width="1.5" filter="drop-shadow(0 0 8px #c084fc)" />
+            <!-- Prism Inner Facet Line -->
+            <polygon points="25,6 31,38 9,38" fill="rgba(255,255,255,0.25)" />
+          </svg>
+        </div>
+        <h1 class="brand-title">PrismLab</h1>
+      </div>
+
+      <div class="header-badge header-badge-right">
+        <span class="badge-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><rect x="6" y="3" width="12" height="18" rx="6"/><line x1="12" y1="7" x2="12" y2="11"/></svg></span>
+        <span>Click / Tap → random animation</span>
+        <span class="badge-sep">•</span>
+        <span>Double click → play runner</span>
+        <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" aria-label="Toggle mascot voice">Voice off</button>
+      </div>
+    </header>
+
+    <!-- Master Showcase Grid: 6 Mascots on Glowing Pedestals -->
+    <section class="mascot-grid" id="mascotGrid" aria-label="PrismLab Mascots"></section>
+
+    <!-- Lower Interactive Dashboard Row -->
+    <section class="interactive-dashboard-row">
+      <!-- Left: Example Emotions & Reactions Card -->
+      <div class="dashboard-panel emotions-panel" id="emotionsPanel"></div>
+
+      <!-- Center: Embedded Live Runner Mini-Game Playground -->
+      <div class="dashboard-panel runner-panel" id="runnerPanel"></div>
+
+      <!-- Right: Feature Badges Panel -->
+      <div class="dashboard-panel features-panel">
+        <ul class="features-list">
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="15" cy="11" r="1" fill="#c084fc"/><circle cx="17" cy="13" r="1" fill="#c084fc"/></svg></span>
+            <span class="feature-text">Dino-style Endless Runner</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e879f9" stroke-width="2"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#e879f9" fill-opacity="0.3"/><circle cx="19" cy="5" r="1.5" fill="#f0abfc"/></svg></span>
+            <span class="feature-text">Individual Mascot Animations</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3.2" fill="#f472b6" fill-opacity="0.45"/><circle cx="12" cy="12" r="1.2" fill="#ffffff"/></svg></span>
+            <span class="feature-text">Cursor Eye Tracking</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><path d="M9 3L10.5 7.5L15 9L10.5 10.5L9 15L7.5 10.5L3 9L7.5 7.5L9 3Z" fill="#c084fc" fill-opacity="0.3"/><path d="M18 13L19 16L22 17L19 18L18 21L17 18L14 17L17 16L18 13Z" fill="#f0abfc" fill-opacity="0.4"/></svg></span>
+            <span class="feature-text">Rich Emotions & Reactions</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d946ef" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
+            <span class="feature-text">Custom Cosmetics & Ornaments</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="12" rx="2"/><rect x="18" y="8" width="5" height="9" rx="1.5"/><line x1="6" y1="20" x2="12" y2="20"/><line x1="9" y1="16" x2="9" y2="20"/></svg></span>
+            <span class="feature-text">Responsive & Smooth</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

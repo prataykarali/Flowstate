@@ -13,6 +13,7 @@ class FakeManager:
         "d1": SimpleNamespace(
             base_url="http://127.0.0.1:8085",
             model_id="d1-text",
+            auth_token=None,
         )
     }
 
@@ -66,7 +67,12 @@ class TestP6Decision(unittest.TestCase):
             task="decision",
             text="The payment form is blank.",
         )
-        result = execute(req, FakeManager())
+        manager = FakeManager()
+        manager.specs = {"d1": SimpleNamespace(
+            base_url="http://127.0.0.1:8085", model_id="d1-text",
+            auth_token="test-key",
+        )}
+        result = execute(req, manager)
         self.assertEqual(result.status, "completed")
         self.assertEqual(result.route, ("d1",))
         self.assertTrue(
@@ -77,6 +83,7 @@ class TestP6Decision(unittest.TestCase):
         )
         self.assertIsNone(result.ttft_s)
         mock_query.assert_called_once()
+        self.assertEqual(mock_query.call_args.kwargs["auth_token"], "test-key")
 
     @patch(
         "prismlab.core.decision_adapter.query_d1",

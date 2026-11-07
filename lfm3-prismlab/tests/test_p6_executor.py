@@ -70,6 +70,27 @@ class TestP6Executor(unittest.TestCase):
         self.assertIsNotNone(result.ttft_s)
 
     @patch("prismlab.core.executor.urlopen")
+    def test_token_limit_finish_reason_reaches_result(self, net):
+        net.return_value = sse(
+            '{"choices":[{"delta":{"content":"The bridge"}}]}',
+            '{"choices":[{"delta":{},"finish_reason":"length"}]}',
+            "[DONE]",
+        )
+        result = execute(PrismRequest(task="chat", text="Continue"), FakeManager())
+        self.assertEqual(result.finish_reason, "length")
+        self.assertEqual(result.output, "The bridge")
+
+    @patch("prismlab.core.executor.urlopen")
+    def test_stream_keeps_only_final_answer_after_think_marker(self, net):
+        net.return_value = sse(
+            '{"choices":[{"delta":{"content":"Draft reasoning"}}]}',
+            '{"choices":[{"delta":{"content":"</think>Final answer."}}]}',
+            "[DONE]",
+        )
+        result = stream_text("http://127.0.0.1:8080", "lfm3-text", "Hi")
+        self.assertEqual(result.content, "Final answer.")
+
+    @patch("prismlab.core.executor.urlopen")
     def test_interrupted_stream(self, net):
         net.return_value = sse(
             '{"choices":[{"delta":{"content":"Partial"}}]}'
@@ -78,6 +99,12 @@ class TestP6Executor(unittest.TestCase):
             stream_text(
                 "http://127.0.0.1:8080", "lfm3-text", "Hi"
             )
+
+    @patch("prismlab.core.executor.urlopen", side_effect=TimeoutError("runtime stalled"))
+    def test_runtime_timeout_fails_without_answer(self, net):
+        result = execute(PrismRequest(task="chat", text="Hello"), FakeManager())
+        self.assertEqual(result.status, "failed")
+        self.assertIsNone(result.output)
 
     @patch("prismlab.core.executor.urlopen")
     def test_complete_inference(self, net):

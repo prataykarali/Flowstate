@@ -5,9 +5,11 @@ from __future__ import annotations
 import base64
 import json
 import math
+import threading
 import time
 from urllib.request import Request, urlopen
 
+from prismlab.core.cancellation import register_upstream, unregister_upstream
 from prismlab.core.audio_adapter import validate_audio
 from prismlab.core.schema import PrismRequest, PrismResult, TraceStep
 
@@ -52,17 +54,22 @@ def validate_decision(raw: dict) -> tuple[str, float, dict]:
     }
 
 
-def query_d1(base_url: str, payload: dict) -> tuple[dict, float]:
+def query_d1(base_url: str, payload: dict, auth_token: str | None = None) -> tuple[dict, float]:
     req = Request(
         base_url.rstrip("/") + "/v1/systemone",
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json", **({"Authorization": f"Bearer {auth_token}"} if auth_token else {})},
         method="POST",
     )
 
     start = time.perf_counter()
+    ident = threading.get_ident()
     with urlopen(req, timeout=300) as response:
-        raw = json.load(response)
+        register_upstream(ident, response)
+        try:
+            raw = json.load(response)
+        finally:
+            unregister_upstream(ident)
 
     return raw, time.perf_counter() - start
 
@@ -211,7 +218,8 @@ def execute_decision(
         ))
 
         raw, elapsed = query_d1(
-            manager.specs[key].base_url, payload
+            manager.specs[key].base_url, payload,
+            **({"auth_token": getattr(manager.specs[key], "auth_token", None)} if getattr(manager.specs[key], "auth_token", None) else {}),
         )
 
         prediction, confidence, probs = validate_decision(raw)

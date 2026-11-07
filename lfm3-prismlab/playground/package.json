@@ -1,0 +1,29 @@
+{
+  "name": "prismlab-playground",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "npm run build:research && npm run build:architecture && npm run build:runner && tsc && vite build",
+    "check:space-static": "node scripts/check-space-static.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/**/*.test.js",
+    "build:research": "node scripts/build-research-data.mjs",
+    "build:architecture": "node scripts/build-architecture-data.mjs",
+    "build:runner": "node scripts/build-runner-prototype.mjs"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "supabase": "^3.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

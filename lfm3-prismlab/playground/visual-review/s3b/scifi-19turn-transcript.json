@@ -1,0 +1,2125 @@
+{
+  "canonicalWorldState": {
+    "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+    "genreId": "science_fiction",
+    "theme": "Science fiction",
+    "premise": "Aboard an underwater research dome, a message arrives from forty years in the future, forcing Chiara the florist and Teo to solve a critical crisis. a message arrives from forty years in the future",
+    "currentAct": 4,
+    "setting": {
+      "location": "an underwater research dome",
+      "establishedRules": []
+    },
+    "characters": [
+      {
+        "id": "char_chiara",
+        "name": "Chiara",
+        "role": "florist",
+        "status": "alive",
+        "location": "an underwater research dome",
+        "motivations": [
+          "Resolve the crisis: a message arrives from forty years in the future"
+        ],
+        "knowledge": [
+          "Initial situation"
+        ],
+        "pastActions": [
+          "Turn 1: Aurelia's dome glows with bioluminescent",
+          "Turn 2: The dome's bioluminescent algae flicker ",
+          "Turn 3: Teo reroutes his holo-message to highlig",
+          "Turn 4: The low hum of the research dome's life ",
+          "Turn 5: The distorted transmission cuts through ",
+          "Turn 7: Chiara's suit alarms blare as Teo franti",
+          "Turn 9: Chiara lunges into the searing vent corr",
+          "Turn 10: Chiara dives into the vent corridor, her",
+          "Turn 11: Chiara surfaces in the dome's observatio",
+          "Turn 12: The faint signal from forty years later ",
+          "Turn 13: Chiara steps into the observation bay as",
+          "Turn 15: The pulse resolves into a single, clear ",
+          "Turn 17: Teo whispers that the future’s data stre",
+          "Turn 18: Chiara steps toward the hull panel, her ",
+          "Turn 19: Chiara steps forward, her breath held as"
+        ]
+      },
+      {
+        "id": "char_teo",
+        "name": "Teo",
+        "role": "companion",
+        "status": "alive",
+        "location": "an underwater research dome",
+        "motivations": [
+          "Support the journey"
+        ],
+        "knowledge": [
+          "Initial situation"
+        ],
+        "pastActions": [
+          "Turn 1: Aurelia's dome glows with bioluminescent",
+          "Turn 2: The dome's bioluminescent algae flicker ",
+          "Turn 3: Teo reroutes his holo-message to highlig",
+          "Turn 4: The low hum of the research dome's life ",
+          "Turn 5: The distorted transmission cuts through ",
+          "Turn 7: Chiara's suit alarms blare as Teo franti",
+          "Turn 9: Chiara lunges into the searing vent corr",
+          "Turn 10: Chiara dives into the vent corridor, her",
+          "Turn 11: Chiara surfaces in the dome's observatio",
+          "Turn 12: The faint signal from forty years later ",
+          "Turn 13: Chiara steps into the observation bay as",
+          "Turn 14: The pulse resolves into a single, clear ",
+          "Turn 15: The pulse resolves into a single, clear ",
+          "Turn 17: Teo whispers that the future’s data stre",
+          "Turn 18: Chiara steps toward the hull panel, her ",
+          "Turn 19: Chiara steps forward, her breath held as"
+        ]
+      }
+    ],
+    "entities": [],
+    "relationships": [
+      {
+        "sourceName": "Chiara",
+        "targetName": "Teo",
+        "kind": "companions",
+        "state": "allied against crisis",
+        "changes": [
+          "United by initial crisis"
+        ]
+      }
+    ],
+    "establishedFacts": [
+      {
+        "id": "fact_premise",
+        "text": "Aboard an underwater research dome, a message arrives from forty years in the future, forcing Chiara the florist and Teo to solve a critical crisis. a message arrives from forty years in the future",
+        "turnIndex": 0,
+        "confidence": 1,
+        "sourceModelId": "config",
+        "irreversible": false
+      }
+    ],
+    "unresolvedConflicts": [
+      {
+        "id": "conflict_primary",
+        "description": "a message arrives from forty years in the future",
+        "stakes": "Critical life-support or planetary systems will fail within hours if the speculative crisis is not resolved.",
+        "resolved": false
+      }
+    ],
+    "resolvedConflicts": [],
+    "eventLog": [
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_0",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 0,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Story begins: a message arrives from forty years in the future",
+        "proposedChanges": [
+          "Story initialized with active cast and premise"
+        ],
+        "acceptedChanges": [
+          "Story initialized with active cast and premise"
+        ],
+        "irreversible": false,
+        "confidence": "high",
+        "auditLog": [
+          "Initialized via canonical story config and director plan"
+        ],
+        "timestamp": "2026-11-05T00:49:34.045Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_0_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 0,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Aurelia's dome glows with bioluminescent algae as Teo scans the holo-message, its data from 2044 war",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:50:04.541Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_1_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 1,
+        "modelId": "vision",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "The dome's bioluminescent algae flicker erratically as pressure shifts intensify, signaling structur",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:50:38.085Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_2_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 2,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Teo reroutes his holo-message to highlight the dome's failing support beams while Chiara rushes towa",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:51:12.045Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_3_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 3,
+        "modelId": "audio",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "The low hum of the research dome's life support systems is interrupted by a sharp, distorted transmi",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:52:08.408Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_4_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 4,
+        "modelId": "omni",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "The distorted transmission cuts through the dome's hum, and Teo's holo-message flashes a single, urg",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:52:57.481Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_6_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 6,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara's suit alarms blare as Teo frantically reroutes the dome's thermal shielding, but the wavefro",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:54:21.047Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_8_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 8,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara lunges into the searing vent corridor, her suit's thermal shield shattered by Teo’s frantic r",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:55:45.849Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_9_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 9,
+        "modelId": "vision",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara dives into the vent corridor, her suit's shield shattered by Teo's urgent rerouting. She wren",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:56:25.056Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_10_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 10,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station rema",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:56:56.024Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_11_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 11,
+        "modelId": "audio",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "The faint signal from forty years later flickers on, promising a message from the future. Chiara sur",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:57:35.449Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_12_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 12,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara steps into the observation bay as Teo watches telemetry hold steady through the aftershocks o",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:58:13.153Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_13_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 13,
+        "modelId": "omni",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Teo"
+        ],
+        "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:58:55.395Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_14_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 14,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T00:59:32.980Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_16_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 16,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Teo whispers that the future’s data stream contains a hidden beacon mapping the orbital telemetry to",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T01:00:36.116Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_17_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 17,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara steps toward the hull panel, her breath held as Teo points to a pulsing beacon embedded in th",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T01:01:12.814Z"
+      },
+      {
+        "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_18_prog",
+        "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+        "turnIndex": 18,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Chiara",
+          "Teo"
+        ],
+        "description": "Chiara steps forward, her breath held as Teo points to a pulsing beacon that resolves to the year 21",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-05T01:02:47.945Z"
+      }
+    ],
+    "latestAcceptedEventIds": [
+      "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_18_prog"
+    ],
+    "narrativeGoal": "a message arrives from forty years in the future",
+    "prohibitedContradictions": [],
+    "endingRequirements": [
+      "Resolve the speculative technological crisis using established capabilities and show the new planetary or station reality."
+    ],
+    "directorPlan": {
+      "genre": "resolved",
+      "theme": "Science fiction",
+      "characters": [
+        {
+          "name": "Chiara",
+          "role": "florist",
+          "relationToProtagonist": "Self"
+        },
+        {
+          "name": "Teo",
+          "role": "Companion / Witness",
+          "relationToProtagonist": "Close associate / partner"
+        }
+      ],
+      "primaryConflict": "Aboard an underwater research dome, a message arrives from forty years in the future, threatening systemic failure under unforgiving physics. (Established opening: \"Aboard an underwater research dome, a message arrives from forty years in the future, forcing Chiara\")",
+      "initialStakes": "Critical life-support or planetary systems will fail within hours if the speculative crisis is not resolved.",
+      "developmentBeats": [
+        {
+          "beatIndex": 0,
+          "act": 1,
+          "targetAct": "Act I — Beginning",
+          "narrativeGoal": "Analyze the emergency telemetry and alarming anomalies aboard an underwater research dome.",
+          "requiredProgression": "Confirm automated override protocols have failed from the primary bridge.",
+          "avoidRepeating": "Do not repeat station specifications."
+        },
+        {
+          "beatIndex": 1,
+          "act": 2,
+          "targetAct": "Act II — Discovery",
+          "narrativeGoal": "Don protective gear and venture into the hazardous exterior or engine core.",
+          "requiredProgression": "Discover an unexpected physical slag or anomaly fusing the primary conduits.",
+          "avoidRepeating": "Do not repeat bridge telemetry."
+        },
+        {
+          "beatIndex": 2,
+          "act": 2,
+          "targetAct": "Act II — Discovery",
+          "narrativeGoal": "Improvise a technical bypass under mounting thermal or atmospheric hazard.",
+          "requiredProgression": "A warning sensor indicates an approaching physical wavefront or deadline.",
+          "avoidRepeating": "Do not repeat suit checks."
+        },
+        {
+          "beatIndex": 3,
+          "act": 3,
+          "targetAct": "Act III — Confrontation",
+          "narrativeGoal": "Manually wrench the bypass open under critical hazard.",
+          "requiredProgression": "Superheated plasma or pressure vents into the void, returning systems to nominal.",
+          "avoidRepeating": "Do not repeat cutting or tool use."
+        },
+        {
+          "beatIndex": 4,
+          "act": 4,
+          "targetAct": "Act IV — Resolution",
+          "narrativeGoal": "Re-enter the airlock and verify stable orbital telemetry.",
+          "requiredProgression": "Observe the station riding out the remainder of the crisis in safe orbit.",
+          "avoidRepeating": "Do not trigger another system alarm."
+        }
+      ],
+      "climaxObjective": "Execute a dangerous manual intervention to stabilize the system before critical failure.",
+      "endingRequirements": "Resolve the speculative technological crisis using established capabilities and show the new planetary or station reality.",
+      "endingType": "resolved"
+    },
+    "candidateObservations": [],
+    "currentLocation": "an underwater research dome",
+    "completedMilestones": [],
+    "discoveredClues": [],
+    "locationHistory": [
+      {
+        "location": "an underwater research dome",
+        "turnIndex": 0
+      }
+    ],
+    "bridgeDamaged": false
+  },
+  "directorPlan": {
+    "genre": "resolved",
+    "theme": "Science fiction",
+    "characters": [
+      {
+        "name": "Chiara",
+        "role": "florist",
+        "relationToProtagonist": "Self"
+      },
+      {
+        "name": "Teo",
+        "role": "Companion / Witness",
+        "relationToProtagonist": "Close associate / partner"
+      }
+    ],
+    "primaryConflict": "Aboard an underwater research dome, a message arrives from forty years in the future, threatening systemic failure under unforgiving physics. (Established opening: \"Aboard an underwater research dome, a message arrives from forty years in the future, forcing Chiara\")",
+    "initialStakes": "Critical life-support or planetary systems will fail within hours if the speculative crisis is not resolved.",
+    "developmentBeats": [
+      {
+        "beatIndex": 0,
+        "act": 1,
+        "targetAct": "Act I — Beginning",
+        "narrativeGoal": "Analyze the emergency telemetry and alarming anomalies aboard an underwater research dome.",
+        "requiredProgression": "Confirm automated override protocols have failed from the primary bridge.",
+        "avoidRepeating": "Do not repeat station specifications."
+      },
+      {
+        "beatIndex": 1,
+        "act": 2,
+        "targetAct": "Act II — Discovery",
+        "narrativeGoal": "Don protective gear and venture into the hazardous exterior or engine core.",
+        "requiredProgression": "Discover an unexpected physical slag or anomaly fusing the primary conduits.",
+        "avoidRepeating": "Do not repeat bridge telemetry."
+      },
+      {
+        "beatIndex": 2,
+        "act": 2,
+        "targetAct": "Act II — Discovery",
+        "narrativeGoal": "Improvise a technical bypass under mounting thermal or atmospheric hazard.",
+        "requiredProgression": "A warning sensor indicates an approaching physical wavefront or deadline.",
+        "avoidRepeating": "Do not repeat suit checks."
+      },
+      {
+        "beatIndex": 3,
+        "act": 3,
+        "targetAct": "Act III — Confrontation",
+        "narrativeGoal": "Manually wrench the bypass open under critical hazard.",
+        "requiredProgression": "Superheated plasma or pressure vents into the void, returning systems to nominal.",
+        "avoidRepeating": "Do not repeat cutting or tool use."
+      },
+      {
+        "beatIndex": 4,
+        "act": 4,
+        "targetAct": "Act IV — Resolution",
+        "narrativeGoal": "Re-enter the airlock and verify stable orbital telemetry.",
+        "requiredProgression": "Observe the station riding out the remainder of the crisis in safe orbit.",
+        "avoidRepeating": "Do not trigger another system alarm."
+      }
+    ],
+    "climaxObjective": "Execute a dangerous manual intervention to stabilize the system before critical failure.",
+    "endingRequirements": "Resolve the speculative technological crisis using established capabilities and show the new planetary or station reality.",
+    "endingType": "resolved"
+  },
+  "version": "s3b.2",
+  "showId": "1f07be1a-00a3-4aee-988c-e38cf9586f15",
+  "createdAt": "2026-11-05T00:49:34.044Z",
+  "updatedAt": "2026-11-05T01:02:47.968Z",
+  "config": {
+    "theme": "Science fiction",
+    "opening": "Aboard an underwater research dome, a message arrives from forty years in the future, forcing Chiara the florist and Teo to solve a critical crisis.",
+    "turnCount": 19,
+    "modelIds": [
+      "text",
+      "vision",
+      "audio",
+      "omni",
+      "d1",
+      "d1_omni"
+    ],
+    "playback": "automatic",
+    "maxTokens": 180,
+    "cast": {
+      "protagonist": "Chiara",
+      "companion": "Teo",
+      "role": "florist",
+      "setting": "an underwater research dome",
+      "hook": "a message arrives from forty years in the future"
+    },
+    "avoidOpenings": []
+  },
+  "turnOrder": [
+    "text",
+    "vision",
+    "text",
+    "audio",
+    "omni",
+    "d1",
+    "text",
+    "d1_omni",
+    "text",
+    "vision",
+    "text",
+    "audio",
+    "text",
+    "omni",
+    "text",
+    "d1",
+    "text",
+    "text",
+    "text"
+  ],
+  "turns": [
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:1",
+      "index": 0,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "5fe24f624d2a4bfcb89f880ffba76a03",
+      "route": [
+        "text"
+      ],
+      "output": "Aurelia's dome glows with bioluminescent algae as Teo scans the holo-message, its data from 2044 warning of structural collapse due to unforgiving pressure shifts. Chiara, a florist tending to the dome's hydroponic gardens, realizes the future's physics could shatter the containment field within hours. They must decode the signal and reroute stabilizers before the dome's oxygen reserves run out.",
+      "stageText": "Aurelia's dome glows with bioluminescent algae as Teo scans the holo-message, its data from 2044 warning of structural collapse due to unforgiving pressure shifts. Chiara, a florist tending to the dome's hydroponic gardens, realizes the future's physics could shatter the containment field within hours. They must decode the signal and reroute stabilizers before the dome's oxygen reserves run out.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 943,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:49:34.056Z",
+      "finishedAt": "2026-11-05T00:50:04.544Z",
+      "latencyS": 30.260440386000028,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: signal, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_0_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 0,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Aurelia's dome glows with bioluminescent algae as Teo scans the holo-message, its data from 2044 war",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:50:04.541Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_0_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 0,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Aurelia's dome glows with bioluminescent algae as Teo scans the holo-message, its data from 2044 war",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:50:04.541Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:2",
+      "index": 1,
+      "modelId": "vision",
+      "role": "visual_interpreter",
+      "status": "completed",
+      "requestId": "2b04e7e7969f43dfbb55bde4b15e11fb",
+      "route": [
+        "vision"
+      ],
+      "output": "The dome's bioluminescent algae flicker erratically as pressure shifts intensify, signaling structural strain. Teo quickly reroutes his holo-message to highlight the dome's failing support beams, while Chiara rushes to secure a portable air tank for emergency evacuation. Suddenly, a sudden surge of cold water floods the chamber, forcing both to scramble toward the exit hatch as time dwindles.",
+      "stageText": "The dome's bioluminescent algae flicker erratically as pressure shifts intensify, signaling structural strain. Teo quickly reroutes his holo-message to highlight the dome's failing support beams, while Chiara rushes to secure a portable air tank for emergency evacuation. Suddenly, a sudden surge of cold water floods the chamber, forcing both to scramble toward the exit hatch as time dwindles.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 974,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:50:08.148Z",
+      "finishedAt": "2026-11-05T00:50:38.786Z",
+      "latencyS": 29.8103239080001,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_1_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 1,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The dome's bioluminescent algae flicker erratically as pressure shifts intensify, signaling structur",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:50:38.085Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_1_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 1,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The dome's bioluminescent algae flicker erratically as pressure shifts intensify, signaling structur",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:50:38.085Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:3",
+      "index": 2,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "aafd39755ef2427da0b48da3ca87240d",
+      "route": [
+        "text"
+      ],
+      "output": "Teo reroutes his holo-message to highlight the dome's failing support beams while Chiara rushes toward the glowing fissure where the algae flicker erratically, revealing a molten slag anomaly fused between primary conduits. The surge of heat and pressure triggers an unexpected cascade, exposing a sealed temporal breach that pulses with forty years of future data encoded in bioluminescent particles. As they dive deeper, the message arrives—not as a transmission but as a living warning embedded in the very rock, demanding immediate containment before the core collapses into oblivion.",
+      "stageText": "Teo reroutes his holo-message to highlight the dome's failing support beams while Chiara rushes toward the glowing fissure where the algae flicker erratically, revealing a molten slag anomaly fused between primary conduits. The surge of heat and pressure triggers an unexpected cascade, exposing a sealed temporal breach that pulses with forty years of future data encoded in bioluminescent particles.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 931,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:50:42.388Z",
+      "finishedAt": "2026-11-05T00:51:12.046Z",
+      "latencyS": 29.52863279600001,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn exceeds the 500-character maximum."
+        ],
+        "evidence": [
+          "Genre cues: future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_2_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 2,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Teo reroutes his holo-message to highlight the dome's failing support beams while Chiara rushes towa",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:51:12.045Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_2_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 2,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Teo reroutes his holo-message to highlight the dome's failing support beams while Chiara rushes towa",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:51:12.045Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:4",
+      "index": 3,
+      "modelId": "audio",
+      "role": "audio_interpreter",
+      "status": "completed",
+      "requestId": "a26fcc508e9e4181a32b8e2f871f910b",
+      "route": [
+        "audio"
+      ],
+      "output": "The low hum of the research dome's life support systems is interrupted by a sharp, distorted transmission from the future. Teo quickly reroutes his holo-message to highlight the dome's failing support beams, while Chiara rushes toward the glowing fissure where the algae flicker erratically, revealing a molten slag anomaly. The transmission crackles with urgency, demanding immediate attention. Teo's voice crackles with alarm as he warns, \"The anomaly is spreading! We must evacuate the dome before it collapses!\" Chiara darts forward, her eyes fixed on the molten slag, her movements swift and determined. The transmission's urgency is palpable, and the characters are forced to act quickly to prevent disaster. Teo's holo-message flashes",
+      "stageText": "The low hum of the research dome's life support systems is interrupted by a sharp, distorted transmission from the future. Teo quickly reroutes his holo-message to highlight the dome's failing support beams, while Chiara rushes toward the glowing fissure where the algae flicker erratically, revealing a molten slag anomaly. The transmission crackles with urgency, demanding immediate attention. Teo's voice crackles with alarm as he warns, \"The anomaly is spreading!",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 888,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:51:15.649Z",
+      "finishedAt": "2026-11-05T00:52:09.083Z",
+      "latencyS": 52.63418434900018,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn exceeds the 500-character maximum.",
+          "Turn exceeds the 5-sentence maximum.",
+          "Turn output is truncated or incomplete."
+        ],
+        "evidence": [
+          "Genre cues: future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_3_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 3,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The low hum of the research dome's life support systems is interrupted by a sharp, distorted transmi",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:52:08.408Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_3_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 3,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The low hum of the research dome's life support systems is interrupted by a sharp, distorted transmi",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:52:08.408Z"
+        }
+      ],
+      "isTruncated": true
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:5",
+      "index": 4,
+      "modelId": "omni",
+      "role": "multimodal_interpreter",
+      "status": "completed",
+      "requestId": "0596001644884189865b22cc02a8502e",
+      "route": [
+        "omni"
+      ],
+      "output": "The distorted transmission cuts through the dome's hum, and Teo's holo-message flashes a single, urgent warning: the message from forty years in the future is not a message at all, but a containment breach. As the alarms flare, Chiara's console sputters, and the dome's power grid begins to flicker, threatening to shut down the entire research facility. Teo immediately initiates a manual override, rerouting the backup power to the dome's core life support while Chiara works to stabilize the failing systems.",
+      "stageText": "The distorted transmission cuts through the dome's hum, and Teo's holo-message flashes a single, urgent warning: the message from forty years in the future is not a message at all, but a containment breach. As the alarms flare, Chiara's console sputters, and the dome's power grid begins to flicker, threatening to shut down the entire research facility.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 952,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:52:12.690Z",
+      "finishedAt": "2026-11-05T00:52:58.142Z",
+      "latencyS": 44.64303633899999,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn exceeds the 500-character maximum."
+        ],
+        "evidence": [
+          "Genre cues: future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_4_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 4,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The distorted transmission cuts through the dome's hum, and Teo's holo-message flashes a single, urg",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:52:57.481Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_4_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 4,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The distorted transmission cuts through the dome's hum, and Teo's holo-message flashes a single, urg",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:52:57.481Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:6",
+      "index": 5,
+      "modelId": "d1",
+      "role": "decision_assistant",
+      "status": "completed",
+      "requestId": "20069209ced64e588c0d302f3324de96",
+      "route": [
+        "d1"
+      ],
+      "output": "{\n  \"predicted_route\": \"raise_stakes\",\n  \"confidence\": 0.7105672737964651,\n  \"probabilities\": {\n    \"override_system\": 0.18132832061616627,\n    \"raise_stakes\": 0.7105672737964651,\n    \"honest_moment\": 0.10810440558736867\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+      "stageText": "Analyzing the active vectors, the crucial turn is: Chiara faces a bigger risk as the problem suddenly gets worse.",
+      "stageTextProvenance": "template",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "decisionData": {
+        "predicted_route": "raise_stakes",
+        "confidence": 0.7105672737964651,
+        "probabilities": {
+          "override_system": 0.18132832061616627,
+          "raise_stakes": 0.7105672737964651,
+          "honest_moment": 0.10810440558736867
+        },
+        "valid": true,
+        "rawText": "{\n  \"predicted_route\": \"raise_stakes\",\n  \"confidence\": 0.7105672737964651,\n  \"probabilities\": {\n    \"override_system\": 0.18132832061616627,\n    \"raise_stakes\": 0.7105672737964651,\n    \"honest_moment\": 0.10810440558736867\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}"
+      },
+      "decisionOptions": {
+        "override_system": "Chiara overrides the station mainframe to prevent catastrophic systemic failure.",
+        "raise_stakes": "Chiara faces a bigger risk as the problem suddenly gets worse.",
+        "honest_moment": "Chiara and Teo share an honest moment that changes their bond."
+      },
+      "promptLength": 950,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:53:01.685Z",
+      "finishedAt": "2026-11-05T00:53:28.942Z",
+      "latencyS": 26.471447465999972,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:7",
+      "index": 6,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "839a06b95bb24a409df1d0372202c5d9",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara's suit alarms blare as Teo frantically reroutes the dome's thermal shielding, but the wavefront breaches the pressure hull in seconds; the holo-message flashes again, now showing a distorted transmission from forty years ahead that isn’t a message at all. She dives into the flooded corridor, deploying a makeshift EMP pulse to jam the incoming data stream while Teo scrambles to reroute power to the emergency vent.",
+      "stageText": "Chiara's suit alarms blare as Teo frantically reroutes the dome's thermal shielding, but the wavefront breaches the pressure hull in seconds; the holo-message flashes again, now showing a distorted transmission from forty years ahead that isn’t a message at all. She dives into the flooded corridor, deploying a makeshift EMP pulse to jam the incoming data stream while Teo scrambles to reroute power to the emergency vent.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 964,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:53:31.346Z",
+      "finishedAt": "2026-11-05T00:54:21.049Z",
+      "latencyS": 49.55593642200006,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_6_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 6,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara's suit alarms blare as Teo frantically reroutes the dome's thermal shielding, but the wavefro",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:54:21.047Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_6_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 6,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara's suit alarms blare as Teo frantically reroutes the dome's thermal shielding, but the wavefro",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:54:21.047Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:8",
+      "index": 7,
+      "modelId": "d1_omni",
+      "role": "decision_assistant",
+      "status": "completed",
+      "requestId": "333ed22e87f24c64ace2f456ae9dc28d",
+      "route": [
+        "d1_omni"
+      ],
+      "output": "{\n  \"predicted_route\": \"secure_cryo_data\",\n  \"confidence\": 0.8806758556810681,\n  \"probabilities\": {\n    \"setback\": 0.08279670742983562,\n    \"secure_cryo_data\": 0.8806758556810681,\n    \"honest_moment\": 0.0365274368890962\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+      "stageText": "Evaluating every thread of evidence, the decisive development here is: Chiara risks exposure in the vent corridor to extract the encrypted cryo-data chip.",
+      "stageTextProvenance": "template",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "decisionData": {
+        "predicted_route": "secure_cryo_data",
+        "confidence": 0.8806758556810681,
+        "probabilities": {
+          "setback": 0.08279670742983562,
+          "secure_cryo_data": 0.8806758556810681,
+          "honest_moment": 0.0365274368890962
+        },
+        "valid": true,
+        "rawText": "{\n  \"predicted_route\": \"secure_cryo_data\",\n  \"confidence\": 0.8806758556810681,\n  \"probabilities\": {\n    \"setback\": 0.08279670742983562,\n    \"secure_cryo_data\": 0.8806758556810681,\n    \"honest_moment\": 0.0365274368890962\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}"
+      },
+      "decisionOptions": {
+        "setback": "The plan fails, and Chiara has to try another way.",
+        "secure_cryo_data": "Chiara risks exposure in the vent corridor to extract the encrypted cryo-data chip.",
+        "honest_moment": "Chiara and Teo share an honest moment that changes their bond."
+      },
+      "promptLength": 965,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:54:24.652Z",
+      "finishedAt": "2026-11-05T00:55:07.787Z",
+      "latencyS": 42.431125577999865,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:9",
+      "index": 8,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "214649ae753e486baf691b5ecae20e7a",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara lunges into the searing vent corridor, her suit's thermal shield shattered by Teo’s frantic rerouting. She wrenches the pressure hull open, unleashing superheated plasma and a roar of escaping void gas as systems surge back to nominal. The holo-message flashes: forty years later, humanity has learned—and Chiara carries the encrypted cryo-data chip toward the abyss.",
+      "stageText": "Chiara lunges into the searing vent corridor, her suit's thermal shield shattered by Teo’s frantic rerouting. She wrenches the pressure hull open, unleashing superheated plasma and a roar of escaping void gas as systems surge back to nominal. The holo-message flashes: forty years later, humanity has learned—and Chiara carries the encrypted cryo-data chip toward the abyss.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 902,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:55:10.192Z",
+      "finishedAt": "2026-11-05T00:55:45.852Z",
+      "latencyS": 35.537963339000044,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_8_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 8,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara lunges into the searing vent corridor, her suit's thermal shield shattered by Teo’s frantic r",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:55:45.849Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_8_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 8,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara lunges into the searing vent corridor, her suit's thermal shield shattered by Teo’s frantic r",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:55:45.849Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:10",
+      "index": 9,
+      "modelId": "vision",
+      "role": "visual_interpreter",
+      "status": "completed",
+      "requestId": "2b638e0c40fa4b3da6861dd6a2257bdf",
+      "route": [
+        "vision"
+      ],
+      "output": "Chiara dives into the vent corridor, her suit's shield shattered by Teo's urgent rerouting. She wrenches the pressure hull open, unleashing superheated plasma and a roar that shakes the dome. Teo rushes to stabilize the breach, while Chiara scans for signals from forty years ahead.",
+      "stageText": "Chiara dives into the vent corridor, her suit's shield shattered by Teo's urgent rerouting. She wrenches the pressure hull open, unleashing superheated plasma and a roar that shakes the dome. Teo rushes to stabilize the breach, while Chiara scans for signals from forty years ahead.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 972,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:55:49.460Z",
+      "finishedAt": "2026-11-05T00:56:25.723Z",
+      "latencyS": 35.464476027000046,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_9_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 9,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara dives into the vent corridor, her suit's shield shattered by Teo's urgent rerouting. She wren",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:56:25.056Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_9_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 9,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara dives into the vent corridor, her suit's shield shattered by Teo's urgent rerouting. She wren",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:56:25.056Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:11",
+      "index": 10,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "f1804553eb6d41a9b9b22fb5abf61e00",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station remains stable despite the crisis. A faint signal from forty years later flickers on the display, promising a message from the future. The crew prepares to decode it while the airlock seals, ensuring safe orbit and no alarms remain active.",
+      "stageText": "Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station remains stable despite the crisis. A faint signal from forty years later flickers on the display, promising a message from the future. The crew prepares to decode it while the airlock seals, ensuring safe orbit and no alarms remain active.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 882,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:56:28.547Z",
+      "finishedAt": "2026-11-05T00:56:56.026Z",
+      "latencyS": 27.362405657999943,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: station, signal, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_10_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 10,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station rema",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:56:56.024Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_10_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 10,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station rema",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:56:56.024Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:12",
+      "index": 11,
+      "modelId": "audio",
+      "role": "audio_interpreter",
+      "status": "completed",
+      "requestId": "3821242593d1462db4c17d5ef5c3f74c",
+      "route": [
+        "audio"
+      ],
+      "output": "The faint signal from forty years later flickers on, promising a message from the future. Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station remains stable despite the crisis. A new transmission from the future arrives, containing critical information that could change everything. Chiara approaches the transmission, ready to decipher its meaning.",
+      "stageText": "The faint signal from forty years later flickers on, promising a message from the future. Chiara surfaces in the dome's observation bay as Teo monitors telemetry, confirming the station remains stable despite the crisis. A new transmission from the future arrives, containing critical information that could change everything. Chiara approaches the transmission, ready to decipher its meaning.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "promptLength": 980,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:56:59.381Z",
+      "finishedAt": "2026-11-05T00:57:36.070Z",
+      "latencyS": 35.94816052200008,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Repeated a previous passage or action; kept out of the story context."
+        ],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_11_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 11,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The faint signal from forty years later flickers on, promising a message from the future. Chiara sur",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:57:35.449Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_11_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 11,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The faint signal from forty years later flickers on, promising a message from the future. Chiara sur",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:57:35.449Z"
+        }
+      ],
+      "loopIssue": "Duplicate sentence detected from turn 9: \"chiara surfaces in the dome's observation bay as teo monitor...\"",
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:13",
+      "index": 12,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "9e2d1893d01c4a4484e7121533362bb6",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara steps into the observation bay as Teo watches telemetry hold steady through the aftershocks of the crisis. A faint, encrypted pulse from forty years later flickers on the display, its rhythm matching the station's orbit. She reaches out to confirm the signal is genuine and stable, while Teo logs the final orbital data before sealing the dome for safe return. The message arrives as a promise: we are still here, and the future is listening.",
+      "stageText": "Chiara steps into the observation bay as Teo watches telemetry hold steady through the aftershocks of the crisis. A faint, encrypted pulse from forty years later flickers on the display, its rhythm matching the station's orbit. She reaches out to confirm the signal is genuine and stable, while Teo logs the final orbital data before sealing the dome for safe return. The message arrives as a promise: we are still here, and the future is listening.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 881,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:57:39.676Z",
+      "finishedAt": "2026-11-05T00:58:13.155Z",
+      "latencyS": 33.36639970700003,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: station, signal, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_12_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 12,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps into the observation bay as Teo watches telemetry hold steady through the aftershocks o",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:58:13.153Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_12_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 12,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps into the observation bay as Teo watches telemetry hold steady through the aftershocks o",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:58:13.153Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:14",
+      "index": 13,
+      "modelId": "omni",
+      "role": "multimodal_interpreter",
+      "status": "completed",
+      "requestId": "420f27fafda34eeb97b1aa8cac066d41",
+      "route": [
+        "omni"
+      ],
+      "output": "The pulse resolves into a single, clear data stream that streams directly into the dome's central console, bypassing the usual encryption layer. A sudden, sharp vibration ripples through the water, and the telemetry feed flickers, showing a critical error code that the team has never seen before. Teo immediately initiates a manual override, forcing the console to reroute the signal through an alternate, untested pathway.",
+      "stageText": "The pulse resolves into a single, clear data stream that streams directly into the dome's central console, bypassing the usual encryption layer. A sudden, sharp vibration ripples through the water, and the telemetry feed flickers, showing a critical error code that the team has never seen before. Teo immediately initiates a manual override, forcing the console to reroute the signal through an alternate, untested pathway.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 948,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:58:16.761Z",
+      "finishedAt": "2026-11-05T00:58:55.922Z",
+      "latencyS": 38.52156020199982,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: signal"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_13_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 13,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Teo"
+          ],
+          "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:58:55.395Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_13_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 13,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Teo"
+          ],
+          "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:58:55.395Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:15",
+      "index": 14,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "d7b1a598705e430db114c20e92a02130",
+      "route": [
+        "text"
+      ],
+      "output": "The pulse resolves into a single, clear data stream that streams directly into the dome's central console, bypassing the usual encryption layer. A sudden, sharp vibration ripples through the water as the station begins to drift upward, its hull aligning with the orbital path while Chiara and Teo monitor telemetry on the console. The incoming message from forty years in the future confirms the crisis was averted, and stable orbit is verified for safe re-entry into the airlock.",
+      "stageText": "The pulse resolves into a single, clear data stream that streams directly into the dome's central console, bypassing the usual encryption layer. A sudden, sharp vibration ripples through the water as the station begins to drift upward, its hull aligning with the orbital path while Chiara and Teo monitor telemetry on the console. The incoming message from forty years in the future confirms the crisis was averted, and stable orbit is verified for safe re-entry into the airlock.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 887,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:58:59.529Z",
+      "finishedAt": "2026-11-05T00:59:32.982Z",
+      "latencyS": 33.33143174199995,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: station, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_14_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 14,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:59:32.980Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_14_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 14,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "The pulse resolves into a single, clear data stream that streams directly into the dome's central co",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T00:59:32.980Z"
+        }
+      ],
+      "loopIssue": "Duplicate sentence detected from turn 11: \"the pulse resolves into a single, clear data stream that str...\"",
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:16",
+      "index": 15,
+      "modelId": "d1",
+      "role": "decision_assistant",
+      "status": "completed",
+      "requestId": "f47e8e78f4ca4a17952b5cc77192fc98",
+      "route": [
+        "d1"
+      ],
+      "output": "{\n  \"predicted_route\": \"reveal_secret\",\n  \"confidence\": 0.48101873577189713,\n  \"probabilities\": {\n    \"reveal_secret\": 0.48101873577189713,\n    \"honest_moment\": 0.11497801155526449,\n    \"hard_choice\": 0.4040032526728384\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+      "stageText": "Analyzing the active vectors, the crucial turn is: Teo reveals a secret that changes what Chiara believes.",
+      "stageTextProvenance": "template",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "decisionData": {
+        "predicted_route": "reveal_secret",
+        "confidence": 0.48101873577189713,
+        "probabilities": {
+          "reveal_secret": 0.48101873577189713,
+          "honest_moment": 0.11497801155526449,
+          "hard_choice": 0.4040032526728384
+        },
+        "valid": true,
+        "rawText": "{\n  \"predicted_route\": \"reveal_secret\",\n  \"confidence\": 0.48101873577189713,\n  \"probabilities\": {\n    \"reveal_secret\": 0.48101873577189713,\n    \"honest_moment\": 0.11497801155526449,\n    \"hard_choice\": 0.4040032526728384\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}"
+      },
+      "decisionOptions": {
+        "reveal_secret": "Teo reveals a secret that changes what Chiara believes.",
+        "honest_moment": "Chiara and Teo share an honest moment that changes their bond.",
+        "hard_choice": "Chiara must choose between two things that both matter."
+      },
+      "promptLength": 964,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T00:59:36.587Z",
+      "finishedAt": "2026-11-05T00:59:58.669Z",
+      "latencyS": 21.378702860999965,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "isTruncated": false
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:17",
+      "index": 16,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "3931487018964787a55de5e26fcdb517",
+      "route": [
+        "text"
+      ],
+      "output": "Teo whispers that the future’s data stream contains a hidden beacon mapping the orbital telemetry to a dormant relay at the station’s hull, and he shows Chiara the encrypted coordinates before the vibration fades into silence. The dome’s central console flashes the new signal, confirming stable orbit and revealing a concealed emergency protocol activated by his revelation. As the airlock seals behind them, they verify the telemetry steady, knowing the forty‑year message has already rewritten their mission.",
+      "stageText": "Teo whispers that the future’s data stream contains a hidden beacon mapping the orbital telemetry to a dormant relay at the station’s hull, and he shows Chiara the encrypted coordinates before the vibration fades into silence. The dome’s central console flashes the new signal, confirming stable orbit and revealing a concealed emergency protocol activated by his revelation.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 965,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T01:00:01.078Z",
+      "finishedAt": "2026-11-05T01:00:36.119Z",
+      "latencyS": 34.92448919599997,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn exceeds the 500-character maximum."
+        ],
+        "evidence": [
+          "Genre cues: station, signal, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_16_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 16,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Teo whispers that the future’s data stream contains a hidden beacon mapping the orbital telemetry to",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:00:36.116Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_16_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 16,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Teo whispers that the future’s data stream contains a hidden beacon mapping the orbital telemetry to",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:00:36.116Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:18",
+      "index": 17,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "759a76b0b773465b8907178c9e89c391",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara steps toward the hull panel, her breath held as Teo points to a pulsing beacon embedded in the station's core—its coordinates align with an orbital relay dormant for decades. He urges her to splice the manual override into the telemetry feed before the pressure seals seal shut and the system collapses. She hesitates, then plunges her hand into the cold metal conduit, feeling the tremor of a failing containment field beneath her fingers.",
+      "stageText": "Chiara steps toward the hull panel, her breath held as Teo points to a pulsing beacon embedded in the station's core—its coordinates align with an orbital relay dormant for decades. He urges her to splice the manual override into the telemetry feed before the pressure seals seal shut and the system collapses. She hesitates, then plunges her hand into the cold metal conduit, feeling the tremor of a failing containment field beneath her fingers.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 819,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T01:00:39.722Z",
+      "finishedAt": "2026-11-05T01:01:12.819Z",
+      "latencyS": 32.99332202599999,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: station"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_17_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 17,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps toward the hull panel, her breath held as Teo points to a pulsing beacon embedded in th",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:01:12.814Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_17_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 17,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps toward the hull panel, her breath held as Teo points to a pulsing beacon embedded in th",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:01:12.814Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    },
+    {
+      "turnId": "1f07be1a-00a3-4aee-988c-e38cf9586f15:19",
+      "index": 18,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "22490cf8d9d3428eb2976cf61303ace1",
+      "route": [
+        "text"
+      ],
+      "output": "Chiara steps forward, her breath held as Teo points to a pulsing beacon that resolves to the year 2147; she chooses to trust the signal over the station’s hidden threat, accepting the message from forty years in the future. The beacon delivers a warning of an imminent collapse and a plea for humanity’s survival, forcing her to decide whether to sacrifice the fragile present or risk everything for the distant horizon. In Act IV resolution, she embraces the future, sealing the hull panel and broadcasting the warning, ensuring the station’s core endures while her world learns from its past—her choice saves countless lives but leaves the present’s secrets buried in time.",
+      "stageText": "Chiara steps forward, her breath held as Teo points to a pulsing beacon that resolves to the year 2147; she chooses to trust the signal over the station’s hidden threat, accepting the message from forty years in the future. The beacon delivers a warning of an imminent collapse and a plea for humanity’s survival, forcing her to decide whether to sacrifice the fragile present or risk everything for the distant horizon.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 958,
+      "contextTruncated": true,
+      "startedAt": "2026-11-05T01:01:16.424Z",
+      "finishedAt": "2026-11-05T01:02:47.950Z",
+      "latencyS": 38.11262590199999,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn exceeds the 500-character maximum."
+        ],
+        "evidence": [
+          "Genre cues: station, future"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_18_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 18,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps forward, her breath held as Teo points to a pulsing beacon that resolves to the year 21",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:02:47.945Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_52f50d53-e51b-4837-af02-fcaf6b91f5df_18_prog",
+          "storyId": "52f50d53-e51b-4837-af02-fcaf6b91f5df",
+          "turnIndex": 18,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Chiara",
+            "Teo"
+          ],
+          "description": "Chiara steps forward, her breath held as Teo points to a pulsing beacon that resolves to the year 21",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-05T01:02:47.945Z"
+        }
+      ],
+      "isTruncated": false,
+      "finishReason": "stop"
+    }
+  ],
+  "humanTurns": [],
+  "status": "completed",
+  "mode": "live_local_show",
+  "continuityAudit": {
+    "verdict": "no_conflicts",
+    "label": "No detected continuity conflicts",
+    "issues": [],
+    "characterSummaries": [
+      {
+        "name": "Chiara",
+        "status": "alive",
+        "detail": "alive"
+      },
+      {
+        "name": "Teo",
+        "status": "alive",
+        "detail": "alive"
+      }
+    ],
+    "entitySummaries": [],
+    "actSummaries": {
+      "1": 4,
+      "2": 2,
+      "3": 1,
+      "4": 10
+    }
+  },
+  "storyQualityAudit": {
+    "inferenceCompleted": true,
+    "outputComplete": false,
+    "canonConsistent": true,
+    "genreContractPassed": true,
+    "loopFree": false,
+    "reviewStatus": "review_recommended",
+    "label": "Continuity review recommended",
+    "issues": [
+      "Turn 4 output incomplete: Ended mid-sentence or mid-word on 's' without terminating punctuation",
+      "Duplicate sentence detected from turn 9: \"chiara surfaces in the dome's observation bay as teo monitor...\"",
+      "Duplicate sentence detected from turn 11: \"the pulse resolves into a single, clear data stream that str...\""
+    ],
+    "details": {
+      "truncatedTurnsCount": 1,
+      "repairedTurnsCount": 0,
+      "continuityViolationsCount": 0,
+      "loopViolationsCount": 2,
+      "endingFulfillment": {
+        "addressedCentralConflict": true,
+        "genreRequirementsMet": true,
+        "notes": "Ending addressed primary conflict."
+      }
+    }
+  }
+}

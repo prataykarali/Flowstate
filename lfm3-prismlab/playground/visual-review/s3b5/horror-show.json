@@ -1,0 +1,1209 @@
+{
+  "canonicalWorldState": {
+    "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+    "genreId": "horror",
+    "theme": "Horror",
+    "premise": "something is wearing a neighbor's coat",
+    "currentAct": 4,
+    "setting": {
+      "location": "a fog-covered campground",
+      "establishedRules": []
+    },
+    "characters": [
+      {
+        "id": "char_usha",
+        "name": "Usha",
+        "role": "apprentice chef",
+        "status": "alive",
+        "location": "a fog-covered campground",
+        "motivations": [
+          "Resolve the crisis: something is wearing a neighbor's coat"
+        ],
+        "knowledge": [
+          "Initial situation"
+        ],
+        "pastActions": [
+          "Turn 1: Usha felt the chill as Vikram shuffled n",
+          "Turn 2: Usha gasps as the coat‑wearer steps clos",
+          "Turn 3: Usha stumbles into shadows, flashlight f",
+          "Turn 4: \"My breath freezes in the cold air,\" Ush",
+          "Turn 5: A second neighbor's coat appears, its ey",
+          "Turn 7: Usha spots a glint on the coat’s collar—",
+          "Turn 9: Usha lunges for the glint, heart poundin",
+          "Turn 10: Usha lunges for the glint; Vikram steps "
+        ]
+      },
+      {
+        "id": "char_vikram",
+        "name": "Vikram",
+        "role": "companion",
+        "status": "alive",
+        "location": "a fog-covered campground",
+        "motivations": [
+          "Support the journey"
+        ],
+        "knowledge": [
+          "Initial situation"
+        ],
+        "pastActions": [
+          "Turn 1: Usha felt the chill as Vikram shuffled n",
+          "Turn 4: \"My breath freezes in the cold air,\" Ush",
+          "Turn 5: A second neighbor's coat appears, its ey",
+          "Turn 10: Usha lunges for the glint; Vikram steps "
+        ]
+      }
+    ],
+    "entities": [],
+    "relationships": [
+      {
+        "sourceName": "Usha",
+        "targetName": "Vikram",
+        "kind": "companions",
+        "state": "allied against crisis",
+        "changes": [
+          "United by initial crisis"
+        ]
+      }
+    ],
+    "establishedFacts": [
+      {
+        "id": "fact_premise",
+        "text": "something is wearing a neighbor's coat",
+        "turnIndex": 0,
+        "confidence": 1,
+        "sourceModelId": "config",
+        "irreversible": false
+      }
+    ],
+    "unresolvedConflicts": [
+      {
+        "id": "conflict_primary",
+        "description": "something is wearing a neighbor's coat",
+        "stakes": "If the emergency floodgates are not unlatched, the entity will break into the town drainage pipes.",
+        "resolved": false
+      }
+    ],
+    "resolvedConflicts": [],
+    "eventLog": [
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_0",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 0,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha",
+          "Vikram"
+        ],
+        "description": "Story begins: something is wearing a neighbor's coat",
+        "proposedChanges": [
+          "Story initialized with active cast and premise"
+        ],
+        "acceptedChanges": [
+          "Story initialized with active cast and premise"
+        ],
+        "irreversible": false,
+        "confidence": "high",
+        "auditLog": [
+          "Initialized via canonical story config and director plan"
+        ],
+        "timestamp": "2026-11-04T14:49:37.822Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_0_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 0,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha",
+          "Vikram"
+        ],
+        "description": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neig",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:50:59.821Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_1_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 1,
+        "modelId": "vision",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha"
+        ],
+        "description": "Usha gasps as the coat‑wearer steps closer, then flees, leaving only the eerie silence behind.",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:51:25.487Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_2_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 2,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha"
+        ],
+        "description": "Usha stumbles into shadows, flashlight flickers. A cold hand grips her wrist. She chases, but the en",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:51:56.367Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_3_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 3,
+        "modelId": "audio",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha",
+          "Vikram"
+        ],
+        "description": "\"My breath freezes in the cold air,\" Usha whispered. \"The hand on my wrist trembles. It's not Vikram",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:52:51.928Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_4_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 4,
+        "modelId": "omni",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha",
+          "Vikram"
+        ],
+        "description": "A second neighbor's coat appears, its eyes glinting even more. Usha shrieks, \"It's not Vikram!\" Vikr",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:53:25.717Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_6_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 6,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha"
+        ],
+        "description": "Usha spots a glint on the coat’s collar—pointing away from her. She darts toward it, hearing metal c",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:54:18.380Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_8_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 8,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha"
+        ],
+        "description": "Usha lunges for the glint, heart pounding. Metal clangs behind her as a shadow slips into view.  \n**",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:55:20.202Z"
+      },
+      {
+        "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_9_prog",
+        "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+        "turnIndex": 9,
+        "modelId": "text",
+        "type": "PROGRESSION_BEAT",
+        "actors": [
+          "Usha",
+          "Vikram"
+        ],
+        "description": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neigh",
+        "proposedChanges": [
+          "Story progression step"
+        ],
+        "acceptedChanges": [],
+        "irreversible": false,
+        "confidence": "probable",
+        "auditLog": [
+          "General narrative progression without explicit character state trigger"
+        ],
+        "timestamp": "2026-11-04T14:56:38.833Z"
+      }
+    ],
+    "latestAcceptedEventIds": [
+      "evt_7b700727-8eb7-4392-9d01-225d23898f73_9_prog"
+    ],
+    "narrativeGoal": "something is wearing a neighbor's coat",
+    "endingRequirements": [
+      "Resolve or clarify the true nature of the monstrous/haunting threat and establish the permanent survival consequences."
+    ],
+    "prohibitedContradictions": [],
+    "directorPlan": {
+      "genre": "resolved",
+      "theme": "Horror",
+      "characters": [
+        {
+          "name": "Usha",
+          "role": "apprentice chef",
+          "relationToProtagonist": "Self"
+        },
+        {
+          "name": "Vikram",
+          "role": "Companion / Witness",
+          "relationToProtagonist": "Close associate / partner"
+        }
+      ],
+      "primaryConflict": "An unearthly entity stalks the subterranean pumping station beneath the abandoned reservoir. (Established opening: \"something is wearing a neighbor's coat\")",
+      "initialStakes": "If the emergency floodgates are not unlatched, the entity will break into the town drainage pipes.",
+      "developmentBeats": [
+        {
+          "beatIndex": 0,
+          "act": 1,
+          "targetAct": "Act I — Beginning",
+          "narrativeGoal": "Notice the wet claw marks and the abnormal frequency vibration in the pipes.",
+          "requiredProgression": "Realize the facility exit has rusted shut from the outside.",
+          "avoidRepeating": "Do not repeat the dripping sounds."
+        },
+        {
+          "beatIndex": 1,
+          "act": 2,
+          "targetAct": "Act II — Discovery",
+          "narrativeGoal": "Locate the maintenance blueprint to find the main steam pressure lever.",
+          "requiredProgression": "Encounter the entity in the shadows, losing the main flashlight.",
+          "avoidRepeating": "Do not re-examine the rusted exit door."
+        },
+        {
+          "beatIndex": 2,
+          "act": 2,
+          "targetAct": "Act II — Discovery",
+          "narrativeGoal": "Navigate the narrow gantry by emergency red strobes while hearing pursuit.",
+          "requiredProgression": "Discover that the entity recoils from high-frequency steam bursts.",
+          "avoidRepeating": "Do not repeat the flashlight loss."
+        },
+        {
+          "beatIndex": 3,
+          "act": 3,
+          "targetAct": "Act III — Confrontation",
+          "narrativeGoal": "Trigger the pressure valve while standing as bait on the central platform.",
+          "requiredProgression": "A blinding jet of superheated steam engulfs the creature, throwing the gantry loose.",
+          "avoidRepeating": "Do not repeat pipe-stalking movements."
+        },
+        {
+          "beatIndex": 4,
+          "act": 4,
+          "targetAct": "Act IV — Resolution",
+          "narrativeGoal": "Crawl through the intake conduit into the rainy night air.",
+          "requiredProgression": "Survey the collapsed tunnel below, bearing the psychological scars of survival.",
+          "avoidRepeating": "Do not restart the steam valves."
+        }
+      ],
+      "climaxObjective": "Lure the entity onto the catwalk above the intake turbines and drop the pressure release.",
+      "endingRequirements": "Resolve or clarify the true nature of the monstrous/haunting threat and establish the permanent survival consequences.",
+      "endingType": "resolved"
+    },
+    "candidateObservations": []
+  },
+  "directorPlan": {
+    "genre": "resolved",
+    "theme": "Horror",
+    "characters": [
+      {
+        "name": "Usha",
+        "role": "apprentice chef",
+        "relationToProtagonist": "Self"
+      },
+      {
+        "name": "Vikram",
+        "role": "Companion / Witness",
+        "relationToProtagonist": "Close associate / partner"
+      }
+    ],
+    "primaryConflict": "An unearthly entity stalks the subterranean pumping station beneath the abandoned reservoir. (Established opening: \"something is wearing a neighbor's coat\")",
+    "initialStakes": "If the emergency floodgates are not unlatched, the entity will break into the town drainage pipes.",
+    "developmentBeats": [
+      {
+        "beatIndex": 0,
+        "act": 1,
+        "targetAct": "Act I — Beginning",
+        "narrativeGoal": "Notice the wet claw marks and the abnormal frequency vibration in the pipes.",
+        "requiredProgression": "Realize the facility exit has rusted shut from the outside.",
+        "avoidRepeating": "Do not repeat the dripping sounds."
+      },
+      {
+        "beatIndex": 1,
+        "act": 2,
+        "targetAct": "Act II — Discovery",
+        "narrativeGoal": "Locate the maintenance blueprint to find the main steam pressure lever.",
+        "requiredProgression": "Encounter the entity in the shadows, losing the main flashlight.",
+        "avoidRepeating": "Do not re-examine the rusted exit door."
+      },
+      {
+        "beatIndex": 2,
+        "act": 2,
+        "targetAct": "Act II — Discovery",
+        "narrativeGoal": "Navigate the narrow gantry by emergency red strobes while hearing pursuit.",
+        "requiredProgression": "Discover that the entity recoils from high-frequency steam bursts.",
+        "avoidRepeating": "Do not repeat the flashlight loss."
+      },
+      {
+        "beatIndex": 3,
+        "act": 3,
+        "targetAct": "Act III — Confrontation",
+        "narrativeGoal": "Trigger the pressure valve while standing as bait on the central platform.",
+        "requiredProgression": "A blinding jet of superheated steam engulfs the creature, throwing the gantry loose.",
+        "avoidRepeating": "Do not repeat pipe-stalking movements."
+      },
+      {
+        "beatIndex": 4,
+        "act": 4,
+        "targetAct": "Act IV — Resolution",
+        "narrativeGoal": "Crawl through the intake conduit into the rainy night air.",
+        "requiredProgression": "Survey the collapsed tunnel below, bearing the psychological scars of survival.",
+        "avoidRepeating": "Do not restart the steam valves."
+      }
+    ],
+    "climaxObjective": "Lure the entity onto the catwalk above the intake turbines and drop the pressure release.",
+    "endingRequirements": "Resolve or clarify the true nature of the monstrous/haunting threat and establish the permanent survival consequences.",
+    "endingType": "resolved"
+  },
+  "version": "s3b.2",
+  "showId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5",
+  "createdAt": "2026-11-04T14:49:37.822Z",
+  "updatedAt": "2026-11-04T14:56:38.848Z",
+  "config": {
+    "theme": "Horror",
+    "opening": "",
+    "turnCount": 10,
+    "modelIds": [
+      "text",
+      "vision",
+      "audio",
+      "omni",
+      "d1",
+      "d1_omni"
+    ],
+    "playback": "automatic",
+    "maxTokens": 128,
+    "cast": {
+      "protagonist": "Usha",
+      "companion": "Vikram",
+      "role": "apprentice chef",
+      "setting": "a fog-covered campground",
+      "hook": "something is wearing a neighbor's coat"
+    },
+    "avoidOpenings": []
+  },
+  "turnOrder": [
+    "text",
+    "vision",
+    "text",
+    "audio",
+    "omni",
+    "d1",
+    "text",
+    "d1_omni",
+    "text",
+    "text"
+  ],
+  "turns": [
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:1",
+      "index": 0,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "9ac380fb869048d78b6662eab3109ebf",
+      "route": [
+        "text"
+      ],
+      "output": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neighbor's coat, its eyes glinting in the mist.\n\nThe abandoned reservoir's pumping station groaned beneath her feet. Shadows slipped through pipes like cold fingers.\n\nA low growl rose from the depths. An unearthly entity stalked, hungry for the steam and fear inside Usha.\n\nVikram whispered, \"Stay back, Usha.\"\n\nUsha clutched a knife, but the air tasted of rot. The coat's eyes watched her every move.",
+      "stageText": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neighbor's coat, its eyes glinting in the mist.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 574,
+      "contextTruncated": false,
+      "startedAt": "2026-11-04T14:49:37.923Z",
+      "finishedAt": "2026-11-04T14:50:59.824Z",
+      "latencyS": 39.05810551199829,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn is longer than the requested short format."
+        ],
+        "evidence": [
+          "Genre cues: fear"
+        ]
+      },
+      "rawAttempts": [
+        {
+          "requestId": "9ac380fb869048d78b6662eab3109ebf",
+          "output": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neighbor's coat, its eyes glinting in the mist.\n\nThe abandoned reservoir's pumping station groaned beneath her feet. Shadows slipped through pipes like cold fingers.\n\nA low growl rose from the depths. An unearthly entity stalked, hungry for the steam and fear inside Usha.\n\nVikram whispered, \"Stay back, Usha.\"\n\nUsha clutched a knife, but the air tasted of rot. The coat's eyes watched her every move.",
+          "reason": "Turn is longer than the requested short format."
+        },
+        {
+          "requestId": "7a8e010e176945f3aa0bc0d615f220d7",
+          "output": "Usha was chopping onions in the fog-covered campground when a shadow slipped through the trees, wearing a neighbor's coat. It moved like a hand reaching for her. Vikram stood nearby, his eyes wide with fear. The air grew cold as something unseen crept toward them.\n\nSomething is wearing a neighbor's coat.  \n\nIt stalked the abandoned reservoir's pumping station beneath the fog. Usha felt its claws on her skin; Vikram heard guttural growls behind the rusted pipes. They ran, but the darkness swallowed their screams. The entity never stopped.",
+          "reason": "Turn is longer than the requested short format."
+        }
+      ],
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_0_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 0,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neig",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:50:59.821Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_0_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 0,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "Usha felt the chill as Vikram shuffled near the fog-covered campground. Something was wearing a neig",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:50:59.821Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:2",
+      "index": 1,
+      "modelId": "vision",
+      "role": "visual_interpreter",
+      "status": "completed",
+      "requestId": "f7225370672343e4b22bac3e91f6bf21",
+      "route": [
+        "vision"
+      ],
+      "output": "Usha gasps as the coat‑wearer steps closer, then flees, leaving only the eerie silence behind.",
+      "stageText": "Usha gasps as the coat‑wearer steps closer, then flees, leaving only the eerie silence behind.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 716,
+      "contextTruncated": false,
+      "startedAt": "2026-11-04T14:51:01.230Z",
+      "finishedAt": "2026-11-04T14:51:25.488Z",
+      "latencyS": 23.584782013000222,
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_1_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 1,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha gasps as the coat‑wearer steps closer, then flees, leaving only the eerie silence behind.",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:51:25.487Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_1_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 1,
+          "modelId": "vision",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha gasps as the coat‑wearer steps closer, then flees, leaving only the eerie silence behind.",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:51:25.487Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:3",
+      "index": 2,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "c32f797c7daf4a62899209ddaf2ab166",
+      "route": [
+        "text"
+      ],
+      "output": "Usha stumbles into shadows, flashlight flickers. A cold hand grips her wrist. She chases, but the entity vanishes. Only rusted exit remains. Searching for blueprints feels impossible now.",
+      "stageText": "Usha stumbles into shadows, flashlight flickers. A cold hand grips her wrist.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 872,
+      "contextTruncated": false,
+      "startedAt": "2026-11-04T14:51:26.891Z",
+      "finishedAt": "2026-11-04T14:51:56.369Z",
+      "latencyS": 28.883053216006374,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_2_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 2,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha stumbles into shadows, flashlight flickers. A cold hand grips her wrist. She chases, but the en",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:51:56.367Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_2_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 2,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha stumbles into shadows, flashlight flickers. A cold hand grips her wrist. She chases, but the en",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:51:56.367Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:4",
+      "index": 3,
+      "modelId": "audio",
+      "role": "audio_interpreter",
+      "status": "completed",
+      "requestId": "e2de1127b3a44d7099340e6900ba7d06",
+      "route": [
+        "audio"
+      ],
+      "output": "\"My breath freezes in the cold air,\" Usha whispered. \"The hand on my wrist trembles. It's not Vikram.\" Vikram turned, his eyes wide. \"What's wrong?\" Usha looked around, the fog thickening. \"Something is wearing a neighbor's coat. Its eyes glinting in the mist.\" \"I don't know,\" Vikram said, his voice low. \"But I feel it. Something is watching us.\" Usha's breath catches. \"What are we?\" Vikram pointed toward the shadows ahead. \"The shadows,\" he said. \"They're following us.\" Usha's heart pounds. \"What do we do?\" Vikram paused, his gaze fixed on the flickering flashlight. \"We need to move fast. We",
+      "stageText": "\"My breath freezes in the cold air,\" Usha whispered. \"The hand on my wrist trembles.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 846,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:51:57.771Z",
+      "finishedAt": "2026-11-04T14:52:51.930Z",
+      "latencyS": 53.31826351700147,
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_3_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 3,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "\"My breath freezes in the cold air,\" Usha whispered. \"The hand on my wrist trembles. It's not Vikram",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:52:51.928Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_3_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 3,
+          "modelId": "audio",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "\"My breath freezes in the cold air,\" Usha whispered. \"The hand on my wrist trembles. It's not Vikram",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:52:51.928Z"
+        }
+      ],
+      "isTruncated": true
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:5",
+      "index": 4,
+      "modelId": "omni",
+      "role": "multimodal_interpreter",
+      "status": "completed",
+      "requestId": "924c80660acc4c8d91a631b5c9d6517c",
+      "route": [
+        "omni"
+      ],
+      "output": "A second neighbor's coat appears, its eyes glinting even more. Usha shrieks, \"It's not Vikram!\" Vikram lunges, but the coat's eyes lock onto his face, freezing his breath.",
+      "stageText": "A second neighbor's coat appears, its eyes glinting even more. Usha shrieks, \"It's not Vikram!\" Vikram lunges, but the coat's eyes lock onto his face, freezing…",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 958,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:52:53.333Z",
+      "finishedAt": "2026-11-04T14:53:25.720Z",
+      "latencyS": 31.70050623899442,
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_4_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 4,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "A second neighbor's coat appears, its eyes glinting even more. Usha shrieks, \"It's not Vikram!\" Vikr",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:53:25.717Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_4_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 4,
+          "modelId": "omni",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "A second neighbor's coat appears, its eyes glinting even more. Usha shrieks, \"It's not Vikram!\" Vikr",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:53:25.717Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:6",
+      "index": 5,
+      "modelId": "d1",
+      "role": "decision_assistant",
+      "status": "completed",
+      "requestId": "ed7d3462ac7141328cbe0e4e522b10f5",
+      "route": [
+        "d1"
+      ],
+      "output": "{\n  \"predicted_route\": \"new_clue\",\n  \"confidence\": 0.4226825598112345,\n  \"probabilities\": {\n    \"raise_stakes\": 0.23909726898233596,\n    \"new_clue\": 0.4226825598112345,\n    \"ally_helps\": 0.33822017120642967\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+      "stageText": "I think the story should turn here: Usha notices a small detail that points in a new direction. (42% sure)",
+      "stageTextProvenance": "template",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "decisionData": {
+        "predicted_route": "new_clue",
+        "confidence": 0.4226825598112345,
+        "probabilities": {
+          "raise_stakes": 0.23909726898233596,
+          "new_clue": 0.4226825598112345,
+          "ally_helps": 0.33822017120642967
+        },
+        "valid": true,
+        "rawText": "{\n  \"predicted_route\": \"new_clue\",\n  \"confidence\": 0.4226825598112345,\n  \"probabilities\": {\n    \"raise_stakes\": 0.23909726898233596,\n    \"new_clue\": 0.4226825598112345,\n    \"ally_helps\": 0.33822017120642967\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}"
+      },
+      "decisionOptions": {
+        "raise_stakes": "Usha faces a bigger risk as the problem suddenly gets worse.",
+        "new_clue": "Usha notices a small detail that points in a new direction.",
+        "ally_helps": "Vikram steps in to help Usha, but it costs something."
+      },
+      "promptLength": 729,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:53:27.124Z",
+      "finishedAt": "2026-11-04T14:53:48.411Z",
+      "latencyS": 20.31730722499924,
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:7",
+      "index": 6,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "c8b2356bf83a4d9e8026125c106dbf71",
+      "route": [
+        "text"
+      ],
+      "output": "Usha spots a glint on the coat’s collar—pointing away from her. She darts toward it, hearing metal clang behind. A cold breath brushes her ear.  \n\n**Word count:** 19 words.",
+      "stageText": "Usha spots a glint on the coat’s collar—pointing away from her. She darts toward it, hearing metal clang behind.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 847,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:53:49.815Z",
+      "finishedAt": "2026-11-04T14:54:18.382Z",
+      "latencyS": 27.88846155500505,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": []
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_6_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 6,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha spots a glint on the coat’s collar—pointing away from her. She darts toward it, hearing metal c",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:54:18.380Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_6_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 6,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha spots a glint on the coat’s collar—pointing away from her. She darts toward it, hearing metal c",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:54:18.380Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:8",
+      "index": 7,
+      "modelId": "d1_omni",
+      "role": "decision_assistant",
+      "status": "completed",
+      "requestId": "8a13e1ad13424bb0bc56e196c8592fae",
+      "route": [
+        "d1_omni"
+      ],
+      "output": "{\n  \"predicted_route\": \"confront\",\n  \"confidence\": 0.8315945914344136,\n  \"probabilities\": {\n    \"reveal_secret\": 0.15477228762133305,\n    \"confront\": 0.8315945914344136,\n    \"honest_moment\": 0.013633120944253408\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}",
+      "stageText": "Weighing every clue, the next twist is: Usha faces the source of the problem directly. (83% sure)",
+      "stageTextProvenance": "template",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": false,
+      "decisionData": {
+        "predicted_route": "confront",
+        "confidence": 0.8315945914344136,
+        "probabilities": {
+          "reveal_secret": 0.15477228762133305,
+          "confront": 0.8315945914344136,
+          "honest_moment": 0.013633120944253408
+        },
+        "valid": true,
+        "rawText": "{\n  \"predicted_route\": \"confront\",\n  \"confidence\": 0.8315945914344136,\n  \"probabilities\": {\n    \"reveal_secret\": 0.15477228762133305,\n    \"confront\": 0.8315945914344136,\n    \"honest_moment\": 0.013633120944253408\n  },\n  \"exploratory_gate_passed\": false,\n  \"human_review_required\": true,\n  \"external_action_executed\": false\n}"
+      },
+      "decisionOptions": {
+        "reveal_secret": "Vikram reveals a secret that changes what Usha believes.",
+        "confront": "Usha faces the source of the problem directly.",
+        "honest_moment": "Usha and Vikram share an honest moment that changes their bond."
+      },
+      "promptLength": 823,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:54:19.788Z",
+      "finishedAt": "2026-11-04T14:54:46.988Z",
+      "latencyS": 26.602059835997352,
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:9",
+      "index": 8,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "570dd785c7f7493887e11b139ad178df",
+      "route": [
+        "text"
+      ],
+      "output": "Usha lunges for the glint, heart pounding. Metal clangs behind her as a shadow slips into view.  \n**She presses forward—then drops the pressure release.**  \nThe entity shrieks, and the catwalk trembles beneath them.",
+      "stageText": "Usha lunges for the glint, heart pounding. Metal clangs behind her as a shadow slips into view.",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 938,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:54:48.396Z",
+      "finishedAt": "2026-11-04T14:55:20.204Z",
+      "latencyS": 31.212259476000327,
+      "genreEvaluation": {
+        "status": "pass",
+        "issues": [],
+        "evidence": [
+          "Genre cues: shadow"
+        ]
+      },
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_8_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 8,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha lunges for the glint, heart pounding. Metal clangs behind her as a shadow slips into view.  \n**",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:55:20.202Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_8_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 8,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha"
+          ],
+          "description": "Usha lunges for the glint, heart pounding. Metal clangs behind her as a shadow slips into view.  \n**",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:55:20.202Z"
+        }
+      ],
+      "isTruncated": false
+    },
+    {
+      "turnId": "302e7c32-c341-45fd-bb40-56b4eab4cdd5:10",
+      "index": 9,
+      "modelId": "text",
+      "role": "writer",
+      "status": "completed",
+      "requestId": "988b0a9b899947318bb38388aac3996c",
+      "route": [
+        "text"
+      ],
+      "output": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neighbor’s coat. It is an ancient entity, feeding on fear and metal, but it retreats when Usha screams. They survive, but the station now bears silent scars—no more hauntings.",
+      "stageText": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neighbor’s coat. It is an ancient entity…",
+      "stageTextProvenance": "raw",
+      "mediaIds": [],
+      "storyPerspective": true,
+      "isRelevant": true,
+      "promptLength": 911,
+      "contextTruncated": true,
+      "startedAt": "2026-11-04T14:55:21.607Z",
+      "finishedAt": "2026-11-04T14:56:38.834Z",
+      "latencyS": 33.01873909399728,
+      "genreEvaluation": {
+        "status": "review",
+        "issues": [
+          "Turn is longer than the requested short format."
+        ],
+        "evidence": [
+          "Genre cues: fear, shadow"
+        ]
+      },
+      "rawAttempts": [
+        {
+          "requestId": "988b0a9b899947318bb38388aac3996c",
+          "output": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neighbor’s coat. It is an ancient entity, feeding on fear and metal, but it retreats when Usha screams. They survive, but the station now bears silent scars—no more hauntings.",
+          "reason": "Turn is longer than the requested short format."
+        },
+        {
+          "requestId": "e426d551e02d41a7a0db6a329fae0022",
+          "output": "Usha lunges for the glint, heart pounding as metal clangs behind her; a shadow slips into the pump room, its form coiling like cold smoke beneath rusted pipes. The entity whispers in her ear, \"You are not alone.\" Vikram draws his weapon, but the darkness pulses with unseen eyes. Usha screams, and the water shudders, swallowing them whole.  \n\nThe monster is an ancient, unearthly thing—born from the earth’s own hunger, wearing a neighbor’s coat as a mask. It stalks the pumps, feeding on fear and metal. Now",
+          "reason": "Turn is longer than the requested short format."
+        }
+      ],
+      "proposedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_9_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 9,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neigh",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:56:38.833Z"
+        }
+      ],
+      "acceptedEvents": [
+        {
+          "eventId": "evt_7b700727-8eb7-4392-9d01-225d23898f73_9_prog",
+          "storyId": "7b700727-8eb7-4392-9d01-225d23898f73",
+          "turnIndex": 9,
+          "modelId": "text",
+          "type": "PROGRESSION_BEAT",
+          "actors": [
+            "Usha",
+            "Vikram"
+          ],
+          "description": "Usha lunges for the glint; Vikram steps back as a shadow slips into the pump room, draped in a neigh",
+          "proposedChanges": [
+            "Story progression step"
+          ],
+          "acceptedChanges": [],
+          "irreversible": false,
+          "confidence": "probable",
+          "auditLog": [
+            "General narrative progression without explicit character state trigger"
+          ],
+          "timestamp": "2026-11-04T14:56:38.833Z"
+        }
+      ],
+      "isTruncated": false
+    }
+  ],
+  "humanTurns": [],
+  "status": "completed",
+  "mode": "live_local_show",
+  "continuityAudit": {
+    "verdict": "no_conflicts",
+    "label": "No detected continuity conflicts",
+    "issues": [],
+    "characterSummaries": [
+      {
+        "name": "Usha",
+        "status": "alive",
+        "detail": "alive"
+      },
+      {
+        "name": "Vikram",
+        "status": "alive",
+        "detail": "alive"
+      }
+    ],
+    "entitySummaries": [],
+    "actSummaries": {
+      "1": 4,
+      "2": 2,
+      "3": 1,
+      "4": 2
+    }
+  },
+  "storyQualityAudit": {
+    "inferenceCompleted": true,
+    "outputComplete": false,
+    "canonConsistent": true,
+    "genreContractPassed": true,
+    "loopFree": true,
+    "reviewStatus": "review_recommended",
+    "label": "Continuity review recommended",
+    "issues": [
+      "Turn 4 output incomplete: Ended mid-sentence or mid-word on 'e' without terminating punctuation"
+    ],
+    "details": {
+      "truncatedTurnsCount": 1,
+      "repairedTurnsCount": 2,
+      "continuityViolationsCount": 0,
+      "loopViolationsCount": 0,
+      "endingFulfillment": {
+        "addressedCentralConflict": true,
+        "genreRequirementsMet": true,
+        "notes": "Ending addressed primary conflict."
+      }
+    }
+  }
+}

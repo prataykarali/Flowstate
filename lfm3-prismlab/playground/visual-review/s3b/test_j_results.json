@@ -1,0 +1,1253 @@
+{
+  "tragedy": {
+    "show": {
+      "canonicalWorldState": {
+        "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+        "genreId": "tragedy",
+        "theme": "Tragedy",
+        "premise": "a medicine can save only one person",
+        "currentAct": 4,
+        "setting": {
+          "location": "a hospital night ward",
+          "establishedRules": [
+            "Medicine is limited to exactly one dose."
+          ]
+        },
+        "characters": [
+          {
+            "id": "char_bruno",
+            "name": "Bruno",
+            "role": "junior nurse",
+            "status": "alive",
+            "location": "a hospital night ward",
+            "motivations": [
+              "Resolve the crisis: a medicine can save only one person"
+            ],
+            "knowledge": [
+              "Initial situation"
+            ],
+            "pastActions": [
+              "Turn 1: Bruno watched Hana's hand tremble over t",
+              "Turn 2: Hana’s trembling stops as Bruno offers t",
+              "Turn 3: Bruno hands Hana the pill, risking his o",
+              "Turn 5: Bruno hands Hana the pill, risking his o"
+            ]
+          },
+          {
+            "id": "char_hana",
+            "name": "Hana",
+            "role": "companion",
+            "status": "alive",
+            "location": "a hospital night ward",
+            "motivations": [
+              "Support the journey"
+            ],
+            "knowledge": [
+              "Initial situation"
+            ],
+            "pastActions": [
+              "Turn 1: Bruno watched Hana's hand tremble over t",
+              "Turn 2: Hana’s trembling stops as Bruno offers t",
+              "Turn 3: Bruno hands Hana the pill, risking his o",
+              "Turn 5: Bruno hands Hana the pill, risking his o"
+            ]
+          }
+        ],
+        "entities": [
+          {
+            "id": "entity_medicine",
+            "name": "medicine",
+            "description": "Single dose of medicine capable of saving only one person",
+            "quantity": 1,
+            "initialQuantity": 1,
+            "ownerOrLocation": "Bruno",
+            "status": "available",
+            "storyRules": [
+              "Single dose: can save only one person; once used, it is completely depleted."
+            ]
+          }
+        ],
+        "relationships": [
+          {
+            "sourceName": "Bruno",
+            "targetName": "Hana",
+            "kind": "companions",
+            "state": "allied against crisis",
+            "changes": [
+              "United by initial crisis"
+            ]
+          }
+        ],
+        "establishedFacts": [
+          {
+            "id": "fact_premise",
+            "text": "a medicine can save only one person",
+            "turnIndex": 0,
+            "confidence": 1,
+            "sourceModelId": "config",
+            "irreversible": false
+          }
+        ],
+        "unresolvedConflicts": [
+          {
+            "id": "conflict_primary",
+            "description": "a medicine can save only one person",
+            "stakes": "Meaningful consequence if unresolved",
+            "resolved": false
+          }
+        ],
+        "resolvedConflicts": [],
+        "eventLog": [
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_0",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 0,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Bruno",
+              "Hana"
+            ],
+            "description": "Story begins: a medicine can save only one person",
+            "proposedChanges": [
+              "Story initialized with active cast and premise"
+            ],
+            "acceptedChanges": [
+              "Story initialized with active cast and premise"
+            ],
+            "irreversible": false,
+            "confidence": "high",
+            "auditLog": [
+              "Initialized via canonical story config"
+            ],
+            "timestamp": "2026-11-04T13:25:05.867Z"
+          },
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_0_prog",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 0,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Bruno",
+              "Hana"
+            ],
+            "description": "Bruno watched Hana's hand tremble over the prescription. One dose could save her, but it would also ",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:25:29.093Z"
+          },
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_1_prog",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 1,
+            "modelId": "vision",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Bruno",
+              "Hana"
+            ],
+            "description": "Hana’s trembling stops as Bruno offers the medicine, risking another death to save hers. They share ",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:25:51.823Z"
+          },
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_2_prog",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 2,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Bruno",
+              "Hana"
+            ],
+            "description": "Bruno hands Hana the pill, risking his own life to spare her.  \nThey share it, hoping to stop her fa",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:26:16.381Z"
+          },
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_3_prog",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 3,
+            "modelId": "d1",
+            "type": "PROGRESSION_BEAT",
+            "actors": [],
+            "description": "{\"predicted_route\":\"hard_choice\",\"confidence\":0.5982560821391525,\"probabilities\":{\"hard_choice\":0.59",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:26:34.365Z"
+          },
+          {
+            "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_4_prog",
+            "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+            "turnIndex": 4,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Bruno",
+              "Hana"
+            ],
+            "description": "Bruno hands Hana the pill, risking his own life. They share it, but a second patient wakes and needs",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:27:02.933Z"
+          }
+        ],
+        "latestAcceptedEventIds": [
+          "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_4_prog"
+        ],
+        "narrativeGoal": "a medicine can save only one person",
+        "endingRequirements": [],
+        "prohibitedContradictions": []
+      },
+      "version": "s3b.2",
+      "showId": "show_tragedy_real_01",
+      "createdAt": "2026-11-04T13:25:05.862Z",
+      "updatedAt": "2026-11-04T13:27:02.934Z",
+      "config": {
+        "theme": "Tragedy",
+        "opening": "",
+        "turnCount": 9,
+        "modelIds": [
+          "text",
+          "vision",
+          "audio",
+          "omni",
+          "d1",
+          "d1_omni"
+        ],
+        "playback": "automatic",
+        "maxTokens": 128,
+        "cast": {
+          "protagonist": "Bruno",
+          "companion": "Hana",
+          "role": "junior nurse",
+          "setting": "a hospital night ward",
+          "hook": "a medicine can save only one person"
+        }
+      },
+      "turnOrder": [
+        "text",
+        "vision",
+        "text",
+        "audio",
+        "omni",
+        "d1",
+        "text",
+        "d1_omni",
+        "text"
+      ],
+      "turns": [
+        {
+          "turnId": "t1:1",
+          "index": 0,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "346b90fa36d749e89174a1b416f8eef4",
+          "route": [
+            "text"
+          ],
+          "output": "Bruno watched Hana's hand tremble over the prescription. One dose could save her, but it would also kill another patient on the floor. He felt his heart race as he chose.\n\nHe slipped the vial into the tray for Hana. The nurse whispered that the medicine was a last chance.\n\nHana's eyes widened in shock when she saw him hesitate. She knew the cost of his flaw.",
+          "stageText": "Bruno watched Hana's hand tremble over the prescription. One dose could save her, but it would also kill another patient on the floor.",
+          "promptLength": 477,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:25:29.096Z",
+          "finishedAt": "2026-11-04T13:25:29.096Z",
+          "latencyS": 22.62552927499928,
+          "proposedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_0_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 0,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno watched Hana's hand tremble over the prescription. One dose could save her, but it would also ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:25:29.093Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_0_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 0,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno watched Hana's hand tremble over the prescription. One dose could save her, but it would also ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:25:29.093Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t1:2",
+          "index": 1,
+          "modelId": "vision",
+          "role": "visual_interpreter",
+          "status": "completed",
+          "requestId": "177d960799f441709f0d7580d5ca1e46",
+          "route": [
+            "vision"
+          ],
+          "output": "Hana’s trembling stops as Bruno offers the medicine, risking another death to save hers. They share the dose, hoping for a single life.",
+          "stageText": "I see: Hana’s trembling stops as Bruno offers the medicine, risking another death to save hers. They share the dose, hoping for a single life.",
+          "promptLength": 696,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:25:51.824Z",
+          "finishedAt": "2026-11-04T13:25:51.824Z",
+          "latencyS": 22.064886206004303,
+          "proposedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_1_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 1,
+              "modelId": "vision",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Hana’s trembling stops as Bruno offers the medicine, risking another death to save hers. They share ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:25:51.823Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_1_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 1,
+              "modelId": "vision",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Hana’s trembling stops as Bruno offers the medicine, risking another death to save hers. They share ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:25:51.823Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t1:3",
+          "index": 2,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "845c546aff2e49ec99c7f00267e76c08",
+          "route": [
+            "text"
+          ],
+          "output": "Bruno hands Hana the pill, risking his own life to spare her.  \nThey share it, hoping to stop her fall—until a second patient wakes up.",
+          "stageText": "Bruno hands Hana the pill, risking his own life to spare her. They share it, hoping to stop her fall—until a second patient wakes up.",
+          "promptLength": 931,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:26:16.382Z",
+          "finishedAt": "2026-11-04T13:26:16.382Z",
+          "latencyS": 23.987725684994075,
+          "proposedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_2_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 2,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno hands Hana the pill, risking his own life to spare her.  \nThey share it, hoping to stop her fa",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:26:16.381Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_2_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 2,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno hands Hana the pill, risking his own life to spare her.  \nThey share it, hoping to stop her fa",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:26:16.381Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t1:4",
+          "index": 3,
+          "modelId": "d1",
+          "role": "decision_assistant",
+          "status": "completed",
+          "requestId": "d1eebd1615ec46a1b81d77074227fbb2",
+          "route": [
+            "d1"
+          ],
+          "output": "{\"predicted_route\":\"hard_choice\",\"confidence\":0.5982560821391525,\"probabilities\":{\"hard_choice\":0.5982560821391525,\"raise_stakes\":0.2555473625014727,\"confront\":0.14619655535937479},\"exploratory_gate_passed\":false,\"human_review_required\":true,\"external_action_executed\":false}",
+          "stageText": "The incident report could not be classified.",
+          "promptLength": 873,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:26:34.366Z",
+          "finishedAt": "2026-11-04T13:26:34.366Z",
+          "latencyS": 17.481854786004988,
+          "proposedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_3_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 3,
+              "modelId": "d1",
+              "type": "PROGRESSION_BEAT",
+              "actors": [],
+              "description": "{\"predicted_route\":\"hard_choice\",\"confidence\":0.5982560821391525,\"probabilities\":{\"hard_choice\":0.59",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:26:34.365Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_3_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 3,
+              "modelId": "d1",
+              "type": "PROGRESSION_BEAT",
+              "actors": [],
+              "description": "{\"predicted_route\":\"hard_choice\",\"confidence\":0.5982560821391525,\"probabilities\":{\"hard_choice\":0.59",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:26:34.365Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t1:5",
+          "index": 4,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "6cd3b7bfefff4f0d90fe812709eda4fe",
+          "route": [
+            "text"
+          ],
+          "output": "Bruno hands Hana the pill, risking his own life. They share it, but a second patient wakes and needs help too. He hesitates, then gives the medicine anyway. The dose kills him. Hana survives, but Bruno dies alone.",
+          "stageText": "Bruno hands Hana the pill, risking his own life. They share it, but a second patient wakes and needs help too.",
+          "promptLength": 940,
+          "contextTruncated": true,
+          "startedAt": "2026-11-04T13:27:02.934Z",
+          "finishedAt": "2026-11-04T13:27:02.934Z",
+          "latencyS": 28.07235725800274,
+          "proposedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_4_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 4,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno hands Hana the pill, risking his own life. They share it, but a second patient wakes and needs",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:02.933Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_f24122ee-fc11-410c-82c7-24c43e4a2464_4_prog",
+              "storyId": "f24122ee-fc11-410c-82c7-24c43e4a2464",
+              "turnIndex": 4,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Bruno",
+                "Hana"
+              ],
+              "description": "Bruno hands Hana the pill, risking his own life. They share it, but a second patient wakes and needs",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:02.933Z"
+            }
+          ]
+        }
+      ],
+      "humanTurns": [],
+      "status": "active",
+      "mode": "live_local_show"
+    },
+    "audit": {
+      "verdict": "no_conflicts",
+      "label": "No detected continuity conflicts",
+      "issues": [],
+      "characterSummaries": [
+        {
+          "name": "Bruno",
+          "status": "alive",
+          "detail": "alive"
+        },
+        {
+          "name": "Hana",
+          "status": "alive",
+          "detail": "alive"
+        }
+      ],
+      "entitySummaries": [
+        {
+          "name": "medicine",
+          "status": "available",
+          "quantity": 1
+        }
+      ],
+      "actSummaries": {
+        "1": 4,
+        "2": 2,
+        "3": 0,
+        "4": 0
+      }
+    }
+  },
+  "scifi": {
+    "show": {
+      "canonicalWorldState": {
+        "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+        "genreId": "science_fiction",
+        "theme": "Science fiction",
+        "premise": "oxygen is running out after a strange signal",
+        "currentAct": 4,
+        "setting": {
+          "location": "a mining base on a frozen moon",
+          "establishedRules": []
+        },
+        "characters": [
+          {
+            "id": "char_tariq",
+            "name": "Tariq",
+            "role": "repair dock technician",
+            "status": "alive",
+            "location": "a mining base on a frozen moon",
+            "motivations": [
+              "Resolve the crisis: oxygen is running out after a strange signal"
+            ],
+            "knowledge": [
+              "Initial situation"
+            ],
+            "pastActions": [
+              "Turn 1: Tariq works at the frozen moon base's re",
+              "Turn 2: Leila shouts, \"Tariq, the oxygen is gone",
+              "Turn 3: Leila shouts, “Tariq, the oxygen is gone",
+              "Turn 5: Leila shouts, \"Tariq, the oxygen is gone"
+            ]
+          },
+          {
+            "id": "char_leila",
+            "name": "Leila",
+            "role": "companion",
+            "status": "alive",
+            "location": "a mining base on a frozen moon",
+            "motivations": [
+              "Support the journey"
+            ],
+            "knowledge": [
+              "Initial situation"
+            ],
+            "pastActions": [
+              "Turn 1: Tariq works at the frozen moon base's re",
+              "Turn 2: Leila shouts, \"Tariq, the oxygen is gone",
+              "Turn 3: Leila shouts, “Tariq, the oxygen is gone",
+              "Turn 5: Leila shouts, \"Tariq, the oxygen is gone"
+            ]
+          }
+        ],
+        "entities": [],
+        "relationships": [
+          {
+            "sourceName": "Tariq",
+            "targetName": "Leila",
+            "kind": "companions",
+            "state": "allied against crisis",
+            "changes": [
+              "United by initial crisis"
+            ]
+          }
+        ],
+        "establishedFacts": [
+          {
+            "id": "fact_premise",
+            "text": "oxygen is running out after a strange signal",
+            "turnIndex": 0,
+            "confidence": 1,
+            "sourceModelId": "config",
+            "irreversible": false
+          }
+        ],
+        "unresolvedConflicts": [
+          {
+            "id": "conflict_primary",
+            "description": "oxygen is running out after a strange signal",
+            "stakes": "Meaningful consequence if unresolved",
+            "resolved": false
+          }
+        ],
+        "resolvedConflicts": [],
+        "eventLog": [
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_0",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 0,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Tariq",
+              "Leila"
+            ],
+            "description": "Story begins: oxygen is running out after a strange signal",
+            "proposedChanges": [
+              "Story initialized with active cast and premise"
+            ],
+            "acceptedChanges": [
+              "Story initialized with active cast and premise"
+            ],
+            "irreversible": false,
+            "confidence": "high",
+            "auditLog": [
+              "Initialized via canonical story config"
+            ],
+            "timestamp": "2026-11-04T13:27:02.937Z"
+          },
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_0_prog",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 0,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Tariq",
+              "Leila"
+            ],
+            "description": "Tariq works at the frozen moon base's repair dock. Leila finds a strange oxygen signal fading fast.\n",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:27:23.468Z"
+          },
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_1_prog",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 1,
+            "modelId": "vision",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Tariq",
+              "Leila"
+            ],
+            "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and start digging for fresh air.",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:27:41.043Z"
+          },
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_2_prog",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 2,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Tariq",
+              "Leila"
+            ],
+            "description": "Leila shouts, “Tariq, the oxygen is gone!” They seal the hatch and dig for fresh air beneath the ice",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:28:06.823Z"
+          },
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_3_prog",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 3,
+            "modelId": "d1_omni",
+            "type": "PROGRESSION_BEAT",
+            "actors": [],
+            "description": "{\"predicted_route\":\"technical_repair\",\"confidence\":0.6233241673505584,\"probabilities\":{\"technical_re",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:28:27.419Z"
+          },
+          {
+            "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_4_prog",
+            "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+            "turnIndex": 4,
+            "modelId": "text",
+            "type": "PROGRESSION_BEAT",
+            "actors": [
+              "Tariq",
+              "Leila"
+            ],
+            "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and dig under ice to find an ancient ",
+            "proposedChanges": [
+              "Story progression step"
+            ],
+            "acceptedChanges": [],
+            "irreversible": false,
+            "confidence": "probable",
+            "auditLog": [
+              "General narrative progression without explicit character state trigger"
+            ],
+            "timestamp": "2026-11-04T13:28:51.075Z"
+          }
+        ],
+        "latestAcceptedEventIds": [
+          "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_4_prog"
+        ],
+        "narrativeGoal": "oxygen is running out after a strange signal",
+        "endingRequirements": [],
+        "prohibitedContradictions": []
+      },
+      "version": "s3b.2",
+      "showId": "show_scifi_real_02",
+      "createdAt": "2026-11-04T13:27:02.936Z",
+      "updatedAt": "2026-11-04T13:28:51.076Z",
+      "config": {
+        "theme": "Science fiction",
+        "opening": "",
+        "turnCount": 9,
+        "modelIds": [
+          "text",
+          "vision",
+          "audio",
+          "omni",
+          "d1",
+          "d1_omni"
+        ],
+        "playback": "automatic",
+        "maxTokens": 128,
+        "cast": {
+          "protagonist": "Tariq",
+          "companion": "Leila",
+          "role": "repair dock technician",
+          "setting": "a mining base on a frozen moon",
+          "hook": "oxygen is running out after a strange signal"
+        }
+      },
+      "turnOrder": [
+        "text",
+        "vision",
+        "text",
+        "audio",
+        "omni",
+        "d1",
+        "text",
+        "d1_omni",
+        "text"
+      ],
+      "turns": [
+        {
+          "turnId": "t2:1",
+          "index": 0,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "e2501c0c1d9d4f71858841eba0c610c2",
+          "route": [
+            "text"
+          ],
+          "output": "Tariq works at the frozen moon base's repair dock. Leila finds a strange oxygen signal fading fast.\n\nOxygen is low after a weird pulse. The tech can't fix it yet.\n\nA broken vent line blocks the air flow. Tariq must find another way to get fresh air before the core fails.",
+          "stageText": "Tariq works at the frozen moon base's repair dock. Leila finds a strange oxygen signal fading fast.",
+          "promptLength": 547,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:27:23.468Z",
+          "finishedAt": "2026-11-04T13:27:23.468Z",
+          "latencyS": 19.985398521996103,
+          "proposedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_0_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 0,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Tariq works at the frozen moon base's repair dock. Leila finds a strange oxygen signal fading fast.\n",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:23.468Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_0_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 0,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Tariq works at the frozen moon base's repair dock. Leila finds a strange oxygen signal fading fast.\n",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:23.468Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t2:2",
+          "index": 1,
+          "modelId": "vision",
+          "role": "visual_interpreter",
+          "status": "completed",
+          "requestId": "cc93a16d176f4bfeac7a36e8f9105594",
+          "route": [
+            "vision"
+          ],
+          "output": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and start digging for fresh air.",
+          "stageText": "I see: Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and start digging for fresh air.",
+          "promptLength": 717,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:27:41.044Z",
+          "finishedAt": "2026-11-04T13:27:41.044Z",
+          "latencyS": 17.074439160998736,
+          "proposedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_1_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 1,
+              "modelId": "vision",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and start digging for fresh air.",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:41.043Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_1_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 1,
+              "modelId": "vision",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and start digging for fresh air.",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:27:41.043Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t2:3",
+          "index": 2,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "cc65935cbe9c4ea49370f89f2460ada1",
+          "route": [
+            "text"
+          ],
+          "output": "Leila shouts, “Tariq, the oxygen is gone!” They seal the hatch and dig for fresh air beneath the ice.  \nThey find a hidden cavern with ancient vents—oxygen flows but it’s toxic.  \nThe limit: they can’t breathe clean air; each breath risks suffocation or radiation.",
+          "stageText": "Leila shouts, “Tariq, the oxygen is gone!” They seal the hatch and dig for fresh air beneath the ice. They find a hidden cavern with ancient…",
+          "promptLength": 903,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:28:06.824Z",
+          "finishedAt": "2026-11-04T13:28:06.824Z",
+          "latencyS": 25.289724417001707,
+          "proposedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_2_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 2,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, “Tariq, the oxygen is gone!” They seal the hatch and dig for fresh air beneath the ice",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:06.823Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_2_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 2,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, “Tariq, the oxygen is gone!” They seal the hatch and dig for fresh air beneath the ice",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:06.823Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t2:4",
+          "index": 3,
+          "modelId": "d1_omni",
+          "role": "decision_assistant",
+          "status": "completed",
+          "requestId": "90f9868188f24121b67eae9f57eec506",
+          "route": [
+            "d1_omni"
+          ],
+          "output": "{\"predicted_route\":\"technical_repair\",\"confidence\":0.6233241673505584,\"probabilities\":{\"technical_repair\":0.6233241673505584,\"emergency_beacon\":0.23295310479059791,\"manual_override\":0.14372272785884363},\"exploratory_gate_passed\":false,\"human_review_required\":true,\"external_action_executed\":false}",
+          "stageText": "The incident report could not be classified.",
+          "promptLength": 863,
+          "contextTruncated": false,
+          "startedAt": "2026-11-04T13:28:27.420Z",
+          "finishedAt": "2026-11-04T13:28:27.420Z",
+          "latencyS": 20.193765928001085,
+          "proposedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_3_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 3,
+              "modelId": "d1_omni",
+              "type": "PROGRESSION_BEAT",
+              "actors": [],
+              "description": "{\"predicted_route\":\"technical_repair\",\"confidence\":0.6233241673505584,\"probabilities\":{\"technical_re",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:27.419Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_3_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 3,
+              "modelId": "d1_omni",
+              "type": "PROGRESSION_BEAT",
+              "actors": [],
+              "description": "{\"predicted_route\":\"technical_repair\",\"confidence\":0.6233241673505584,\"probabilities\":{\"technical_re",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:27.419Z"
+            }
+          ]
+        },
+        {
+          "turnId": "t2:5",
+          "index": 4,
+          "modelId": "text",
+          "role": "writer",
+          "status": "completed",
+          "requestId": "cf21bca3cfe6427f846fd68baedf9ae9",
+          "route": [
+            "text"
+          ],
+          "output": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and dig under ice to find an ancient sealed chamber. Inside, they discover a dormant crystal that can generate fresh air but requires a sacrifice.",
+          "stageText": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and dig under ice to find an ancient sealed chamber. Inside, they discover a dormant…",
+          "promptLength": 944,
+          "contextTruncated": true,
+          "startedAt": "2026-11-04T13:28:51.076Z",
+          "finishedAt": "2026-11-04T13:28:51.076Z",
+          "latencyS": 23.163148880994413,
+          "proposedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_4_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 4,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and dig under ice to find an ancient ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:51.075Z"
+            }
+          ],
+          "acceptedEvents": [
+            {
+              "eventId": "evt_6d8b729b-e88f-41b1-9495-e6844069b1f3_4_prog",
+              "storyId": "6d8b729b-e88f-41b1-9495-e6844069b1f3",
+              "turnIndex": 4,
+              "modelId": "text",
+              "type": "PROGRESSION_BEAT",
+              "actors": [
+                "Tariq",
+                "Leila"
+              ],
+              "description": "Leila shouts, \"Tariq, the oxygen is gone!\" They seal the hatch and dig under ice to find an ancient ",
+              "proposedChanges": [
+                "Story progression step"
+              ],
+              "acceptedChanges": [],
+              "irreversible": false,
+              "confidence": "probable",
+              "auditLog": [
+                "General narrative progression without explicit character state trigger"
+              ],
+              "timestamp": "2026-11-04T13:28:51.075Z"
+            }
+          ]
+        }
+      ],
+      "humanTurns": [],
+      "status": "active",
+      "mode": "live_local_show"
+    },
+    "audit": {
+      "verdict": "no_conflicts",
+      "label": "No detected continuity conflicts",
+      "issues": [],
+      "characterSummaries": [
+        {
+          "name": "Tariq",
+          "status": "alive",
+          "detail": "alive"
+        },
+        {
+          "name": "Leila",
+          "status": "alive",
+          "detail": "alive"
+        }
+      ],
+      "entitySummaries": [],
+      "actSummaries": {
+        "1": 4,
+        "2": 2,
+        "3": 0,
+        "4": 0
+      }
+    }
+  }
+}

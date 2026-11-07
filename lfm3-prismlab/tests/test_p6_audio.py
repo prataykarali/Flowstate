@@ -23,6 +23,7 @@ class FakeManager:
             "audio": SimpleNamespace(
                 base_url="http://127.0.0.1:8082",
                 model_id="lfm3-audio",
+                auth_token=None,
             )
         }
 
@@ -101,13 +102,16 @@ class TestP6Audio(unittest.TestCase):
     )
     def test_success(self, mock_post):
         req = self.request()
+        manager = FakeManager()
+        manager.specs["audio"].auth_token = "test-key"
         result = execute_audio(
-            req, FakeManager(), plan_route(req)
+            req, manager, plan_route(req)
         )
         self.assertEqual(result.status, "completed")
         self.assertEqual(result.output, "Test transcript")
         self.assertIsNone(result.ttft_s)
         mock_post.assert_called_once()
+        self.assertEqual(mock_post.call_args.kwargs["auth_token"], "test-key")
 
     @patch(
         "prismlab.core.audio_adapter.post_audio",

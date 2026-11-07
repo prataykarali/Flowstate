@@ -71,13 +71,14 @@ def build_parts(request, plan):
 
 
 def stream_omni(
-    base_url, model_id, parts, on_token=None
+    base_url, model_id, parts, on_token=None, auth_token=None
 ) -> OmniStream:
     payload = {
         "model": model_id,
         "temperature": 0,
-        "max_tokens": 96,
+        "max_tokens": 64,
         "stream": True,
+        "chat_template_kwargs": {"enable_thinking": False},
         "messages": [
             {
                 "role": "system",
@@ -97,6 +98,7 @@ def stream_omni(
         headers={
             "Content-Type": "application/json",
             "Accept": "text/event-stream",
+            **({"Authorization": f"Bearer {auth_token}"} if auth_token else {}),
         },
         method="POST",
     )
@@ -292,6 +294,7 @@ def execute_omni(
             manager.specs["omni"].model_id,
             parts,
             on_token,
+            **({"auth_token": manager.specs["omni"].auth_token} if manager.specs["omni"].auth_token else {}),
         )
 
         trace.append(TraceStep(
