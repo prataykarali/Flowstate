@@ -10,7 +10,7 @@ import { setTriviaRunning } from '../lib/triviaLock.ts';
 import { cancelActiveInference } from '../lib/inferenceLock.ts';
 
 type Phase = 'idle' | 'generating' | 'answering' | 'revealing' | 'paused' | 'completed' | 'cancelled' | 'failed';
-const HOSTS: CanonicalModelId[] = ['text', 'vision', 'omni'];
+const HOSTS: CanonicalModelId[] = ['text'];
 
 const ACTIVE_TRIVIA_STORAGE_KEY = 'prismlab_active_trivia_match_v1';
 

@@ -100,6 +100,9 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
         elif "json only" in request.text.lower() or "return compact json" in request.text.lower():
             payload["response_format"] = {"type": "json_object"}
             payload["messages"][0]["content"] = "You are a helpful assistant. Output valid JSON only."
+        elif "single capital letter" in request.text.lower() or "choose the single best option" in request.text.lower():
+            payload["messages"][0]["content"] = "You are a quiz contestant. Reply ONLY with the single option letter (A, B, C, or D). Never write preamble, explanation, or markdown."
+            payload["max_tokens"] = max(payload.get("max_tokens", 16), 32)
         endpoint = "/v1/chat/completions"
 
     from contextlib import nullcontext

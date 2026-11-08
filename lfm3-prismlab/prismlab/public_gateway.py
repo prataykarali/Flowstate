@@ -308,7 +308,7 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
         task.add_done_callback(on_done)
 
         try:
-            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "75.0"))
+            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "120.0"))
             result = await asyncio.wait_for(asyncio.shield(task), timeout=job_timeout)
             verified_act = "chat"
             if active_sess:
@@ -527,7 +527,7 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
             task = asyncio.create_task(asyncio.to_thread(worker))
             task.add_done_callback(on_done)
             started = True
-            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "75.0"))
+            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "120.0"))
             exec_deadline = asyncio.get_running_loop().time() + job_timeout
             while True:
                 # Browser navigation detachment: if client disconnected, do not cancel server job!

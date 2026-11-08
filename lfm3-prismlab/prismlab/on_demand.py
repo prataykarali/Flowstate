@@ -20,6 +20,14 @@ MODELS = {
     "d1_omni": ("d1-Omni-2B-GGUF", "d1-Omni-2B-Q8_0.gguf", "mmproj-d1-Omni-2B-Q8_0.gguf", "d1-omni"),
 }
 
+MODEL_PORTS = {
+    "vision": 8181,
+    "audio": 8182,
+    "omni": 8183,
+    "d1": 8184,
+    "d1_omni": 8185,
+}
+
 from contextlib import contextmanager, nullcontext
 
 _warm_lock = threading.Lock()
@@ -112,7 +120,8 @@ def warm_manager(group: str, specs: list[RuntimeSpec]) -> LifecycleManager:
             return cached[1]
         if cached:
             cached[1].close()
-        manager = LifecycleManager(specs, max_managed=1, log_dir="results/p6/server_logs")
+        max_managed = int(os.getenv("PRISMLAB_MAX_MANAGED", "3"))
+        manager = LifecycleManager(specs, max_managed=max_managed, log_dir="results/p6/server_logs")
         _warm_managers[group] = (signature, manager)
         return manager
 
@@ -159,19 +168,22 @@ def runtime_specs() -> list[RuntimeSpec]:
     text_spec = text.runtime_spec()
     executable = text.executable
     assert executable is not None
-    base = os.getenv("PRISMLAB_MULTIMODAL_ROUTER_URL", "http://127.0.0.1:8188")
-    port = urlparse(base).port
+    fallback_base = os.getenv("PRISMLAB_MULTIMODAL_ROUTER_URL", "http://127.0.0.1:8188")
+    fallback_port = urlparse(fallback_base).port or 8188
     threads = text.cpu_threads
     context = text.context_size
     specs = []
+    use_dedicated = os.getenv("PRISMLAB_DEDICATED_PORTS", "1") == "1"
     for key, (repo, model_name, projector_name, alias) in MODELS.items():
         model = _cached_or_override(key, "MODEL", repo, model_name)
         projector = _cached_or_override(key, "MMPROJ", repo, projector_name)
         if not model or not projector:
             continue
+        model_port = MODEL_PORTS.get(key, fallback_port) if use_dedicated else fallback_port
+        model_base = f"http://127.0.0.1:{model_port}" if use_dedicated else fallback_base
         command = (
             str(executable), "-m", str(model), "--mmproj", str(projector),
-            "--alias", alias, "--host", "127.0.0.1", "--port", str(port),
+            "--alias", alias, "--host", "127.0.0.1", "--port", str(model_port),
             "-c", str(context), *acceleration_flags(executable),
             "-t", str(threads), "-tb", str(threads),
             "--parallel", "1", "--no-reasoning-preserve",
@@ -185,5 +197,5 @@ def runtime_specs() -> list[RuntimeSpec]:
             command += ("-b", "2048", "-ub", "512")
         if text.auth_key_file:
             command += ("--api-key-file", str(text.auth_key_file))
-        specs.append(RuntimeSpec(key, base, alias, command, auth_token=text.auth_token, timeout_s=text.timeout_s))
+        specs.append(RuntimeSpec(key, model_base, alias, command, auth_token=text.auth_token, timeout_s=text.timeout_s))
     return specs

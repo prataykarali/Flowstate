@@ -296,7 +296,7 @@ export function contestantRequest(modelId: CanonicalModelId, question: LiveQuest
     };
   }
   const prompt = `Choose the single best option (A, B, C, or D).\nQuestion: ${question.question}\nA: ${question.options.A}\nB: ${question.options.B}\nC: ${question.options.C}\nD: ${question.options.D}\nAnswer (single capital letter only):`;
-  return { task: 'chat' as const, model: modelId, prompt: prompt.slice(0, 1000), max_tokens: 16 };
+  return { task: 'chat' as const, model: modelId, prompt: prompt.slice(0, 1000), max_tokens: 32 };
 }
 
 export async function generateQuestion(
