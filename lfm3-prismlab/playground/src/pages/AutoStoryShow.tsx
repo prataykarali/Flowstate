@@ -1,6 +1,6 @@
 import React from 'react';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
-import { executeLocalStream, generateTextStream, getGatewayStatus, outputText, ApiError, startActivity, stopActivity, type LiveResult, type MediaPayload } from '../lib/api.ts';
+import { executeLocalStream, generateTextStream, getGatewayStatus, outputText, ApiError, startActivity, stopActivity, parkActivity, resumeParkedActivity, type LiveResult, type MediaPayload } from '../lib/api.ts';
 import { awardAutoStorySession, awardAutoStoryTurn } from '../lib/leagueAdapters.ts';
 import {
   asReplay,
@@ -93,6 +93,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const [, setReaction] = React.useState(0);
   const [, setReactionState] = React.useState<'idle' | 'thinking' | 'happy' | 'sad'>('idle');
   const [pending, setPending] = React.useState(false);
+  const [rateLimitCountdown, setRateLimitCountdown] = React.useState<number | null>(null);
 
   const showRef = React.useRef<ShowRecord | null>(null);
   const phaseRef = React.useRef<ShowPhase>('configuring');
@@ -100,6 +101,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const pausedRef = React.useRef(false);
   const stoppedRef = React.useRef(false);
   const timerRef = React.useRef<number | null>(null);
+  const countdownIntervalRef = React.useRef<number | null>(null);
   const mountedRef = React.useRef(true);
   const epochRef = React.useRef(0);
   const retryCountRef = React.useRef(0);
@@ -125,9 +127,18 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       epochRef.current += 1;
       stoppedRef.current = true;
       if (timerRef.current !== null) clearTimeout(timerRef.current);
+      if (countdownIntervalRef.current !== null) clearInterval(countdownIntervalRef.current);
       const current = showRef.current;
-      if (current?.mode === 'live_local_show' && current.status === 'active') {
-        try { saveShow({ ...current, status: 'stopped', updatedAt: new Date().toISOString() }); } catch {}
+      if (current?.mode === 'live_local_show' && (current.status === 'active' || current.status === 'paused_rate_limit')) {
+        try {
+          saveShow({ ...current, status: 'parked', updatedAt: new Date().toISOString() });
+          void parkActivity(current.showId, {
+            theme: current.config.theme,
+            turn: current.turns.length,
+            turnCount: current.config.turnCount,
+          });
+          window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
+        } catch {}
       }
     };
   }, []);
@@ -152,6 +163,71 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       timerRef.current = null;
       void runNext();
     }, delay);
+  };
+
+  const resumeFromRateLimit = () => {
+    if (countdownIntervalRef.current !== null) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setRateLimitCountdown(null);
+    pausedRef.current = false;
+    stoppedRef.current = false;
+    const current = showRef.current;
+    if (current && current.mode === 'live_local_show') {
+      commit({ ...current, status: 'active', updatedAt: new Date().toISOString() });
+    }
+    setPhase('preparing');
+    setMessage('Compute allowance replenished. Resuming your Story…');
+    schedule(0);
+  };
+
+  const pauseForRateLimit = (err: unknown, currentTurnIdx: number) => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (countdownIntervalRef.current !== null) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    let retryAfter = 30;
+    if (err instanceof ApiError && typeof err.retryAfter === 'number' && err.retryAfter > 0) {
+      retryAfter = Math.min(600, Math.max(2, err.retryAfter));
+    } else if (err instanceof Error) {
+      const match = err.message.match(/(\d+)\s*(?:s|sec|second)/i);
+      if (match) retryAfter = Math.min(600, Math.max(2, parseInt(match[1], 10)));
+    }
+
+    const current = showRef.current;
+    if (current && current.mode === 'live_local_show') {
+      commit({ ...current, status: 'paused_rate_limit', updatedAt: new Date().toISOString() });
+    }
+    pausedRef.current = true;
+    setPhase('paused_rate_limit');
+    setRateLimitCountdown(retryAfter);
+
+    const totalTurns = current?.turnOrder.length || 20;
+    const turnNum = currentTurnIdx + 1;
+    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Your compute allowance is temporarily exhausted. Auto-resuming in ${retryAfter}s…`);
+
+    let remaining = retryAfter;
+    countdownIntervalRef.current = window.setInterval(() => {
+      remaining -= 1;
+      if (!mountedRef.current) {
+        if (countdownIntervalRef.current !== null) clearInterval(countdownIntervalRef.current);
+        return;
+      }
+      if (remaining <= 0) {
+        if (countdownIntervalRef.current !== null) clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+        resumeFromRateLimit();
+      } else {
+        setRateLimitCountdown(remaining);
+        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Your compute allowance is temporarily exhausted. Auto-resuming in ${remaining}s…`);
+      }
+    }, 1000);
   };
 
   const runNext = async () => {
@@ -277,7 +353,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           break;
         } catch (execErr) {
           const is503 = (execErr instanceof ApiError && execErr.status === 503) || /queue is full|timed out/i.test(String(execErr));
-          const is429 = (execErr instanceof ApiError && execErr.status === 429) || /rate limit/i.test(String(execErr));
+          const is429 = (execErr instanceof ApiError && execErr.status === 429) || /rate limit|compute budget/i.test(String(execErr));
           if (is503 && retries < 3) {
             retries += 1;
             const delayMs = 1500 * (2 ** (retries - 1));
@@ -286,12 +362,9 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
             continue;
           }
-          if (is429 && retries < 2) {
-            retries += 1;
-            setMessage('Visitor rate limit reached; pausing turn for 15s…');
-            await new Promise(r => setTimeout(r, 15000));
-            if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
-            continue;
+          if (is429) {
+            pauseForRateLimit(execErr, index);
+            return;
           }
 
           const fallbackMsg = execErr instanceof Error ? execErr.message : String(execErr);
@@ -594,7 +667,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         setPhase('paused');
         setMessage('Show paused. Completed turns are preserved.');
       } else if (current.config.playback === 'automatic') {
-        const readDelay = Math.min(3600, Math.max(2400, finalDisplay.length * 10));
+        const readDelay = Math.min(1200, Math.max(800, Math.round(finalDisplay.length * 4)));
         schedule(readDelay);
       } else {
         setPhase('paused');
@@ -602,6 +675,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       }
     } catch (error) {
       if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
+      const is429 = (error instanceof ApiError && error.status === 429) || /rate limit|compute budget/i.test(String(error));
+      if (is429) {
+        pauseForRateLimit(error, index);
+        return;
+      }
       const detail = error instanceof Error ? error.message : 'Local inference failed.';
       const failed: ShowTurn = {
         turnId,
@@ -692,8 +770,19 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     setMessage(pendingRef.current ? 'Pause requested. In-flight model request will complete, then pause.' : 'Paused between turns.');
   };
 
-  const resume = () => {
+  const resume = async () => {
     if (!showRef.current || stoppedRef.current) return;
+    if (phaseRef.current === 'paused_rate_limit' || showRef.current.status === 'paused_rate_limit') {
+      resumeFromRateLimit();
+      return;
+    }
+    if (showRef.current.status === 'parked') {
+      try {
+        await resumeParkedActivity(showRef.current.showId);
+      } catch {}
+      commit({ ...showRef.current, status: 'active', updatedAt: new Date().toISOString() });
+      window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
+    }
     pausedRef.current = false;
     setMessage('Resuming the autonomous show.');
     if (!pendingRef.current) {
@@ -710,6 +799,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    if (countdownIntervalRef.current !== null) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setRateLimitCountdown(null);
     const current = showRef.current;
     if (current && current.mode === 'live_local_show') {
       commit({ ...current, status: 'stopped', updatedAt: new Date().toISOString() });
@@ -909,14 +1003,44 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             </span>
           </div>
 
+          {phase === 'paused_rate_limit' && (
+            <div className="chat-story-rate-limit-banner" style={{ padding: '8px 12px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.4)', borderRadius: '6px', margin: '8px 0', fontSize: '0.875rem' }}>
+              <strong>Compute Allowance Replenishing</strong>
+              <p style={{ margin: '4px 0' }}>
+                Your Story is safely preserved at Turn {Math.min(show.turns.length + 1, show.turnOrder.length)} of {show.turnOrder.length}. Your compute allowance is temporarily exhausted. {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Automatic resume in ${rateLimitCountdown}s, or click Resume when ready.` : 'Allowance replenished! You can resume now.'}
+              </p>
+            </div>
+          )}
+
           <div className="chat-story-running-actions">
             {show.mode === 'live_local_show' && (
               <>
-                {phase === 'paused' ? (
-                  <button type="button" onClick={resume} disabled={pending}>▶ Resume</button>
+                {phase === 'paused' || phase === 'paused_rate_limit' ? (
+                  <button type="button" onClick={resume} disabled={pending}>
+                    ▶ Resume {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `(${rateLimitCountdown}s)` : ''}
+                  </button>
                 ) : (
                   <button type="button" onClick={pause} disabled={['completed', 'stopped', 'failed'].includes(phase)}>⏸ Pause</button>
                 )}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    pause();
+                    const curr = showRef.current;
+                    if (curr) {
+                      commit({ ...curr, status: 'parked', updatedAt: new Date().toISOString() });
+                      await parkActivity(curr.showId, {
+                        theme: curr.config.theme,
+                        turn: curr.turns.length,
+                        turnCount: curr.config.turnCount,
+                      });
+                      window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
+                    }
+                  }}
+                  disabled={['completed', 'stopped'].includes(phase)}
+                >
+                  💾 Save & Exit
+                </button>
                 <button type="button" onClick={stop} disabled={['completed', 'stopped'].includes(phase)}>⏹ Stop</button>
                 {show.config.playback === 'manual' && (
                   <button

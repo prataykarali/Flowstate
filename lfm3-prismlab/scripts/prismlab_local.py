@@ -184,8 +184,10 @@ def _build_command() -> tuple[dict[str, str], list[str]]:
             "PRISMLAB_SESSION_SECRET": SECRET.read_text().strip(),
             "PRISMLAB_ALLOWED_ORIGINS": _origin(),
             "PRISMLAB_WAITING_LIMIT": os.getenv("PRISMLAB_WAITING_LIMIT", "3"),
-            "PRISMLAB_VISITOR_LIMIT": os.getenv("PRISMLAB_VISITOR_LIMIT", "20"),
-            "PRISMLAB_TEXT_CPU_THREADS": "4",
+            "PRISMLAB_VISITOR_LIMIT": os.getenv("PRISMLAB_VISITOR_LIMIT", "60"),
+            "PRISMLAB_COMPUTE_BUDGET_S": os.getenv("PRISMLAB_COMPUTE_BUDGET_S", "300.0"),
+            "PRISMLAB_RATE_WINDOW_S": os.getenv("PRISMLAB_RATE_WINDOW_S", "600"),
+            "PRISMLAB_TEXT_CPU_THREADS": os.getenv("PRISMLAB_TEXT_CPU_THREADS", "6"),
             "PRISMLAB_RETAIN_TEXT_WARM": "1",
         }
         command = _build_bwrap_command([
@@ -216,9 +218,13 @@ def _build_command() -> tuple[dict[str, str], list[str]]:
             "PRISMLAB_SESSION_SECRET": SECRET.read_text().strip(),
             "PRISMLAB_ALLOWED_ORIGINS": _origin(),
             "PRISMLAB_WAITING_LIMIT": os.getenv("PRISMLAB_WAITING_LIMIT", "3"),
-            "PRISMLAB_VISITOR_LIMIT": os.getenv("PRISMLAB_VISITOR_LIMIT", "20"),
+            "PRISMLAB_VISITOR_LIMIT": os.getenv("PRISMLAB_VISITOR_LIMIT", "60"),
+            "PRISMLAB_COMPUTE_BUDGET_S": os.getenv("PRISMLAB_COMPUTE_BUDGET_S", "300.0"),
+            "PRISMLAB_RATE_WINDOW_S": os.getenv("PRISMLAB_RATE_WINDOW_S", "600"),
             "LD_LIBRARY_PATH": str(LLAMA),
-            "PRISMLAB_TEXT_CPU_THREADS": "2", "HOME": str(STATE), "PYTHONPATH": str(ROOT),
+            "PRISMLAB_TEXT_CPU_THREADS": os.getenv("PRISMLAB_TEXT_CPU_THREADS", "6"),
+            "PRISMLAB_RETAIN_TEXT_WARM": "1",
+            "HOME": str(STATE), "PYTHONPATH": str(ROOT),
         })
         command = [
             str(VENV / "bin/python"), "-m", "uvicorn", "prismlab.public_gateway:app",

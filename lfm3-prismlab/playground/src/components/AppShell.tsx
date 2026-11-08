@@ -2,6 +2,7 @@ import React from 'react';
 import { RouteId } from '../app/routes.ts';
 import { Navigation } from './Navigation.tsx';
 import { SceneBackground } from './environment/SceneBackground.tsx';
+import { GlobalActivityBanner } from './GlobalActivityBanner.tsx';
 
 interface AppShellProps {
   currentRoute: RouteId;
@@ -35,6 +36,9 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, ch
           PrismLab is an experimental AI research playground. Inference runs on limited CPU hardware, so responses may be queued and service may occasionally be unavailable.
         </span>
       </div>
+
+      {/* Global Activity Status Banner for Paused/Parked sessions */}
+      <GlobalActivityBanner onNavigate={onNavigate} />
 
       {/* Top Header */}
       <header className="header-bar">

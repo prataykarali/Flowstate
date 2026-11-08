@@ -1,4 +1,4 @@
-import { executeLocal, type LiveResult, type ExecuteRequest } from './api.ts';
+import { executeLocal, ApiError, type LiveResult, type ExecuteRequest } from './api.ts';
 import type { CanonicalModelId } from '../data/models.ts';
 
 export type Letter = 'A' | 'B' | 'C' | 'D';
@@ -237,6 +237,8 @@ export async function generateQuestion(
       assertIdentity(result, hostId);
       return validateQuestion(result.output, previous, hostId, result);
     } catch (error) {
+      const is429 = (error instanceof ApiError && error.status === 429) || /rate limit|compute budget/i.test(String(error));
+      if (is429) throw error;
       lastError = error instanceof Error ? error.message : lastError;
     } finally {
       await afterCall?.();
@@ -265,6 +267,8 @@ export async function answerQuestion(modelId: CanonicalModelId, question: LiveQu
       activityReceipt: result.activity_receipt,
     };
   } catch (error) {
+    const is429 = (error instanceof ApiError && error.status === 429) || /rate limit|compute budget/i.test(String(error));
+    if (is429) throw error;
     return {
       modelId,
       backendModelId: BACKEND_IDS[modelId],

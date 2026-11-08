@@ -3,7 +3,7 @@ import { Mascot } from '../components/mascots/Mascot.tsx';
 import { MascotAvatar } from '../components/mascots/MascotAvatar.tsx';
 import { TriviaWinnerModal } from '../components/mascots/TriviaWinnerModal.tsx';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
-import { getGatewayStatus, startActivity, stopActivity, type GatewayStatus } from '../lib/api.ts';
+import { getGatewayStatus, startActivity, stopActivity, ApiError, type GatewayStatus } from '../lib/api.ts';
 import { answerQuestion, generateQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
 import { awardTriviaCorrect } from '../lib/leagueAdapters.ts';
 import { setTriviaRunning } from '../lib/triviaLock.ts';
@@ -24,6 +24,7 @@ export const LiveTrivia: React.FC = () => {
   const [currentContestant, setCurrentContestant] = useState(-1);
   const [match, setMatch] = useState<LiveMatch | null>(null);
   const [error, setError] = useState('');
+  const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null);
   const [stopping, setStopping] = useState(false);
   const [pausePending, setPausePending] = useState(false);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
@@ -34,6 +35,33 @@ export const LiveTrivia: React.FC = () => {
   const epoch = useRef(0);
   const active = phase === 'generating' || phase === 'answering' || phase === 'revealing' || phase === 'paused';
   useEffect(() => { getGatewayStatus(true).then(setGateway); return () => { epoch.current += 1; cancelRef.current = true; resumeWaiterRef.current?.(); resumeWaiterRef.current = null; setTriviaRunning(false); }; }, []);
+
+  const handleRateLimitPause = async (err: unknown, resumePhase: Phase) => {
+    let retryAfter = 30;
+    if (err instanceof ApiError && typeof err.retryAfter === 'number' && err.retryAfter > 0) {
+      retryAfter = Math.min(600, Math.max(2, err.retryAfter));
+    } else if (err instanceof Error) {
+      const match = err.message.match(/(\d+)\s*(?:s|sec|second)/i);
+      if (match) retryAfter = Math.min(600, Math.max(2, parseInt(match[1], 10)));
+    }
+    setPhase('paused');
+    setRateLimitCountdown(retryAfter);
+    setError(`Compute allowance exhausted; pausing match for ${retryAfter}s until replenishment…`);
+
+    while (retryAfter > 0 && !cancelRef.current) {
+      await new Promise(r => setTimeout(r, 1000));
+      retryAfter -= 1;
+      setRateLimitCountdown(retryAfter);
+      if (retryAfter > 0) {
+        setError(`Compute allowance replenishing (${retryAfter}s remaining)…`);
+      }
+    }
+    setRateLimitCountdown(null);
+    setError('');
+    if (!cancelRef.current) {
+      setPhase(resumePhase);
+    }
+  };
 
   const waitIfPaused = async (resumePhase: Phase) => {
     if (!pauseRef.current || cancelRef.current) return;
@@ -88,8 +116,23 @@ export const LiveTrivia: React.FC = () => {
           setHost(candidate);
           const waitingCast = pickContestants(candidate);
           setContestants(waitingCast);
-          try { nextQuestion = await generateQuestion(candidate, topic, difficulty, previous, () => waitIfPaused('generating'), () => !cancelRef.current && run === epoch.current, record.id); hostId = candidate; cast = waitingCast; break; }
-          catch (cause) { generationError = cause instanceof Error ? cause.message : generationError; }
+          while (true) {
+            try {
+              nextQuestion = await generateQuestion(candidate, topic, difficulty, previous, () => waitIfPaused('generating'), () => !cancelRef.current && run === epoch.current, record.id);
+              hostId = candidate;
+              cast = waitingCast;
+              break;
+            } catch (cause) {
+              const is429 = (cause instanceof ApiError && cause.status === 429) || /rate limit|compute budget/i.test(String(cause));
+              if (is429 && !cancelRef.current && run === epoch.current) {
+                await handleRateLimitPause(cause, 'generating');
+                continue;
+              }
+              generationError = cause instanceof Error ? cause.message : generationError;
+              break;
+            }
+          }
+          if (nextQuestion) break;
         }
         if (cancelRef.current || run !== epoch.current) break;
         if (!nextQuestion) throw new Error(generationError);
@@ -102,7 +145,31 @@ export const LiveTrivia: React.FC = () => {
         for (let slot = 0; slot < 3; slot += 1) {
           if (cancelRef.current || run !== epoch.current) break;
           setCurrentContestant(slot);
-          const result = await answerQuestion(cast[slot], nextQuestion, record.id);
+          let result: LiveAttempt;
+          while (true) {
+            try {
+              result = await answerQuestion(cast[slot], nextQuestion, record.id);
+              break;
+            } catch (cause) {
+              const is429 = (cause instanceof ApiError && cause.status === 429) || /rate limit|compute budget/i.test(String(cause));
+              if (is429 && !cancelRef.current && run === epoch.current) {
+                await handleRateLimitPause(cause, 'answering');
+                continue;
+              }
+              result = {
+                modelId: cast[slot],
+                backendModelId: cast[slot],
+                answer: null,
+                status: 'error',
+                points: 0,
+                requestId: null,
+                latencyS: null,
+                timestamp: new Date().toISOString(),
+                error: cause instanceof Error ? cause.message : 'Inference failed.',
+              };
+              break;
+            }
+          }
           if (run !== epoch.current) break;
           const rounds = [...record.rounds];
           rounds[rounds.length - 1] = upsertAttempt(rounds[rounds.length - 1], result);
@@ -127,6 +194,11 @@ export const LiveTrivia: React.FC = () => {
       }
     } catch (cause) {
       if (run === epoch.current) {
+        const is429 = (cause instanceof ApiError && cause.status === 429) || /rate limit|compute budget/i.test(String(cause));
+        if (is429 && !cancelRef.current) {
+          await handleRateLimitPause(cause, 'generating');
+          return;
+        }
         const message = cause instanceof Error ? cause.message : 'Live match failed.';
         setError(message);
         record = { ...record, status: 'failed', finishedAt: new Date().toISOString() };
@@ -189,10 +261,10 @@ export const LiveTrivia: React.FC = () => {
         const reaction = reveal && attempt ? attempt.status === 'correct' ? 'happy' : 'sad' : thinking ? 'thinking' : 'idle';
         return <article className={`s4-contestant ${thinking ? 'is-thinking' : ''}`} key={id}><div className="s4-contestant-figure"><Mascot model={MODELS[id]} motion={reveal && attempt ? attempt.status === 'correct' ? 'celebrating' : 'sad' : 'idle'} reactionState={reaction} reactionSignal={attempt || thinking ? round + 1 : 0} showAuthoredLine={false} interactive={false} /></div><div className="s4-contestant-copy"><strong>{MODELS[id].name}</strong><small>{points(id)} live points</small><div className="s4-answer-bubble" aria-live="polite">{!attempt ? thinking ? 'Thinking…' : 'Waiting…' : attempt.answer ? `Answer ${attempt.answer}` : attempt.status === 'invalid' ? 'Invalid answer' : 'Model error'}</div>{attempt?.latencyS != null && <small>{attempt.latencyS.toFixed(1)} s · {attempt.backendModelId}</small>}</div></article>;
       })}</section>
-      <section className="s4-question-board" aria-labelledby="s4-question-title"><div className="s4-question-top"><span>Question {round + 1}</span><span>{question ? `${question.topic} · ${question.difficulty}` : 'Generating'}</span></div><h2 id="s4-question-title">{question?.question || 'The questioner is preparing a fresh question…'}</h2><div className="s4-answer-list" aria-label="Answer options">{LETTERS.map(letter => <div key={letter} className={`s4-answer-row ${reveal && question?.correct_option === letter ? 'is-key' : ''}`}><span>{letter}</span>{question?.options[letter] || 'Awaiting generated option'}</div>)}</div><div className="s4-question-footer" role="status">{reveal && question ? <><strong>Host-key agreement: {question.correct_option}</strong><p>{question.explanation}</p></> : phase === 'paused' ? 'Paused. Resume to continue the autonomous match.' : phase === 'answering' ? 'Answers arrive sequentially. The host key is hidden until all three calls finish.' : phase === 'generating' ? 'Generating and validating a new MCQ.' : phase === 'completed' ? <div className="s4-completed-footer"><strong>{isZeroScore ? 'Match Complete · No Winner' : `Champion: ${winnerSummary} (${maxScore} pts)`}</strong><span> · Match complete. Championship standings updated.</span><button type="button" className="btn btn-secondary s4-winner-view-btn" onClick={() => setShowWinnerModal(true)}>View Results</button></div> : error || 'Start a live match. The arena chooses 5–10 questions automatically.'}</div></section>
+      <section className="s4-question-board" aria-labelledby="s4-question-title"><div className="s4-question-top"><span>Question {round + 1}</span><span>{question ? `${question.topic} · ${question.difficulty}` : 'Generating'}</span></div><h2 id="s4-question-title">{question?.question || 'The questioner is preparing a fresh question…'}</h2><div className="s4-answer-list" aria-label="Answer options">{LETTERS.map(letter => <div key={letter} className={`s4-answer-row ${reveal && question?.correct_option === letter ? 'is-key' : ''}`}><span>{letter}</span>{question?.options[letter] || 'Awaiting generated option'}</div>)}</div><div className="s4-question-footer" role="status">{reveal && question ? <><strong>Host-key agreement: {question.correct_option}</strong><p>{question.explanation}</p></> : phase === 'paused' ? (rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Compute allowance replenishing (${rateLimitCountdown}s remaining)… Match will resume automatically.` : 'Paused. Resume to continue the autonomous match.') : phase === 'answering' ? 'Answers arrive sequentially. The host key is hidden until all three calls finish.' : phase === 'generating' ? 'Generating and validating a new MCQ.' : phase === 'completed' ? <div className="s4-completed-footer"><strong>{isZeroScore ? 'Match Complete · No Winner' : `Champion: ${winnerSummary} (${maxScore} pts)`}</strong><span> · Match complete. Championship standings updated.</span><button type="button" className="btn btn-secondary s4-winner-view-btn" onClick={() => setShowWinnerModal(true)}>View Results</button></div> : error || 'Start a live match. The arena chooses 5–10 questions automatically.'}</div></section>
       <aside className="s4-host" aria-label="Questioner"><h2>Questioner</h2><div className="s4-host-bubble">{hostLine}</div><div className="s4-host-figure"><Mascot model={MODELS[host]} motion={phase === 'completed' ? 'celebrating' : 'idle'} showAuthoredLine={false} interactive={false} /></div><strong>{MODELS[host].name}</strong><small>Host · {question?.backendModelId || 'local model'} · no points this round</small></aside>
     </div>
-    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <button type="button" className="btn btn-primary" onClick={start}>Start live match</button> : <><button type="button" className="btn btn-secondary" disabled={stopping || pausePending} onClick={phase === 'paused' ? resume : pause}>{phase === 'paused' ? 'Resume' : pausePending ? 'Pausing after current call…' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
+    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <button type="button" className="btn btn-primary" onClick={start}>Start live match</button> : <><button type="button" className="btn btn-secondary" disabled={stopping || pausePending} onClick={phase === 'paused' ? () => { setRateLimitCountdown(0); resume(); } : pause}>{phase === 'paused' ? (rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resume (${rateLimitCountdown}s)` : 'Resume') : pausePending ? 'Pausing after current call…' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
     <TriviaWinnerModal
       isOpen={showWinnerModal}
       onClose={() => setShowWinnerModal(false)}

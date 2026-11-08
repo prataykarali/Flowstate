@@ -1,0 +1,151 @@
+{
+  "test1_gateway_status": {
+    "status": "PASS",
+    "gateway_enabled": true,
+    "backend_live_enabled": true,
+    "routes": [
+      "text",
+      "vision",
+      "audio",
+      "omni",
+      "d1",
+      "d1_omni"
+    ]
+  },
+  "test2_model_benchmarks": {
+    "text": {
+      "status_code": 200,
+      "latency_s": 5.311,
+      "tokens_predicted": 0,
+      "effective_tps": 0.0,
+      "metrics": {
+        "total_latency_s": 5.302555095999878,
+        "ttft_s": 0.6394198099999358,
+        "tokens_per_second": 10.079416617811777
+      },
+      "response_sample": "Entropy is a measure of the number of microscopic configurations corresponding to a macroscopic stat"
+    },
+    "vision": {
+      "status_code": 200,
+      "latency_s": 10.192,
+      "output_preview": "The image shows a split-screen advertisement featuring a woman at a desk with a laptop on the left a"
+    },
+    "audio": {
+      "status_code": 200,
+      "latency_s": 8.105,
+      "output_preview": "A man asks which color is the right most rectangle."
+    },
+    "omni": {
+      "status_code": 200,
+      "latency_s": 10.916,
+      "output_preview": "The right-most rectangle is"
+    },
+    "d1": {
+      "status_code": 200,
+      "latency_s": 5.51,
+      "output": {
+        "predicted_route": "scylladb",
+        "confidence": 0.996463081218056,
+        "probabilities": {
+          "postgresql": 0.003536918781944063,
+          "scylladb": 0.996463081218056
+        },
+        "exploratory_gate_passed": true,
+        "human_review_required": true,
+        "external_action_executed": false
+      }
+    },
+    "d1_omni": {
+      "status_code": 200,
+      "latency_s": 4.901,
+      "output": {
+        "predicted_route": "rate_limit",
+        "confidence": 0.7682245707577227,
+        "probabilities": {
+          "scale_workers": 0.2317754292422774,
+          "rate_limit": 0.7682245707577227
+        },
+        "exploratory_gate_passed": false,
+        "human_review_required": true,
+        "external_action_executed": false
+      }
+    }
+  },
+  "test3_parked_activity_lifecycle": {
+    "status": "PASS",
+    "story_started": true,
+    "concurrent_rejected_409": true,
+    "park_releases_lock": true,
+    "casual_inference_while_parked": true,
+    "resume_reacquires_lock": true
+  },
+  "test4_natural_language_decisions": {
+    "status": "PASS",
+    "comparison_choice": {
+      "predicted_route": "vue",
+      "confidence": 0.5368315848191157,
+      "probabilities": {
+        "react": 0.46316841518088425,
+        "vue": 0.5368315848191157
+      },
+      "exploratory_gate_passed": false,
+      "human_review_required": true,
+      "external_action_executed": false
+    },
+    "binary_decision": {
+      "predicted_route": "approve_yes",
+      "confidence": 0.6768746872410867,
+      "probabilities": {
+        "approve_yes": 0.6768746872410867,
+        "reject_no": 0.3231253127589134
+      },
+      "exploratory_gate_passed": false,
+      "human_review_required": true,
+      "external_action_executed": false
+    },
+    "multimodal_d1_omni": {
+      "predicted_route": "p2_elevated",
+      "confidence": 0.6654264444081794,
+      "probabilities": {
+        "p1_critical": 0.3345735555918205,
+        "p2_elevated": 0.6654264444081794
+      },
+      "exploratory_gate_passed": false,
+      "human_review_required": true,
+      "external_action_executed": false
+    }
+  },
+  "test5_championship_sync": {
+    "status": "PASS",
+    "data_source": "supabase_postgres",
+    "echo_standing": {
+      "model_id": "audio",
+      "display_name": "Echo",
+      "model_family": "LFM3-Audio-2B",
+      "total_points": 101,
+      "chat_points": 0,
+      "story_points": 1,
+      "trivia_points": 100,
+      "rating_points": 0,
+      "other_eligible_points": 0,
+      "last_activity_at": "2026-11-07T04:43:50.256435+00:00",
+      "rank": 1,
+      "unranked": false
+    },
+    "pure_standing": {
+      "model_id": "text",
+      "display_name": "Prism Pure",
+      "model_family": "LFM3-1.7B",
+      "total_points": 25,
+      "chat_points": 12,
+      "story_points": 13,
+      "trivia_points": 0,
+      "rating_points": 0,
+      "other_eligible_points": 0,
+      "last_activity_at": "2026-11-07T06:00:04.646903+00:00",
+      "rank": 2,
+      "unranked": false
+    },
+    "all_six_models_ranked_or_tracked": true
+  }
+}

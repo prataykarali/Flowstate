@@ -10,6 +10,7 @@ import { awardChatSession } from '../lib/leagueAdapters.ts';
 import { AutoStoryShow, type AutoStoryView } from './AutoStoryShow.tsx';
 import { showBeat } from '../lib/storyShow.ts';
 import { DecisionStudio } from '../components/DecisionStudio.tsx';
+import { parseNaturalDecision, formatDecisionSummary } from '../lib/decisionAdapter.ts';
 
 interface Message { role: 'you' | 'model'; text: string; fullText?: string; speaker?: string; failed?: boolean; requestId?: string; route?: string; status?: string; mode?: string; metrics?: LiveResult['metrics']; trace?: LiveResult['trace'] }
 const acceptsImage = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('image');
@@ -100,6 +101,7 @@ export const Chat: React.FC = () => {
   const [streamDraft, setStreamDraft] = useState('');
   const [streamStatus, setStreamStatus] = useState('');
   const [storyMode, setStoryMode] = useState(false);
+  const [showAdvancedStudio, setShowAdvancedStudio] = useState(false);
   const [storyView, setStoryView] = useState<AutoStoryView>({show:null,phase:'configuring',preview:'',message:'',pending:false});
   const [chapterCue,setChapterCue]=useState('');
   const lastChapterRef=useRef('');
@@ -111,6 +113,12 @@ export const Chat: React.FC = () => {
     const el = stageReplyRef.current;
     if (el && storyView.preview) el.scrollTop = el.scrollHeight;
   }, [storyView.preview]);
+
+  useEffect(() => {
+    const handleOpenStory = () => setStoryMode(true);
+    window.addEventListener('prismlab_open_story', handleOpenStory);
+    return () => window.removeEventListener('prismlab_open_story', handleOpenStory);
+  }, []);
 
   const [activeActivity, setActiveActivity] = useState<ActivitySessionInfo | null>(null);
 
@@ -242,16 +250,27 @@ export const Chat: React.FC = () => {
     setPending(true); setStageReply(null); setStreamDraft(''); setStreamStatus(''); setError(''); setContextNote(built?.truncated ? 'Older context was shortened to fit the 1,000-character text request.' : model === 'text' ? 'Text history is formatted into each single-turn request, up to 1,000 characters.' : 'This pathway receives the latest message and attached media.');
     setReactionState('thinking'); setReaction(n => n + 1);
     const isDecisionModel = model === 'd1' || model === 'd1_omni';
-    const isCasualChat = isDecisionModel && /^(hi|hello|hey|who are you|how are you|tell me a joke|what can you do|what are you)\b/i.test(userText.trim());
-    if (isCasualChat) {
-      const explanation = model === 'd1_omni'
-        ? `${character.characterName} is a specialized multimodal decision intelligence model. Rather than open-ended conversation, I evaluate multimodal evidence (audio, image, text) against structured operational categories (Ticket Triage: Billing, Technical, Shipping, Other) with confidence scores and human-review gates. Try submitting a customer support issue or operational scenario to classify!`
-        : `${character.characterName} is a specialized structured decision intelligence model. Rather than open-ended conversation, I evaluate text scenarios against structured operational categories (Ticket Triage: Billing, Technical, Shipping, Other) with confidence scores and human-review gates. Try submitting a customer support issue or operational scenario to classify!`;
-      const reply: Message = { role: 'model', text: explanation, speaker: character.characterName, route: 'Specialized Role Explanation', status: 'completed' };
-      setMessages(list => [...list, reply]); setStageReply(reply);
-      setReactionState('happy'); setReaction(n => n + 1);
-      setPending(false);
-      return;
+    let parsedDecision: ReturnType<typeof parseNaturalDecision> | null = null;
+    if (isDecisionModel) {
+      parsedDecision = parseNaturalDecision(userText, model, {
+        hasImage: !!image,
+        hasAudio: !!audio,
+        hasVideo: !!video,
+      });
+
+      if (parsedDecision.kind === 'conversational' || parsedDecision.kind === 'generative_redirect') {
+        const reply: Message = {
+          role: 'model',
+          text: parsedDecision.message || '',
+          speaker: character.characterName,
+          route: parsedDecision.kind === 'generative_redirect' ? 'Generative Recommendation' : 'Role Overview',
+          status: 'completed',
+        };
+        setMessages(list => [...list, reply]); setStageReply(reply);
+        setReactionState('happy'); setReaction(n => n + 1);
+        setPending(false);
+        return;
+      }
     }
     const activeImage = image;
     const activeAudio = audio;
@@ -278,6 +297,8 @@ export const Chat: React.FC = () => {
             audio: activeAudio ? await readMedia(activeAudio, 'audio') : undefined,
             video: activeVideo ? await readMedia(activeVideo, 'video') : undefined,
             required_media: selectedMedia.length ? selectedMedia : undefined,
+            decision_question: parsedDecision?.question,
+            max_tokens: 48,
           })
         : await executeLocalStream({
             model,
@@ -289,11 +310,12 @@ export const Chat: React.FC = () => {
             required_media: selectedMedia.length ? selectedMedia : undefined,
             max_tokens: 80,
           }, onStream);
-      if (result.status === 'completed' && result.output != null && outputText(result.output).trim()) {
-        const rawOutput = outputText(result.output).trim();
+      if (result.status === 'completed' && result.output != null) {
+        const rawOutput = typeof result.output === 'object' ? JSON.stringify(result.output, null, 2) : outputText(result.output).trim();
         const isDecision = model === 'd1' || model === 'd1_omni';
-        const cleanText = isDecision || rawOutput.length <= MAX_REPLY_CHARS ? rawOutput : `${rawOutput.slice(0, MAX_REPLY_CHARS).trimEnd()}…`;
-        const reply: Message = { role: 'model', text: cleanText, fullText: cleanText === rawOutput ? undefined : rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace };
+        const displaySummary = isDecision && typeof result.output === 'object' ? formatDecisionSummary(result.output as any) : rawOutput;
+        const cleanText = isDecision || displaySummary.length <= MAX_REPLY_CHARS ? displaySummary : `${displaySummary.slice(0, MAX_REPLY_CHARS).trimEnd()}…`;
+        const reply: Message = { role: 'model', text: cleanText, fullText: rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace };
         setMessages(list => [...list, reply]); setStageReply(reply);
         const completedIds = [...messages.filter(item => item.role === 'model' && item.status === 'completed' && item.requestId).map(item => item.requestId!), result.request_id];
         if (completedIds.length >= 2) awardChatSession(model, completedIds, result.activity_receipt);
@@ -545,8 +567,26 @@ export const Chat: React.FC = () => {
           </div>
         </div>
       )}
-      <div className="chat-dock-actions"><button type="button" onClick={newConversation} disabled={pending}>＋ New conversation</button><button type="button" onClick={() => void getGatewayStatus(true).then(setGateway)}>↻ Check runtime</button><details><summary>How this route works</summary><p>{model === 'text' ? 'The text endpoint handles one request at a time. Previous turns are included as plain text until the 1,000-character limit; oldest turns are omitted first.' : 'Attach the media shown below to run this character. Sample files are available if you choose them.'}</p><p>{character.specialty}</p><a href="#playground">Recorded traces in Playground ↗</a></details></div>
-      {(model === 'd1' || model === 'd1_omni') ? (
+      <div className="chat-dock-actions">
+        <button type="button" onClick={newConversation} disabled={pending}>＋ New conversation</button>
+        <button type="button" onClick={() => void getGatewayStatus(true).then(setGateway)}>↻ Check runtime</button>
+        {(model === 'd1' || model === 'd1_omni') && (
+          <button
+            type="button"
+            onClick={() => setShowAdvancedStudio(v => !v)}
+            style={{ fontWeight: 600, color: showAdvancedStudio ? '#fef08a' : '#93c5fd' }}
+          >
+            {showAdvancedStudio ? '← Simple Chat Mode' : '✦ Advanced Decision Studio'}
+          </button>
+        )}
+        <details>
+          <summary>How this route works</summary>
+          <p>{model === 'text' ? 'The text endpoint handles one request at a time. Previous turns are included as plain text until the 1,000-character limit; oldest turns are omitted first.' : (model === 'd1' || model === 'd1_omni') ? 'Ask naturally in plain English (e.g. "Should we pick A or B?"). The input adapter translates your prompt into candidate options and evaluates forward probabilities.' : 'Attach the media shown below to run this character. Sample files are available if you choose them.'}</p>
+          <p>{character.specialty}</p>
+          <a href="#playground">Recorded traces in Playground ↗</a>
+        </details>
+      </div>
+      {(model === 'd1' || model === 'd1_omni') && showAdvancedStudio ? (
         <DecisionStudio
           model={model}
           isBusy={isBusy}
@@ -555,7 +595,24 @@ export const Chat: React.FC = () => {
         />
       ) : (
         <>
-          <div className="chat-compose"><button className="chat-attach-button" type="button" aria-label="Attachments" aria-expanded={mediaOpen} onClick={() => setMediaOpen(v => !v)}>＋</button><label className="sr-only" htmlFor="chat-draft">Your message</label><textarea id="chat-draft" rows={1} maxLength={MAX_INPUT_CHARS} value={draft} disabled={pending || !!activeActivity} onFocus={() => { setFocused(true); if (!pending) { setReactionState('thinking'); setReaction(n => n + 1); } }} onBlur={() => { setFocused(false); if (!pending) { setReactionState('idle'); setReaction(n => n + 1); } }} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void send(); } }} placeholder={activeActivity ? `Chat paused while ${activeActivity.activity_type === 'STORY' ? 'Auto Story' : 'Live Trivia'} is active…` : isBusy ? `${MODELS[lock.modelId || model]?.characterName || 'A model'} is busy…` : `Message ${character.characterName}…`} /><span className="chat-input-count">{draft.length}/{MAX_INPUT_CHARS}</span><button className="chat-send-button" type="button" aria-label="Send message" disabled={!ready || pending || !canSend || !!activeActivity} onClick={() => void send()}>{pending ? '···' : '➤'}</button></div>
+          <div className="chat-compose">
+            <button className="chat-attach-button" type="button" aria-label="Attachments" aria-expanded={mediaOpen} onClick={() => setMediaOpen(v => !v)}>＋</button>
+            <label className="sr-only" htmlFor="chat-draft">Your message</label>
+            <textarea
+              id="chat-draft"
+              rows={1}
+              maxLength={MAX_INPUT_CHARS}
+              value={draft}
+              disabled={pending || !!activeActivity}
+              onFocus={() => { setFocused(true); if (!pending) { setReactionState('thinking'); setReaction(n => n + 1); } }}
+              onBlur={() => { setFocused(false); if (!pending) { setReactionState('idle'); setReaction(n => n + 1); } }}
+              onChange={e => setDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); void send(); } }}
+              placeholder={activeActivity ? `Chat paused while ${activeActivity.activity_type === 'STORY' ? 'Auto Story' : 'Live Trivia'} is active…` : isBusy ? `${MODELS[lock.modelId || model]?.characterName || 'A model'} is busy…` : (model === 'd1' || model === 'd1_omni') ? `Ask ${character.characterName} anything (e.g. "Should I choose X or Y?")...` : `Message ${character.characterName}…`}
+            />
+            <span className="chat-input-count">{draft.length}/{MAX_INPUT_CHARS}</span>
+            <button className="chat-send-button" type="button" aria-label="Send message" disabled={!ready || pending || !canSend || !!activeActivity} onClick={() => void send()}>{pending ? '···' : '➤'}</button>
+          </div>
           {(mediaOpen || image || audio || video) && <div className="chat-media-row">
             {acceptsImage(model) && <div className="chat-media-slot"><label>Image <input type="file" accept="image/png,image/jpeg" onChange={e => setImage(e.target.files?.[0] || null)} /></label>{image ? <span>{image.name}</span> : <button type="button" className="chat-sample-btn" onClick={() => void attachSample('image')}>+ Use sample PNG</button>}</div>}
             {acceptsAudio(model) && <div className="chat-media-slot"><label>WAV audio <input type="file" accept="audio/wav,audio/x-wav,.wav" onChange={e => setAudio(e.target.files?.[0] || null)} /></label>{audio ? <span>{audio.name}</span> : <button type="button" className="chat-sample-btn" onClick={() => void attachSample('audio')}>+ Use sample WAV</button>}</div>}

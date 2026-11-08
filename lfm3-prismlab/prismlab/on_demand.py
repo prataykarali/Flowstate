@@ -97,7 +97,10 @@ def warm_manager(group: str, specs: list[RuntimeSpec]) -> LifecycleManager:
             for other_group, (_, other_manager) in list(_warm_managers.items()):
                 if other_group != group:
                     # Retain text resident if another group is activated
-                    if retain_text and other_group == "text" and group != "text":
+                    if retain_text and other_group == "text":
+                        continue
+                    # When text is activated, retain the active specialist warm as well
+                    if retain_text and group == "text":
                         continue
                     other_manager.close()
                     _warm_managers.pop(other_group, None)
@@ -169,7 +172,8 @@ def runtime_specs() -> list[RuntimeSpec]:
         command = (
             str(executable), "-m", str(model), "--mmproj", str(projector),
             "--alias", alias, "--host", "127.0.0.1", "--port", str(port),
-            "-c", str(context), *acceleration_flags(executable), "-t", str(threads),
+            "-c", str(context), *acceleration_flags(executable),
+            "-t", str(threads), "-tb", str(threads),
             "--parallel", "1", "--no-reasoning-preserve",
             "--reasoning", "off", "--reasoning-budget", "0",
             "--cache-reuse", "256",
@@ -177,6 +181,8 @@ def runtime_specs() -> list[RuntimeSpec]:
         if key in {"d1", "d1_omni"}:
             batch = "4096" if key == "d1_omni" else "2048"
             command += ("-b", batch, "-ub", batch)
+        else:
+            command += ("-b", "2048", "-ub", "512")
         if text.auth_key_file:
             command += ("--api-key-file", str(text.auth_key_file))
         specs.append(RuntimeSpec(key, base, alias, command, auth_token=text.auth_token, timeout_s=text.timeout_s))

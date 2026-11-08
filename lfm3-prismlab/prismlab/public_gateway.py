@@ -338,7 +338,11 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
             job_rec.error = f"Inference unavailable: {exc}"
             raise HTTPException(503, f"Inference unavailable: {exc}") from None
         response = JSONResponse(result, status_code=200 if result.get("status") == "completed" else 502,
-                                headers={"Cache-Control": "no-store", "X-Job-Id": job_id})
+                                headers={
+                                    "Cache-Control": "no-store",
+                                    "X-Job-Id": job_id,
+                                    "X-Compute-Budget": str(int(queue.compute_budget_s)),
+                                })
         _set_cookie(response, request, cookie)
         return response
     finally:
@@ -524,7 +528,7 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
 
     admitted_at = asyncio.get_running_loop().time()
     response = StreamingResponse(events(), media_type="text/event-stream",
-                                 headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no", "X-Job-Id": job_id})
+                                 headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no", "X-Job-Id": job_id, "X-Compute-Budget": str(int(queue.compute_budget_s))})
     _set_cookie(response, request, cookie)
     return response
 
@@ -615,13 +619,80 @@ async def cancel_job(job_id: str, request: Request):
     return response
 
 
+@app.get("/local-api/compute/status")
+async def get_compute_status_endpoint(request: Request):
+    visitor, cookie = _visitor(request)
+    status_data = await queue.get_visitor_compute_status(visitor)
+    response = JSONResponse(status_data, headers={"Cache-Control": "no-store"})
+    _set_cookie(response, request, cookie)
+    return response
+
+
 @app.get("/local-api/activity/current")
 async def get_current_activity_endpoint(request: Request):
     visitor, cookie = _visitor(request)
     session = activity_manager.get_current_activity(visitor)
+    parked = activity_manager.get_parked_activity(visitor)
     response = JSONResponse({
         "active": session is not None,
         "activity": session.to_dict() if session else None,
+        "parked": parked.to_dict() if parked else None,
+    }, headers={"Cache-Control": "no-store"})
+    _set_cookie(response, request, cookie)
+    return response
+
+
+@app.post("/local-api/activity/park")
+async def park_activity_endpoint(request: Request):
+    visitor, cookie = _visitor(request)
+    body = await _payload(request)
+    sess_id = body.get("session_id")
+    if not sess_id:
+        raise HTTPException(422, "session_id required")
+    metadata = body.get("metadata")
+
+    ok, session, err = activity_manager.park_activity(visitor, sess_id, metadata=metadata)
+    if not ok:
+        status_code = 403 if err == "ACCESS_DENIED" else 404
+        response = JSONResponse(
+            status_code=status_code,
+            content={"error": err, "session": session.to_dict() if session else None},
+            headers={"Cache-Control": "no-store"}
+        )
+        _set_cookie(response, request, cookie)
+        return response
+
+    response = JSONResponse({
+        "status": "parked",
+        "session": session.to_dict() if session else None,
+    }, headers={"Cache-Control": "no-store"})
+    _set_cookie(response, request, cookie)
+    return response
+
+
+@app.post("/local-api/activity/resume-parked")
+async def resume_parked_activity_endpoint(request: Request):
+    visitor, cookie = _visitor(request)
+    body = await _payload(request)
+    sess_id = body.get("session_id")
+    if not sess_id:
+        raise HTTPException(422, "session_id required")
+    ttl_s = float(body.get("ttl_s", 180.0))
+
+    ok, session, err = activity_manager.resume_parked_activity(visitor, sess_id, ttl_s=ttl_s)
+    if not ok:
+        status_code = 409 if err == "ACTIVE_ACTIVITY_CONFLICT" else (403 if err == "ACCESS_DENIED" else 404)
+        response = JSONResponse(
+            status_code=status_code,
+            content={"error": err, "session": session.to_dict() if session else None},
+            headers={"Cache-Control": "no-store"}
+        )
+        _set_cookie(response, request, cookie)
+        return response
+
+    response = JSONResponse({
+        "status": "active",
+        "session": session.to_dict(),
     }, headers={"Cache-Control": "no-store"})
     _set_cookie(response, request, cookie)
     return response

@@ -78,7 +78,12 @@ export interface BackendJobRecord {
   completed_at?: number | null;
 }
 export class ApiError extends Error {
-  constructor(message: string, public status: number) {
+  constructor(
+    message: string,
+    public status: number,
+    public retryAfter?: number,
+    public computeRemaining?: number
+  ) {
     super(message);
     this.name = 'ApiError';
   }
@@ -89,7 +94,11 @@ async function jsonResponse<T>(response: Response): Promise<T> {
   try { data = JSON.parse(text); } catch { /* text payload */ }
   if (!response.ok) {
     const detail = data && typeof data.detail === 'string' ? data.detail : text.slice(0, 200) || `Request failed with status ${response.status}`;
-    throw new ApiError(detail, response.status);
+    const retryAfterHeader = response.headers.get('retry-after');
+    const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : undefined;
+    const computeRemainingHeader = response.headers.get('x-compute-remaining');
+    const computeRemaining = computeRemainingHeader ? parseFloat(computeRemainingHeader) : undefined;
+    throw new ApiError(detail, response.status, retryAfter, computeRemaining);
   }
   return (data !== null ? data : text) as T;
 }
@@ -385,7 +394,6 @@ export async function executeLocalStream(request: ExecuteRequest, onUpdate: (upd
     }
     try {
       const res = await executeLocal(request);
-      invalidateGatewayCache();
       lock?.release('completed');
       return res;
     } catch (e) {
@@ -404,7 +412,6 @@ export async function generateText(prompt: string, jobId?: string, maxTokens = 1
   const lock = needLock ? lockAcquire!('text', 'chat') : null;
   try {
     const result = await post<LiveResult>('/text', { prompt, max_tokens: cappedTokens, job_id: jobId, activity_session_id: activitySessionId }, jobId);
-    invalidateGatewayCache();
     lock?.release('completed');
     return result;
   } catch (err) {
@@ -540,7 +547,7 @@ export interface ActivitySessionInfo {
   visitor_id: string;
   activity_type: 'CHAT' | 'STORY' | 'TRIVIA';
   session_id: string;
-  status: 'active' | 'completed' | 'terminated' | 'expired';
+  status: 'active' | 'completed' | 'terminated' | 'expired' | 'parked';
   created_at: number;
   updated_at: number;
   expires_at: number;
@@ -553,13 +560,14 @@ export interface ActivitySessionInfo {
 export interface ActivityCurrentResponse {
   active: boolean;
   activity: ActivitySessionInfo | null;
+  parked?: ActivitySessionInfo | null;
 }
 
 export async function getCurrentActivity(): Promise<ActivityCurrentResponse> {
   try {
     return await get<ActivityCurrentResponse>('/activity/current');
   } catch {
-    return { active: false, activity: null };
+    return { active: false, activity: null, parked: null };
   }
 }
 
@@ -587,6 +595,24 @@ export async function stopActivity(
   });
 }
 
+export async function parkActivity(
+  sessionId: string,
+  metadata?: Record<string, unknown>
+): Promise<{ status: string; session: ActivitySessionInfo | null }> {
+  return await post<{ status: string; session: ActivitySessionInfo | null }>('/activity/park', {
+    session_id: sessionId,
+    metadata
+  });
+}
+
+export async function resumeParkedActivity(
+  sessionId: string
+): Promise<{ status: string; session: ActivitySessionInfo }> {
+  return await post<{ status: string; session: ActivitySessionInfo }>('/activity/resume-parked', {
+    session_id: sessionId
+  });
+}
+
 export async function heartbeatActivity(
   sessionId: string,
   extensionS = 180
@@ -602,4 +628,23 @@ export async function getActivityCheckpoints(
 ): Promise<{ session_id: string; checkpoints: Array<{ turn_index: number; activity_type: string; prompt?: string; output?: string; state: Record<string, unknown>; timestamp: number }> }> {
   return await get(`/activity/checkpoints/${sessionId}`);
 }
+
+export interface ComputeStatus {
+  visitor_id: string;
+  compute_budget_s: number;
+  compute_used_s: number;
+  compute_remaining_s: number;
+  rate_window_s: number;
+  cooldown_s: number;
+  is_rate_limited: boolean;
+}
+
+export async function getComputeStatus(): Promise<ComputeStatus | null> {
+  try {
+    return await get<ComputeStatus>('/compute/status');
+  } catch {
+    return null;
+  }
+}
+
 

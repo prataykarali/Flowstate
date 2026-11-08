@@ -53,7 +53,7 @@ export {
 export const SHOW_STORAGE_KEY = 'prismlab_auto_story_shows_v1';
 export const OPENING_MEMORY_KEY = 'prismlab_story_opening_memory_v1';
 export const SHOW_VERSION = 's3b.2';
-export type ShowPhase = 'idle' | 'configuring' | 'preparing' | 'loading_model' | 'requesting' | 'awaiting_result' | 'presenting_turn' | 'paused' | 'completed' | 'failed' | 'stopped';
+export type ShowPhase = 'idle' | 'configuring' | 'preparing' | 'loading_model' | 'requesting' | 'awaiting_result' | 'presenting_turn' | 'paused' | 'paused_rate_limit' | 'waiting_for_queue' | 'resuming' | 'completed' | 'failed' | 'stopped';
 export type ShowRole = 'writer' | 'visual_interpreter' | 'audio_interpreter' | 'multimodal_interpreter' | 'decision_assistant';
 export interface ShowCapability {
   modelId: CanonicalModelId;
@@ -199,7 +199,7 @@ export interface ShowRecord {
   turnOrder: CanonicalModelId[];
   turns: ShowTurn[];
   humanTurns?: HumanInterjection[];
-  status: 'active' | 'completed' | 'failed' | 'stopped';
+  status: 'active' | 'completed' | 'failed' | 'stopped' | 'paused_rate_limit' | 'parked';
   mode: 'live_local_show' | 'recorded_show';
   canonicalWorldState?: CanonicalWorldState;
   continuityAudit?: ContinuityAuditResult;
@@ -906,10 +906,21 @@ export function appendShowTurn(show: ShowRecord, turn: ShowTurn): ShowRecord {
   };
 }
 
+export function sanitizeShow(show: ShowRecord): ShowRecord {
+  const cleanTurns = show.turns.filter(t => t.status === 'completed' && !t.rejectionReason && !/unavailable:|returned no response/i.test(t.stageText || ''));
+  return {
+    ...show,
+    turns: cleanTurns,
+  };
+}
+
 export function readShows(storage: Pick<Storage, 'getItem'> = localStorage): ShowRecord[] {
   try {
     const parsed: unknown = JSON.parse(storage.getItem(SHOW_STORAGE_KEY) || '[]');
-    return Array.isArray(parsed) ? parsed.filter((item): item is ShowRecord => !!item && (item.version === SHOW_VERSION || item.version === 's3b.1') && typeof item.showId === 'string' && Array.isArray(item.turns) && Array.isArray(item.turnOrder)).slice(0, 5) : [];
+    return Array.isArray(parsed) ? parsed
+      .filter((item): item is ShowRecord => !!item && (item.version === SHOW_VERSION || item.version === 's3b.1') && typeof item.showId === 'string' && Array.isArray(item.turns) && Array.isArray(item.turnOrder))
+      .map(sanitizeShow)
+      .slice(0, 5) : [];
   } catch {
     return [];
   }

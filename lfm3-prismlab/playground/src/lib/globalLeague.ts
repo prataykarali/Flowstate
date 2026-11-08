@@ -79,9 +79,9 @@ export async function fetchGlobalStandings(force = false): Promise<GlobalStandin
   fetchPromise = (async () => {
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : (import.meta.env?.VITE_VERCEL_ORIGIN || '');
-      const res = await fetch(`${origin}/api/league/standings`, {
+      const res = await fetch(`${origin}/api/league/standings?t=${Date.now()}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
       });
 
       if (!res.ok) {
@@ -171,6 +171,29 @@ export async function recordGlobalEvent(
 
     if (res.ok) {
       const data = await res.json() as { status: string; points: number };
+      const awarded = data.points ?? points;
+      // Optimistic update for immediate feedback
+      if (awarded > 0 && Array.isArray(currentState.standings)) {
+        const nextStandings = currentState.standings.map(row => {
+          if (row.model_id !== modelId) return row;
+          return {
+            ...row,
+            total_points: row.total_points + awarded,
+            chat_points: activityType === 'chat' ? row.chat_points + awarded : row.chat_points,
+            story_points: activityType.startsWith('story') ? row.story_points + awarded : row.story_points,
+            trivia_points: activityType.startsWith('trivia') ? row.trivia_points + awarded : row.trivia_points,
+            unranked: false,
+          };
+        }).sort((a, b) => b.total_points - a.total_points).map((row, idx) => ({ ...row, rank: idx + 1 }));
+
+        currentState = {
+          ...currentState,
+          standings: nextStandings,
+          allUnranked: false,
+          updatedAt: new Date().toISOString(),
+        };
+        notify();
+      }
       void fetchGlobalStandings(true);
       return data;
     }

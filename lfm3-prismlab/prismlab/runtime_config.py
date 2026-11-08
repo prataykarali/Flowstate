@@ -53,7 +53,7 @@ class TextRuntimeConfig:
         )
         model_id = os.getenv("PRISMLAB_TEXT_MODEL_ALIAS", "lfm3-1.7b")
         context_size = _positive_int("PRISMLAB_TEXT_CONTEXT_SIZE", 2048)
-        cpu_threads = _positive_int("PRISMLAB_TEXT_CPU_THREADS", 2)
+        cpu_threads = _positive_int("PRISMLAB_TEXT_CPU_THREADS", 6)
         max_concurrency = _positive_int("PRISMLAB_TEXT_MAX_CONCURRENCY", 1)
         timeout_s = _positive_int("PRISMLAB_TEXT_TIMEOUT_S", 180)
         if max_concurrency != 1:
@@ -92,8 +92,10 @@ class TextRuntimeConfig:
             str(self.executable), "-m", str(self.model_path),
             "--alias", self.model_id, "--host", parsed.hostname or "127.0.0.1", "--port", str(parsed.port),
             "-c", str(self.context_size), *acceleration_flags(self.executable), "-t", str(self.cpu_threads),
+            "-tb", str(self.cpu_threads), "-b", "2048", "-ub", "512",
             "--parallel", str(self.max_concurrency), "--no-reasoning-preserve",
             "--reasoning", "off", "--reasoning-budget", "0",
+            "--cache-reuse", "256",
             "--cors-origins", "http://127.0.0.1:8000",
         )
         if self.auth_key_file:

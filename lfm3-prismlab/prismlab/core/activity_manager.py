@@ -72,20 +72,46 @@ class ActivitySessionManager:
 
     def _init_db(self) -> None:
         with self._get_connection() as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS activity_sessions (
-                    visitor_id TEXT PRIMARY KEY,
-                    activity_type TEXT NOT NULL,
-                    session_id TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    created_at REAL NOT NULL,
-                    updated_at REAL NOT NULL,
-                    expires_at REAL NOT NULL,
-                    idempotency_key TEXT,
-                    metadata_json TEXT,
-                    current_job_id TEXT
-                );
-            """)
+            cur = conn.execute("PRAGMA table_info(activity_sessions)")
+            cols = {r[1]: r for r in cur.fetchall()}
+            if cols and cols.get("visitor_id", (0, 0, 0, 0, 0, 0))[5] == 1:
+                # visitor_id was PK, migrate to session_id as PK
+                conn.execute("ALTER TABLE activity_sessions RENAME TO activity_sessions_old")
+                conn.execute("""
+                    CREATE TABLE activity_sessions (
+                        session_id TEXT PRIMARY KEY,
+                        visitor_id TEXT NOT NULL,
+                        activity_type TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        created_at REAL NOT NULL,
+                        updated_at REAL NOT NULL,
+                        expires_at REAL NOT NULL,
+                        idempotency_key TEXT,
+                        metadata_json TEXT,
+                        current_job_id TEXT
+                    );
+                """)
+                conn.execute("""
+                    INSERT INTO activity_sessions (session_id, visitor_id, activity_type, status, created_at, updated_at, expires_at, idempotency_key, metadata_json, current_job_id)
+                    SELECT session_id, visitor_id, activity_type, status, created_at, updated_at, expires_at, idempotency_key, metadata_json, current_job_id FROM activity_sessions_old;
+                """)
+                conn.execute("DROP TABLE activity_sessions_old")
+            else:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS activity_sessions (
+                        session_id TEXT PRIMARY KEY,
+                        visitor_id TEXT NOT NULL,
+                        activity_type TEXT NOT NULL,
+                        status TEXT NOT NULL,
+                        created_at REAL NOT NULL,
+                        updated_at REAL NOT NULL,
+                        expires_at REAL NOT NULL,
+                        idempotency_key TEXT,
+                        metadata_json TEXT,
+                        current_job_id TEXT
+                    );
+                """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_activity_visitor_status ON activity_sessions (visitor_id, status);")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS activity_checkpoints (
                     session_id TEXT NOT NULL,
@@ -108,8 +134,8 @@ class ActivitySessionManager:
             rows = cur.fetchall()
             for r in rows:
                 conn.execute(
-                    "UPDATE activity_sessions SET status = 'terminated', updated_at = ? WHERE visitor_id = ?",
-                    (now, r["visitor_id"])
+                    "UPDATE activity_sessions SET status = 'terminated', updated_at = ? WHERE session_id = ?",
+                    (now, r["session_id"])
                 )
             conn.commit()
             if rows:
@@ -121,7 +147,7 @@ class ActivitySessionManager:
             if not session:
                 with self._get_connection() as conn:
                     cur = conn.execute(
-                        "SELECT * FROM activity_sessions WHERE visitor_id = ? AND status = 'active'",
+                        "SELECT * FROM activity_sessions WHERE visitor_id = ? AND status = 'active' ORDER BY updated_at DESC LIMIT 1",
                         (visitor_id,)
                     )
                     row = cur.fetchone()
@@ -133,9 +159,22 @@ class ActivitySessionManager:
                 if session.status == "active" and time.time() >= session.expires_at:
                     session.status = "expired"
                     self._persist_session(session)
+                    self._sessions.pop(visitor_id, None)
                     return None
                 if session.status == "active":
                     return session
+            return None
+
+    def get_parked_activity(self, visitor_id: str) -> Optional[ActivitySession]:
+        with self._lock:
+            with self._get_connection() as conn:
+                cur = conn.execute(
+                    "SELECT * FROM activity_sessions WHERE visitor_id = ? AND status = 'parked' ORDER BY updated_at DESC LIMIT 1",
+                    (visitor_id,)
+                )
+                row = cur.fetchone()
+                if row:
+                    return self._row_to_session(row)
             return None
 
     def start_activity(
@@ -192,6 +231,77 @@ class ActivitySessionManager:
             self._persist_session(new_session)
             return True, new_session, None
 
+    def park_activity(
+        self,
+        visitor_id: str,
+        session_id: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[bool, Optional[ActivitySession], Optional[str]]:
+        """Park an active session, releasing the active lock while checkpointing state."""
+        now = time.time()
+        with self._lock:
+            session = self._sessions.get(visitor_id)
+            if not session or session.session_id != session_id:
+                with self._get_connection() as conn:
+                    cur = conn.execute(
+                        "SELECT * FROM activity_sessions WHERE session_id = ?",
+                        (session_id,)
+                    )
+                    row = cur.fetchone()
+                    if row:
+                        session = self._row_to_session(row)
+
+            if not session:
+                return False, None, "SESSION_NOT_FOUND"
+
+            if session.visitor_id != visitor_id:
+                return False, None, "ACCESS_DENIED"
+
+            # Transition to parked
+            session.status = "parked"
+            session.updated_at = now
+            if metadata:
+                session.metadata = {**(session.metadata or {}), **metadata}
+            self._persist_session(session)
+            if visitor_id in self._sessions and self._sessions[visitor_id].session_id == session_id:
+                self._sessions.pop(visitor_id, None)
+            return True, session, None
+
+    def resume_parked_activity(
+        self,
+        visitor_id: str,
+        session_id: str,
+        ttl_s: float = DEFAULT_LEASE_TTL_S,
+    ) -> Tuple[bool, Optional[ActivitySession], Optional[str]]:
+        """Resume a parked activity session, acquiring the active lock."""
+        now = time.time()
+        with self._lock:
+            # Check if there is already an active session
+            active = self.get_current_activity(visitor_id)
+            if active and active.session_id != session_id:
+                return False, active, "ACTIVE_ACTIVITY_CONFLICT"
+
+            with self._get_connection() as conn:
+                cur = conn.execute(
+                    "SELECT * FROM activity_sessions WHERE session_id = ?",
+                    (session_id,)
+                )
+                row = cur.fetchone()
+                if not row:
+                    return False, None, "SESSION_NOT_FOUND"
+                session = self._row_to_session(row)
+
+            if session.visitor_id != visitor_id:
+                return False, None, "ACCESS_DENIED"
+
+            # Transition to active
+            session.status = "active"
+            session.updated_at = now
+            session.expires_at = now + ttl_s
+            self._sessions[visitor_id] = session
+            self._persist_session(session)
+            return True, session, None
+
     def stop_activity(
         self,
         visitor_id: str,
@@ -204,32 +314,18 @@ class ActivitySessionManager:
         """
         now = time.time()
         with self._lock:
-            if session_id:
-                with self._get_connection() as conn:
-                    cur = conn.execute(
-                        "SELECT visitor_id FROM activity_sessions WHERE session_id = ?",
-                        (session_id,)
-                    )
-                    row = cur.fetchone()
-                    if row and row["visitor_id"] != visitor_id:
-                        return False, None, "ACCESS_DENIED"
+            with self._get_connection() as conn:
+                cur = conn.execute(
+                    "SELECT * FROM activity_sessions WHERE session_id = ?",
+                    (session_id,)
+                )
+                row = cur.fetchone()
+                if not row:
+                    return True, None, "no_active_session"
+                session = self._row_to_session(row)
 
-            session = self._sessions.get(visitor_id)
-            if not session:
-                with self._get_connection() as conn:
-                    cur = conn.execute(
-                        "SELECT * FROM activity_sessions WHERE visitor_id = ?",
-                        (visitor_id,)
-                    )
-                    row = cur.fetchone()
-                    if row:
-                        session = self._row_to_session(row)
-
-            if not session:
-                return True, None, "no_active_session"
-
-            if session.session_id != session_id and session.status == "active":
-                return False, session, "SESSION_MISMATCH"
+            if session.visitor_id != visitor_id:
+                return False, None, "ACCESS_DENIED"
 
             # Transition status
             final_status = "completed" if reason == "completed" else "terminated"
@@ -237,7 +333,8 @@ class ActivitySessionManager:
             session.updated_at = now
             session.expires_at = now
             self._persist_session(session)
-            self._sessions.pop(visitor_id, None)
+            if visitor_id in self._sessions and self._sessions[visitor_id].session_id == session_id:
+                self._sessions.pop(visitor_id, None)
             return True, session, None
 
     def renew_lease(
@@ -334,12 +431,13 @@ class ActivitySessionManager:
         """Persist an activity checkpoint (e.g. story turn or trivia question)."""
         now = time.time()
         state_json = json.dumps(state_data or {})
+        output_str = json.dumps(output) if isinstance(output, (dict, list)) else (str(output) if output is not None else None)
         with self._get_connection() as conn:
             conn.execute("""
                 INSERT OR REPLACE INTO activity_checkpoints
                 (session_id, turn_index, activity_type, prompt, output, state_json, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (session_id, turn_index, activity_type, prompt, output, state_json, now))
+            """, (session_id, turn_index, activity_type, prompt, output_str, state_json, now))
             conn.commit()
 
     def get_checkpoints(self, session_id: str) -> List[Dict[str, Any]]:
