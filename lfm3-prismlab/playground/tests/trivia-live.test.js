@@ -90,6 +90,9 @@ test('P2 response normalization: accepts harmlessly wrapped letters and rejects 
     { raw: '"D"', expected: 'D' },
     { raw: 'B)', expected: 'B' },
     { raw: '   C   ', expected: 'C' },
+    { raw: 'Option B', expected: 'B' },
+    { raw: 'Option B.', expected: 'B' },
+    { raw: 'Choice C', expected: 'C' },
     { raw: '{"answer": "A"}', expected: 'A' },
     { raw: '{"answer": "d"}', expected: 'D' }
   ];
@@ -97,6 +100,11 @@ test('P2 response normalization: accepts harmlessly wrapped letters and rejects 
   for (const { raw, expected } of acceptedCases) {
     assert.equal(live.validateAnswer(raw, 'vision'), expected, `Expected ${raw} to normalize to ${expected}`);
   }
+
+  // Question option matching
+  const testQ = makeQuestion(99);
+  assert.equal(live.validateAnswer('two', 'audio', testQ), 'B');
+  assert.equal(live.validateAnswer('Four', 'audio', testQ), 'D');
 
   // Decision models return object with predicted_route
   assert.equal(live.validateAnswer({ predicted_route: 'B' }, 'd1'), 'B');

@@ -3,7 +3,7 @@ import { Mascot } from '../components/mascots/Mascot.tsx';
 import { MascotAvatar } from '../components/mascots/MascotAvatar.tsx';
 import { TriviaWinnerModal } from '../components/mascots/TriviaWinnerModal.tsx';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
-import { getGatewayStatus, startActivity, stopActivity, ApiError, type GatewayStatus } from '../lib/api.ts';
+import { getGatewayStatus, startActivity, stopActivity, parkActivity, resumeParkedActivity, ApiError, type GatewayStatus } from '../lib/api.ts';
 import { answerQuestion, generateQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
 import { awardTriviaCorrect } from '../lib/leagueAdapters.ts';
 import { setTriviaRunning } from '../lib/triviaLock.ts';
@@ -12,17 +12,35 @@ import { cancelActiveInference } from '../lib/inferenceLock.ts';
 type Phase = 'idle' | 'generating' | 'answering' | 'revealing' | 'paused' | 'completed' | 'cancelled' | 'failed';
 const HOSTS: CanonicalModelId[] = ['text', 'vision', 'omni'];
 
+const ACTIVE_TRIVIA_STORAGE_KEY = 'prismlab_active_trivia_match_v1';
+
 export const LiveTrivia: React.FC = () => {
   const [gateway, setGateway] = useState<GatewayStatus | null>(null);
-  const [length, setLength] = useState<number | null>(null);
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [round, setRound] = useState(0);
+  const [match, setMatch] = useState<LiveMatch | null>(() => {
+    try {
+      const raw = localStorage.getItem(ACTIVE_TRIVIA_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as LiveMatch;
+      if (parsed && (parsed.status === 'paused' || parsed.status === 'running') && parsed.rounds.length < parsed.length) {
+        return parsed;
+      }
+    } catch {}
+    return null;
+  });
+  const [length, setLength] = useState<number | null>(() => match?.length || null);
+  const [phase, setPhase] = useState<Phase>(() => match ? 'paused' : 'idle');
+  const [round, setRound] = useState(() => match ? match.rounds.length : 0);
   const [host, setHost] = useState<CanonicalModelId>('text');
   const [contestants, setContestants] = useState<CanonicalModelId[]>(['vision', 'audio', 'omni']);
-  const [question, setQuestion] = useState<LiveQuestion | null>(null);
-  const [attempts, setAttempts] = useState<LiveAttempt[]>([]);
+  const [question, setQuestion] = useState<LiveQuestion | null>(() => {
+    if (!match || !match.rounds.length) return null;
+    return match.rounds[match.rounds.length - 1]?.question || null;
+  });
+  const [attempts, setAttempts] = useState<LiveAttempt[]>(() => {
+    if (!match || !match.rounds.length) return [];
+    return match.rounds[match.rounds.length - 1]?.attempts || [];
+  });
   const [currentContestant, setCurrentContestant] = useState(-1);
-  const [match, setMatch] = useState<LiveMatch | null>(null);
   const [error, setError] = useState('');
   const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null);
   const [stopping, setStopping] = useState(false);
@@ -31,10 +49,56 @@ export const LiveTrivia: React.FC = () => {
   const runningRef = useRef(false);
   const cancelRef = useRef(false);
   const pauseRef = useRef(false);
+  const rateLimitSkipRef = useRef(false);
   const resumeWaiterRef = useRef<(() => void) | null>(null);
   const epoch = useRef(0);
+  const matchRef = useRef<LiveMatch | null>(match);
+  const isUnmountingRef = useRef(false);
   const active = phase === 'generating' || phase === 'answering' || phase === 'revealing' || phase === 'paused';
-  useEffect(() => { getGatewayStatus(true).then(setGateway); return () => { epoch.current += 1; cancelRef.current = true; resumeWaiterRef.current?.(); resumeWaiterRef.current = null; setTriviaRunning(false); }; }, []);
+
+  useEffect(() => {
+    getGatewayStatus(true).then(setGateway);
+    const handleGlobalResume = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail || !detail.activity || detail.activity === 'TRIVIA') {
+        if (runningRef.current) {
+          pauseRef.current = false;
+          setPausePending(false);
+          rateLimitSkipRef.current = true;
+          setRateLimitCountdown(null);
+          setError('');
+          resumeWaiterRef.current?.();
+        } else if (matchRef.current) {
+          void start(matchRef.current);
+        }
+      }
+    };
+    window.addEventListener('prismlab_resume_activity', handleGlobalResume);
+    window.addEventListener('prismlab_resume_trivia', handleGlobalResume);
+    return () => {
+      window.removeEventListener('prismlab_resume_activity', handleGlobalResume);
+      window.removeEventListener('prismlab_resume_trivia', handleGlobalResume);
+      isUnmountingRef.current = true;
+      epoch.current += 1;
+      const current = matchRef.current;
+      if (current && runningRef.current && current.rounds.length < current.length) {
+        try {
+          const pausedRecord: LiveMatch = { ...current, status: 'paused' };
+          localStorage.setItem(ACTIVE_TRIVIA_STORAGE_KEY, JSON.stringify(pausedRecord));
+          void parkActivity(current.id, {
+            theme: 'Trivia Match',
+            round: current.rounds.length,
+            matchLength: current.length,
+          });
+          window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
+        } catch {}
+      }
+      cancelRef.current = true;
+      resumeWaiterRef.current?.();
+      resumeWaiterRef.current = null;
+      setTriviaRunning(false);
+    };
+  }, []);
 
   const handleRateLimitPause = async (err: unknown, resumePhase: Phase) => {
     let retryAfter = 30;
@@ -47,8 +111,9 @@ export const LiveTrivia: React.FC = () => {
     setPhase('paused');
     setRateLimitCountdown(retryAfter);
     setError(`Compute allowance exhausted; pausing match for ${retryAfter}s until replenishment…`);
+    rateLimitSkipRef.current = false;
 
-    while (retryAfter > 0 && !cancelRef.current) {
+    while (retryAfter > 0 && !cancelRef.current && !rateLimitSkipRef.current) {
       await new Promise(r => setTimeout(r, 1000));
       retryAfter -= 1;
       setRateLimitCountdown(retryAfter);
@@ -58,6 +123,7 @@ export const LiveTrivia: React.FC = () => {
     }
     setRateLimitCountdown(null);
     setError('');
+    rateLimitSkipRef.current = false;
     if (!cancelRef.current) {
       setPhase(resumePhase);
     }
@@ -71,15 +137,24 @@ export const LiveTrivia: React.FC = () => {
     if (!cancelRef.current) setPhase(resumePhase);
   };
 
-  const start = async () => {
+  const start = async (existingMatch?: LiveMatch) => {
     if (runningRef.current) return;
     runningRef.current = true; cancelRef.current = false; pauseRef.current = false; setPausePending(false); setStopping(false); setError(''); setShowWinnerModal(false);
+    rateLimitSkipRef.current = false;
     const run = ++epoch.current;
-    const matchLength = Math.floor(Math.random() * 6) + 5;
+    const matchLength = existingMatch ? existingMatch.length : Math.floor(Math.random() * 6) + 5;
     setLength(matchLength);
-    let record: LiveMatch = { id: crypto.randomUUID(), mode: 'live', status: 'running', length: matchLength, startedAt: new Date().toISOString(), rounds: [] };
+    let record: LiveMatch = existingMatch ? { ...existingMatch, status: 'running' } : { id: crypto.randomUUID(), mode: 'live', status: 'running', length: matchLength, startedAt: new Date().toISOString(), rounds: [] };
+    matchRef.current = record;
     setMatch(record); setTriviaRunning(true);
-    void startActivity('TRIVIA', record.id);
+    try { localStorage.setItem(ACTIVE_TRIVIA_STORAGE_KEY, JSON.stringify(record)); } catch {}
+    try {
+      await resumeParkedActivity(record.id);
+    } catch {
+      try {
+        await startActivity('TRIVIA', record.id);
+      } catch {}
+    }
     try {
       const state = await getGatewayStatus(true);
       setGateway(state);
@@ -100,10 +175,21 @@ export const LiveTrivia: React.FC = () => {
         pool.sort((a, b) => record.rounds.flatMap(r => r.attempts).filter(x => x.modelId === a).length - record.rounds.flatMap(r => r.attempts).filter(x => x.modelId === b).length);
         return pool.slice(0, 3);
       };
-      for (let index = 0; index < matchLength; index += 1) {
+      let startRound = record.rounds.length;
+      if (record.rounds.length > 0) {
+        const last = record.rounds[record.rounds.length - 1];
+        if (!last.question || !last.attempts || last.attempts.length < 3) {
+          record = { ...record, rounds: record.rounds.slice(0, -1) };
+          startRound = record.rounds.length;
+        }
+      }
+      for (let index = startRound; index < matchLength; index += 1) {
         await waitIfPaused('generating');
-        if (cancelRef.current || run !== epoch.current) break;
-        let hostId = hosts[index % hosts.length];
+        // Rotate hosts across eligible models (text, vision, omni) so text gets rounds to compete and score
+        const hostOrder: CanonicalModelId[] = hosts.length
+          ? [hosts[index % hosts.length], ...hosts.filter(h => h !== hosts[index % hosts.length])]
+          : ['text'];
+        let hostId: CanonicalModelId = hostOrder[0];
         setRound(index); setHost(hostId); setQuestion(null); setAttempts([]); setCurrentContestant(-1); setPhase('generating');
         const previous = record.rounds.map(item => item.question);
         const topic = TOPICS[(seed + index * 3) % TOPICS.length];
@@ -111,7 +197,7 @@ export const LiveTrivia: React.FC = () => {
         let nextQuestion: LiveQuestion | null = null;
         let cast: CanonicalModelId[] = [];
         let generationError = 'No host generated a valid question.';
-        for (const candidate of [hostId, ...hosts.filter(id => id !== hostId)]) {
+        for (const candidate of hostOrder) {
           if (cancelRef.current || run !== epoch.current) break;
           setHost(candidate);
           const waitingCast = pickContestants(candidate);
@@ -188,7 +274,14 @@ export const LiveTrivia: React.FC = () => {
         await waitIfPaused('revealing');
       }
       if (run === epoch.current) {
+        if (cancelRef.current && isUnmountingRef.current) {
+          return;
+        }
         record = { ...record, status: cancelRef.current ? 'cancelled' : 'completed', finishedAt: new Date().toISOString() };
+        matchRef.current = record;
+        if (!cancelRef.current) {
+          try { localStorage.removeItem(ACTIVE_TRIVIA_STORAGE_KEY); } catch {}
+        }
         saveMatch(record); setMatch(record); setPhase(cancelRef.current ? 'cancelled' : 'completed');
         if (!cancelRef.current) setShowWinnerModal(true);
       }
@@ -202,6 +295,8 @@ export const LiveTrivia: React.FC = () => {
         const message = cause instanceof Error ? cause.message : 'Live match failed.';
         setError(message);
         record = { ...record, status: 'failed', finishedAt: new Date().toISOString() };
+        matchRef.current = null;
+        try { localStorage.removeItem(ACTIVE_TRIVIA_STORAGE_KEY); } catch {}
         saveMatch(record); setMatch(record); setPhase('failed');
       }
     } finally {
@@ -209,8 +304,40 @@ export const LiveTrivia: React.FC = () => {
     }
   };
   const pause = () => { pauseRef.current = true; setPausePending(true); };
-  const resume = () => { pauseRef.current = false; setPausePending(false); resumeWaiterRef.current?.(); };
-  const stop = () => { cancelRef.current = true; pauseRef.current = false; setStopping(true); resumeWaiterRef.current?.(); cancelActiveInference(); };
+  const resume = () => {
+    pauseRef.current = false;
+    setPausePending(false);
+    rateLimitSkipRef.current = true;
+    setRateLimitCountdown(null);
+    setError('');
+    if (resumeWaiterRef.current) {
+      resumeWaiterRef.current();
+    } else if (!runningRef.current && matchRef.current) {
+      void start(matchRef.current);
+    }
+  };
+  const stop = () => {
+    try { localStorage.removeItem(ACTIVE_TRIVIA_STORAGE_KEY); } catch {}
+    cancelRef.current = true;
+    pauseRef.current = false;
+    setStopping(true);
+    resumeWaiterRef.current?.();
+    cancelActiveInference();
+  };
+  const discardMatch = () => {
+    try { localStorage.removeItem(ACTIVE_TRIVIA_STORAGE_KEY); } catch {}
+    matchRef.current = null;
+    cancelRef.current = true;
+    pauseRef.current = false;
+    resumeWaiterRef.current?.();
+    cancelActiveInference();
+    setMatch(null);
+    setPhase('idle');
+    setQuestion(null);
+    setAttempts([]);
+    setCurrentContestant(-1);
+    setLength(null);
+  };
   const matchRounds = match?.rounds || [];
   const allAttempts = matchRounds.flatMap(r => r.attempts);
   const contestantMatchStats = LIVE_MODELS.map(id => {
@@ -264,7 +391,7 @@ export const LiveTrivia: React.FC = () => {
       <section className="s4-question-board" aria-labelledby="s4-question-title"><div className="s4-question-top"><span>Question {round + 1}</span><span>{question ? `${question.topic} · ${question.difficulty}` : 'Generating'}</span></div><h2 id="s4-question-title">{question?.question || 'The questioner is preparing a fresh question…'}</h2><div className="s4-answer-list" aria-label="Answer options">{LETTERS.map(letter => <div key={letter} className={`s4-answer-row ${reveal && question?.correct_option === letter ? 'is-key' : ''}`}><span>{letter}</span>{question?.options[letter] || 'Awaiting generated option'}</div>)}</div><div className="s4-question-footer" role="status">{reveal && question ? <><strong>Host-key agreement: {question.correct_option}</strong><p>{question.explanation}</p></> : phase === 'paused' ? (rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Compute allowance replenishing (${rateLimitCountdown}s remaining)… Match will resume automatically.` : 'Paused. Resume to continue the autonomous match.') : phase === 'answering' ? 'Answers arrive sequentially. The host key is hidden until all three calls finish.' : phase === 'generating' ? 'Generating and validating a new MCQ.' : phase === 'completed' ? <div className="s4-completed-footer"><strong>{isZeroScore ? 'Match Complete · No Winner' : `Champion: ${winnerSummary} (${maxScore} pts)`}</strong><span> · Match complete. Championship standings updated.</span><button type="button" className="btn btn-secondary s4-winner-view-btn" onClick={() => setShowWinnerModal(true)}>View Results</button></div> : error || 'Start a live match. The arena chooses 5–10 questions automatically.'}</div></section>
       <aside className="s4-host" aria-label="Questioner"><h2>Questioner</h2><div className="s4-host-bubble">{hostLine}</div><div className="s4-host-figure"><Mascot model={MODELS[host]} motion={phase === 'completed' ? 'celebrating' : 'idle'} showAuthoredLine={false} interactive={false} /></div><strong>{MODELS[host].name}</strong><small>Host · {question?.backendModelId || 'local model'} · no points this round</small></aside>
     </div>
-    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <button type="button" className="btn btn-primary" onClick={start}>Start live match</button> : <><button type="button" className="btn btn-secondary" disabled={stopping || pausePending} onClick={phase === 'paused' ? () => { setRateLimitCountdown(0); resume(); } : pause}>{phase === 'paused' ? (rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resume (${rateLimitCountdown}s)` : 'Resume') : pausePending ? 'Pausing after current call…' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
+    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <button type="button" className="btn btn-primary" onClick={() => void start()}>Start live match</button> : phase === 'paused' && !runningRef.current ? <><button type="button" className="btn btn-primary" onClick={() => void start(match || undefined)}>▶ Resume Match (Round {(match?.rounds.length || 0) + 1}/{match?.length || '?'})</button><button type="button" className="btn btn-secondary" onClick={discardMatch}>✕ New Match</button></> : <><button type="button" className="btn btn-secondary" disabled={stopping} onClick={phase === 'paused' || pausePending ? resume : pause}>{phase === 'paused' ? (rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resume (${rateLimitCountdown}s)` : 'Resume') : pausePending ? 'Resume (Pausing…)' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
     <TriviaWinnerModal
       isOpen={showWinnerModal}
       onClose={() => setShowWinnerModal(false)}

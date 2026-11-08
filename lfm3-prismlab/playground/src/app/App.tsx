@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHashRoute } from './routes.ts';
+import { useHashRoute, type RouteId, ROUTES } from './routes.ts';
 import { AppShell } from '../components/AppShell.tsx';
 import { CanonicalModelId, MODELS } from '../data/models.ts';
 import { ExperienceProvider, useExperience } from './ExperienceContext.tsx';
@@ -20,6 +20,17 @@ const AppContent: React.FC = () => {
   const [currentRoute, navigate] = useHashRoute();
   const { setSelectedModelId } = useExperience();
   const [leagueAward, setLeagueAward] = React.useState<LeagueEvent | null>(null);
+  const [visitedRoutes, setVisitedRoutes] = React.useState<Set<RouteId>>(() => new Set([currentRoute]));
+
+  React.useEffect(() => {
+    setVisitedRoutes(prev => {
+      if (prev.has(currentRoute)) return prev;
+      const next = new Set(prev);
+      next.add(currentRoute);
+      return next;
+    });
+  }, [currentRoute]);
+
   React.useEffect(() => {
     const onAward = (event: Event) => setLeagueAward((event as CustomEvent<LeagueEvent>).detail);
     window.addEventListener(LEAGUE_CHANGE_EVENT, onAward);
@@ -36,8 +47,8 @@ const AppContent: React.FC = () => {
     navigate('playground');
   };
 
-  const renderPage = () => {
-    switch (currentRoute) {
+  const renderPageRoute = (route: RouteId) => {
+    switch (route) {
       case 'world':
         return <Home onNavigateToPlayground={handleNavigateToPlayground} />;
       case 'playground':
@@ -61,9 +72,26 @@ const AppContent: React.FC = () => {
     }
   };
 
+  const KEEP_ALIVE_ROUTES = React.useMemo(() => new Set<RouteId>(['chat', 'trivia']), []);
+
   return (
     <AppShell currentRoute={currentRoute} onNavigate={navigate}>
-      {renderPage()}
+      {ROUTES.map(routeMeta => {
+        const route = routeMeta.id;
+        const isCurrent = currentRoute === route;
+        const shouldKeepAlive = KEEP_ALIVE_ROUTES.has(route) && visitedRoutes.has(route);
+        if (!isCurrent && !shouldKeepAlive) return null;
+        return (
+          <div
+            key={route}
+            className={`prism-page-view prism-page-${route}`}
+            style={{ display: isCurrent ? 'contents' : 'none' }}
+            aria-hidden={!isCurrent}
+          >
+            {renderPageRoute(route)}
+          </div>
+        );
+      })}
       {leagueAward && currentRoute !== 'championship' && <div className="league-global-toast" role="status">✨ +{leagueAward.pointsEarned} League points for {MODELS[leagueAward.modelId].characterName}</div>}
     </AppShell>
   );

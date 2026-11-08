@@ -72,7 +72,7 @@ export interface LiveRound {
 export interface LiveMatch {
   id: string;
   mode: 'live';
-  status: 'running' | 'completed' | 'cancelled' | 'failed';
+  status: 'running' | 'paused' | 'completed' | 'cancelled' | 'failed';
   length: number;
   startedAt: string;
   finishedAt?: string;
@@ -86,44 +86,80 @@ const similarity = (a: string, b: string) => {
   return [...left].filter(word => right.has(word)).length / Math.max(1, new Set([...left, ...right]).size);
 };
 
-export function validateQuestion(raw: unknown, previous: LiveQuestion[], hostId: CanonicalModelId, result: LiveResult): LiveQuestion {
+export function validateQuestion(
+  raw: unknown,
+  previous: LiveQuestion[],
+  hostId: CanonicalModelId,
+  result: LiveResult,
+  fallbackTopic?: Topic,
+  fallbackDifficulty?: Difficulty
+): LiveQuestion {
   let text = typeof raw === 'string' ? raw.trim() : '';
   if (text.startsWith('```')) {
     text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   }
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    text = text.slice(firstBrace, lastBrace + 1);
+  }
   const data = typeof raw === 'string' ? (JSON.parse(text) as Record<string, unknown>) : (raw as Record<string, unknown>);
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Question is not a JSON object.');
-  const allowed = ['topic', 'difficulty', 'question', 'options', 'correct_option', 'explanation'];
-  if (Object.keys(data).sort().join(',') !== allowed.sort().join(',')) throw new Error('Question fields do not match the schema.');
-  const options = data.options as Record<string, unknown>;
-  if (!options || typeof options !== 'object' || Array.isArray(options) || Object.keys(options).sort().join(',') !== 'A,B,C,D') {
+
+  const coreKeys = ['correct_option', 'options', 'question'];
+  if (!coreKeys.every(k => k in data)) {
+    throw new Error('Question fields do not match the schema.');
+  }
+
+  const rawOptions = (data.options || {}) as Record<string, unknown>;
+  if (!rawOptions || typeof rawOptions !== 'object' || Array.isArray(rawOptions)) {
     throw new Error('Four labeled options are required.');
   }
-  if (typeof data.topic !== 'string' || data.topic.trim().length < 3 || data.topic.length > 80 || typeof data.difficulty !== 'string' || !['easy', 'medium', 'hard'].includes(data.difficulty.toLowerCase())) {
-    throw new Error('Invalid topic or difficulty.');
+  const normalizedOptions: Record<Letter, string> = {} as Record<Letter, string>;
+  for (const [k, v] of Object.entries(rawOptions)) {
+    const upperK = k.toUpperCase();
+    if (LETTERS.includes(upperK as Letter)) {
+      normalizedOptions[upperK as Letter] = String(v).trim();
+    }
   }
-  if (typeof data.question !== 'string' || data.question.trim().length < 18 || data.question.length > 240 || !data.question.trim().endsWith('?')) {
+  if (LETTERS.some(letter => !normalizedOptions[letter])) {
+    throw new Error('Four labeled options are required.');
+  }
+
+  const topicStr = typeof data.topic === 'string' && data.topic.trim() ? data.topic.trim() : (fallbackTopic || 'General Knowledge');
+  const diffStr = typeof data.difficulty === 'string' && ['easy', 'medium', 'hard'].includes(data.difficulty.toLowerCase())
+    ? data.difficulty.toLowerCase()
+    : (fallbackDifficulty || 'medium');
+
+  if (typeof data.question !== 'string' || data.question.trim().length < 12 || data.question.length > 280 || !data.question.trim().endsWith('?')) {
     throw new Error('Invalid question text.');
   }
-  if (typeof data.explanation !== 'string' || data.explanation.trim().length < 6 || data.explanation.length > 300) {
-    throw new Error('Invalid explanation.');
-  }
-  if (!LETTERS.includes(data.correct_option as Letter)) throw new Error('Invalid answer key.');
-  const values = LETTERS.map(letter => options[letter]);
+
+  const upperKey = typeof data.correct_option === 'string' ? data.correct_option.trim().toUpperCase() : '';
+  if (!LETTERS.includes(upperKey as Letter)) throw new Error('Invalid answer key.');
+  const correctLetter = upperKey as Letter;
+
+  const values = LETTERS.map(letter => normalizedOptions[letter]);
   if (values.some(value => typeof value !== 'string' || value.trim().length < 1 || value.length > 120) || new Set(values.map(value => normalize(String(value)))).size !== 4) {
     throw new Error('Options must be distinct, nonempty text.');
   }
+
+  const explanationStr = typeof data.explanation === 'string' && data.explanation.trim().length >= 6
+    ? data.explanation.trim()
+    : `The correct answer is (${correctLetter}) ${String(normalizedOptions[correctLetter]).trim()}.`;
+
   if (previous.some(item => normalize(item.question) === normalize(data.question as string) || similarity(item.question, data.question as string) >= 0.78)) {
     throw new Error('Repeated or near-duplicate question.');
   }
+
   return {
     id: crypto.randomUUID(),
-    topic: data.topic.trim() as Topic,
-    difficulty: data.difficulty.toLowerCase() as Difficulty,
+    topic: topicStr as Topic,
+    difficulty: diffStr as Difficulty,
     question: data.question.trim(),
-    options: Object.fromEntries(LETTERS.map(letter => [letter, String(options[letter]).trim()])) as Record<Letter, string>,
-    correct_option: data.correct_option as Letter,
-    explanation: data.explanation.trim(),
+    options: normalizedOptions,
+    correct_option: correctLetter,
+    explanation: explanationStr,
     hostId,
     requestId: result.request_id,
     backendModelId: result.backend_model_id || BACKEND_IDS[hostId],
@@ -131,7 +167,7 @@ export function validateQuestion(raw: unknown, previous: LiveQuestion[], hostId:
   };
 }
 
-export function validateAnswer(output: LiveResult['output'], modelId: CanonicalModelId): Letter | null {
+export function validateAnswer(output: LiveResult['output'], modelId: CanonicalModelId, question?: LiveQuestion): Letter | null {
   if (modelId === 'd1' || modelId === 'd1_omni') {
     if (
       output &&
@@ -175,6 +211,25 @@ export function validateAnswer(output: LiveResult['output'], modelId: CanonicalM
 
   if (LETTERS.includes(stripped as Letter)) return stripped as Letter;
 
+  // Explicit option label prefixes like "Option B", "Option B.", "Choice C"
+  const prefixMatch = trimmed.match(/^(?:option|choice)\s+([A-D])[.:]?$/i);
+  if (prefixMatch) {
+    const candidate = prefixMatch[1].toUpperCase() as Letter;
+    if (LETTERS.includes(candidate)) return candidate;
+  }
+
+  // If question is passed and output is the literal option text (e.g. "Mars" when B is "Mars")
+  if (question?.options) {
+    const norm = normalize(trimmed);
+    const matches: Letter[] = [];
+    for (const letter of LETTERS) {
+      if (normalize(question.options[letter]) === norm) {
+        matches.push(letter);
+      }
+    }
+    if (matches.length === 1) return matches[0];
+  }
+
   return null;
 }
 
@@ -192,8 +247,8 @@ export function assertIdentity(result: LiveResult, expected: CanonicalModelId): 
 }
 
 export function hostPrompt(topic: Topic, difficulty: Difficulty, previous: LiveQuestion[], correction = ''): string {
-  const avoid = previous.slice(-3).map(item => normalize(item.question).slice(0, 40)).join('; ');
-  return `Write one ${difficulty} MCQ on ${topic}. Output compact JSON only: {"topic":"${topic}","difficulty":"${difficulty}","question":"...?","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_option":"A","explanation":"one short factual sentence"}. Use four distinct short choices. The question ends with ?. Pick the true answer key. Avoid: ${avoid || 'none'}.${correction ? ` Fix: ${correction.slice(0, 80)}.` : ''}`.slice(0, 1000);
+  const avoid = previous.slice(-3).map(item => normalize(item.question).slice(0, 30)).join('; ');
+  return `Write one concise ${difficulty} MCQ on ${topic}. Output ONLY valid JSON: {"question":"...?","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_option":"A"}. Options must be 1-2 words. The question must end with ?. No markdown, no explanation. Avoid: ${avoid || 'none'}.${correction ? ` Fix: ${correction.slice(0, 40)}.` : ''}`.slice(0, 700);
 }
 
 export function contestantRequest(modelId: CanonicalModelId, question: LiveQuestion): ExecuteRequest {
@@ -206,10 +261,10 @@ export function contestantRequest(modelId: CanonicalModelId, question: LiveQuest
         instructions: 'Choose the single best answer to the multiple-choice question.',
         criteria: question.options,
       },
-      max_tokens: 48,
+      max_tokens: 16,
     };
   }
-  const prompt = `Answer this multiple-choice question. Select the single best choice. Reply ONLY with a single capital letter: A, B, C, or D. No punctuation or markdown. Question: ${question.question} A: ${question.options.A} B: ${question.options.B} C: ${question.options.C} D: ${question.options.D}`;
+  const prompt = `Choose the single best option (A, B, C, or D).\nQuestion: ${question.question}\nA: ${question.options.A}\nB: ${question.options.B}\nC: ${question.options.C}\nD: ${question.options.D}\nAnswer (single capital letter only):`;
   return { task: 'chat' as const, model: modelId, prompt: prompt.slice(0, 1000), max_tokens: 16 };
 }
 
@@ -226,16 +281,17 @@ export async function generateQuestion(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (shouldContinue && !shouldContinue()) break;
     try {
-      // max_tokens strictly budgeted at 128 (gateway contract 16-128)
+      // Budgeted for fast generation (30-45 tokens, 3-5s latency target)
       const result = await executeLocal({
         task: 'chat',
         model: hostId,
         prompt: hostPrompt(topic, difficulty, previous, attempt ? lastError : ''),
-        max_tokens: 128,
+        max_tokens: 80,
+        response_format: { type: 'json_object' },
         activity_session_id: matchId,
       });
       assertIdentity(result, hostId);
-      return validateQuestion(result.output, previous, hostId, result);
+      return validateQuestion(result.output, previous, hostId, result, topic, difficulty);
     } catch (error) {
       const is429 = (error instanceof ApiError && error.status === 429) || /rate limit|compute budget/i.test(String(error));
       if (is429) throw error;
@@ -254,7 +310,7 @@ export async function answerQuestion(modelId: CanonicalModelId, question: LiveQu
     if (matchId) req.activity_session_id = matchId;
     const result = await executeLocal(req);
     assertIdentity(result, modelId);
-    const answer = validateAnswer(result.output, modelId);
+    const answer = validateAnswer(result.output, modelId, question);
     return {
       modelId,
       backendModelId: result.backend_model_id || BACKEND_IDS[modelId],
