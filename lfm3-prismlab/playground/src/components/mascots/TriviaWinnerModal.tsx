@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { MODELS, type CanonicalModelId } from '../../data/models.ts';
 import { MascotAvatar } from './MascotAvatar.tsx';
 
@@ -18,8 +18,6 @@ interface TriviaWinnerModalProps {
   modeTitle?: string;
 }
 
-const AUTO_DISMISS_MS = 5000;
-
 export const TriviaWinnerModal: React.FC<TriviaWinnerModalProps> = ({
   isOpen,
   onClose,
@@ -27,54 +25,15 @@ export const TriviaWinnerModal: React.FC<TriviaWinnerModalProps> = ({
   results,
   modeTitle = 'Live Match'
 }) => {
-  const [isPaused, setIsPaused] = useState(false);
-  const [remainingMs, setRemainingMs] = useState(AUTO_DISMISS_MS);
-  const reducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isPausedRef = useRef(false);
-  isPausedRef.current = isPaused;
-
-  // Reset timer when opened
+  // Keyboard ESC listener
   useEffect(() => {
-    if (!isOpen) {
-      setRemainingMs(AUTO_DISMISS_MS);
-      setIsPaused(false);
-      return;
-    }
-
-    // Keyboard ESC listener
+    if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
-
-    // If reduced motion is requested, do not force auto-dismiss
-    if (reducedMotion) {
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-
-    const stepMs = 100;
-    const interval = window.setInterval(() => {
-      if (isPausedRef.current) return;
-      setRemainingMs(prev => {
-        if (prev <= stepMs) {
-          window.clearInterval(interval);
-          onClose();
-          return 0;
-        }
-        return prev - stepMs;
-      });
-    }, stepMs);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.clearInterval(interval);
-    };
-  }, [isOpen, onClose, reducedMotion]);
-
-  const handleMouseEnter = useCallback(() => setIsPaused(true), []);
-  const handleMouseLeave = useCallback(() => setIsPaused(false), []);
-  const handleFocus = useCallback(() => setIsPaused(true), []);
-  const handleBlur = useCallback(() => setIsPaused(false), []);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || results.length === 0) return null;
 
@@ -87,7 +46,6 @@ export const TriviaWinnerModal: React.FC<TriviaWinnerModalProps> = ({
   const winnerNames = isZeroScore
     ? 'No Winner This Match'
     : winners.map(w => MODELS[w.id].characterName).join(' & ');
-  const secondsLeft = Math.ceil(remainingMs / 1000);
 
   return (
     <div
@@ -101,31 +59,12 @@ export const TriviaWinnerModal: React.FC<TriviaWinnerModalProps> = ({
         aria-modal="true"
         aria-label="Trivia match results and scoreboard"
         onClick={e => e.stopPropagation()}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
       >
-        {/* Dismiss countdown progress bar */}
-        {!reducedMotion && (
-          <div className="s4-winner-timer-bar" aria-hidden="true">
-            <div
-              className={`s4-winner-timer-fill ${isPaused ? 'is-paused' : ''}`}
-              style={{ width: `${(remainingMs / AUTO_DISMISS_MS) * 100}%` }}
-            />
-          </div>
-        )}
-
         {/* Modal Header */}
         <div className="s4-winner-head">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <p className="eyebrow" style={{ margin: 0 }}>{modeTitle} · Match Scoreboard</p>
-              {!reducedMotion && (
-                <span className="s4-winner-timer-tag">
-                  {isPaused ? 'Timer Paused' : `Auto-closing in ${secondsLeft}s`}
-                </span>
-              )}
             </div>
             <h2>{winnerTitle}</h2>
           </div>

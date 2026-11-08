@@ -4,25 +4,176 @@ import type { CanonicalModelId } from '../data/models.ts';
 export type Letter = 'A' | 'B' | 'C' | 'D';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type Topic =
+  | 'General Knowledge'
+  | 'Nature and Animals'
+  | 'World Geography'
+  | 'Astronomy and Space'
+  | 'Food and Cuisine'
+  | 'World History'
+  | 'Everyday Inventions'
+  | 'Cinema and Music'
+  | 'Sports and Games'
+  | 'Human Body and Health'
+  | 'General Science'
+  | 'Oceans and Wonders'
+  | 'Literature and Myths'
+  | 'Art and Culture'
+  | 'Logical Reasoning'
   | 'Computer Science'
+  | 'Mathematics'
   | 'Artificial Intelligence'
   | 'Machine Learning'
-  | 'Mathematics'
-  | 'Logical Reasoning'
-  | 'General Science'
-  | 'History and Geography'
-  | 'General Knowledge';
+  | 'History and Geography';
 
 export const TOPICS: Topic[] = [
-  'Computer Science',
-  'Artificial Intelligence',
-  'Machine Learning',
-  'Mathematics',
-  'Logical Reasoning',
-  'General Science',
-  'History and Geography',
   'General Knowledge',
+  'Nature and Animals',
+  'World Geography',
+  'Astronomy and Space',
+  'Food and Cuisine',
+  'World History',
+  'Everyday Inventions',
+  'Cinema and Music',
+  'Sports and Games',
+  'Human Body and Health',
+  'General Science',
+  'Oceans and Wonders',
+  'Literature and Myths',
+  'Art and Culture',
+  'Logical Reasoning',
+  'Computer Science',
+  'Mathematics',
+  'History and Geography',
 ];
+
+export const TOPIC_SPARKS: Record<string, string[]> = {
+  'Nature and Animals': [
+    'animal superpowers and senses',
+    'fastest land and sea animals',
+    'birds, flight, and feathers',
+    'curious insect behaviors',
+    'mammal habitats and diets',
+  ],
+  'World Geography': [
+    'famous rivers, lakes, and falls',
+    'island nations and seas',
+    'mountain peaks and volcanoes',
+    'world capitals and iconic borders',
+    'deserts, canyons, and landscapes',
+  ],
+  'Astronomy and Space': [
+    'solar system planets and moons',
+    'lunar missions and space walks',
+    'the Sun, stars, and eclipses',
+    'comets, asteroids, and constellations',
+    'spacecraft and telescope discoveries',
+  ],
+  'Food and Cuisine': [
+    'origins of iconic world dishes',
+    'spices, flavors, and ingredients',
+    'fruits, cocoa, and coffee culture',
+    'traditional breads and desserts',
+    'famous culinary traditions',
+  ],
+  'World History': [
+    'ancient Egypt, Rome, and Greece',
+    'medieval castles and knights',
+    'historic explorers and journeys',
+    'famous world discoveries',
+    'legendary leaders and events',
+  ],
+  'Everyday Inventions': [
+    'everyday household tools',
+    'history of bicycles, trains, and planes',
+    'paper, printing, and books',
+    'telephones, clocks, and cameras',
+    'electricity, lighting, and batteries',
+  ],
+  'Cinema and Music': [
+    'world musical instruments',
+    'classic animated movies',
+    'iconic film characters and themes',
+    'singers, bands, and rhythm',
+    'theater, sound, and movies',
+  ],
+  'Sports and Games': [
+    'Olympic events and traditions',
+    'balls, nets, and fields in sports',
+    'chess pieces and classic games',
+    'famous athletes and races',
+    'soccer, tennis, and athletics trivia',
+  ],
+  'Human Body and Health': [
+    'the five senses and perception',
+    'bones, muscles, and the beating heart',
+    'sleep, memory, and the brain',
+    'healthy nutrition and vitamins',
+    'breathing, circulation, and balance',
+  ],
+  'General Science': [
+    'why things float, sink, or fly',
+    'solids, liquids, and gases',
+    'rainbows, reflections, and sounds',
+    'magnets and simple gravity',
+    'plants, sunlight, and seeds',
+  ],
+  'Oceans and Wonders': [
+    'coral reefs and colorful fish',
+    'whales, dolphins, and sharks',
+    'tides, waves, and ocean trenches',
+    'deep sea glowing creatures',
+    'polar ice and marine habitats',
+  ],
+  'Literature and Myths': [
+    'Greek, Norse, and world mythology',
+    'dragons, unicorns, and legendary beasts',
+    'classic fairy tales and fables',
+    'famous storybook heroes and authors',
+    'ancient legends and folk stories',
+  ],
+  'Art and Culture': [
+    'famous paintings and masterpieces',
+    'sculptures and ancient monuments',
+    'world architecture and bridges',
+    'colors, brushes, and pottery',
+    'festivals and cultural celebrations',
+  ],
+  'Logical Reasoning': [
+    'everyday observation and sequences',
+    'clock hands and calendar riddles',
+    'clever word patterns and clues',
+    'mirror reflections and directions',
+    'common sense deduction puzzles',
+  ],
+  'Computer Science': [
+    'retro video games and pixel art',
+    'robots and friendly smart helpers',
+    'how messages travel across the web',
+    'screens, keyboards, and mice',
+    'computer milestones and inventions',
+  ],
+  'Mathematics': [
+    'geometric shapes and symmetry',
+    'number patterns and counting tricks',
+    'measuring heights, weights, and distances',
+    'ancient number systems like Roman numerals',
+    'fun everyday math curiosities',
+  ],
+  'General Knowledge': [
+    'curious world records',
+    'national symbols and emblems',
+    'unexpected everyday truths',
+    'currencies and trade milestones',
+    'wonders of the world',
+  ],
+  'History and Geography': [
+    'ancient trade routes like the Silk Road',
+    'famous canals like Panama and Suez',
+    'historic lighthouses and harbours',
+    'lost cities like Machu Picchu and Petra',
+    'landmarks that shaped the globe',
+  ],
+};
 export const LETTERS: Letter[] = ['A', 'B', 'C', 'D'];
 export const LIVE_MODELS: CanonicalModelId[] = ['text', 'vision', 'audio', 'omni', 'd1', 'd1_omni'];
 export const BACKEND_IDS: Record<CanonicalModelId, string> = {
@@ -279,7 +430,10 @@ export function assertIdentity(result: LiveResult, expected: CanonicalModelId): 
 
 export function hostPrompt(topic: Topic, difficulty: Difficulty, previous: LiveQuestion[], correction = ''): string {
   const avoid = previous.slice(-3).map(item => normalize(item.question).slice(0, 30)).join('; ');
-  return `Write one concise ${difficulty} MCQ on ${topic}. Output ONLY valid JSON: {"question":"...?","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_option":"A"}. Options must be 1-2 words. The question must end with ?. No markdown, no explanation. Avoid: ${avoid || 'none'}.${correction ? ` Fix: ${correction.slice(0, 40)}.` : ''}`.slice(0, 700);
+  const sparks = TOPIC_SPARKS[topic];
+  const spark = sparks ? sparks[Math.floor(Math.random() * sparks.length)] : '';
+  const focus = spark ? ` (subtopic: ${spark})` : '';
+  return `Write one concise, engaging ${difficulty} trivia MCQ on ${topic}${focus}. Suitable for a general audience (no PhD-level jargon). Output ONLY valid JSON: {"question":"...?","options":{"A":"...","B":"...","C":"...","D":"..."},"correct_option":"A"}. Options must be 1-4 words. The question must end with ?. No preamble, no explanation. Avoid: ${avoid || 'none'}.${correction ? ` Fix: ${correction.slice(0, 40)}.` : ''}`.slice(0, 700);
 }
 
 export function contestantRequest(modelId: CanonicalModelId, question: LiveQuestion): ExecuteRequest {
@@ -312,12 +466,12 @@ export async function generateQuestion(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (shouldContinue && !shouldContinue()) break;
     try {
-      // Budgeted for fast generation (30-45 tokens, 3-5s latency target)
+      // Budgeted for fast generation (30-55 tokens, 3-5s latency target)
       const result = await executeLocal({
         task: 'chat',
         model: hostId,
         prompt: hostPrompt(topic, difficulty, previous, attempt ? lastError : ''),
-        max_tokens: 80,
+        max_tokens: 100,
         response_format: { type: 'json_object' },
         activity_session_id: matchId,
       });

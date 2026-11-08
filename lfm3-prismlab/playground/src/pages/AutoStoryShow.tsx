@@ -50,6 +50,7 @@ import {
   type NarrativeEvent
 } from '../lib/storyShow.ts';
 import { getEvidencePackForTheme, loadPackMedia, type StoryEvidencePack } from '../lib/storyEvidencePacks.ts';
+import { StoryWinnerModal } from '../components/mascots/StoryWinnerModal.tsx';
 
 const isRouteReady = (status: Awaited<ReturnType<typeof getGatewayStatus>>, modelId: CanonicalModelId) =>
   !!status.gateway_enabled && ((!!status.backend_live_enabled && (status.on_demand_routes?.includes(modelId) || (modelId === 'text' ? status.text_model_available : status.multimodal_model_available))) || !!status.auto_start_available);
@@ -108,6 +109,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const [, setReaction] = React.useState(0);
   const [, setReactionState] = React.useState<'idle' | 'thinking' | 'happy' | 'sad'>('idle');
   const [pending, setPending] = React.useState(false);
+  const [showWinnerModal, setShowWinnerModal] = React.useState(false);
   const [rateLimitCountdown, setRateLimitCountdown] = React.useState<number | null>(null);
   const [storyCooldownRemaining, setStoryCooldownRemaining] = React.useState<number>(() => {
     try {
@@ -283,6 +285,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       setMessage(complete ? 'Live show complete! All turns recorded for replay.' : 'Show ended with incomplete turns.');
       setModeLabel('Completed');
       if (complete) {
+        setShowWinnerModal(true);
         try {
           const cooldownUntil = Date.now() + 180 * 1000;
           localStorage.setItem('prismlab_story_cooldown_until', String(cooldownUntil));
@@ -1160,6 +1163,15 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                 )}
               </>
             )}
+            {phase === 'completed' && (
+              <button
+                type="button"
+                className="chat-story-primary"
+                onClick={() => setShowWinnerModal(true)}
+              >
+                🏆 View Standings
+              </button>
+            )}
             <button type="button" onClick={restart}>+ New Story</button>
             <button type="button" onClick={onHistory}>Story History ({show.turns.length}) →</button>
             <button type="button" onClick={() => exportShow(show, 'txt')}>Export Text</button>
@@ -1172,6 +1184,12 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           </p>
         </div>
       )}
+      <StoryWinnerModal
+        isOpen={showWinnerModal}
+        onClose={() => setShowWinnerModal(false)}
+        onPlayAgain={startRandomShow}
+        show={show}
+      />
     </section>
   );
 };

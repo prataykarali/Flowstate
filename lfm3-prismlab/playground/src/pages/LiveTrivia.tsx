@@ -181,8 +181,12 @@ export const LiveTrivia: React.FC = () => {
       if (state.inference_busy && state.queue && state.queue.waiting >= (state.queue.waiting_limit || 3)) throw new Error('Inference queue is currently full. Please try again shortly.');
       const eligible = LIVE_MODELS.filter(id => state.on_demand_routes?.includes(id));
       const hosts = HOSTS.filter(id => eligible.includes(id));
-      if (!hosts.length || eligible.length < 4) throw new Error('Four distinct eligible local models are required.');
-      const seed = crypto.getRandomValues(new Uint32Array(1))[0] % TOPICS.length;
+      // Shuffle topics so every round in this match gets a completely unique, exciting domain!
+      const shuffledTopics = [...TOPICS];
+      for (let i = shuffledTopics.length - 1; i > 0; i -= 1) {
+        const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+        [shuffledTopics[i], shuffledTopics[j]] = [shuffledTopics[j], shuffledTopics[i]];
+      }
       // Randomize initial host so match doesn't always start with 'text'
       const startHostIndex = crypto.getRandomValues(new Uint32Array(1))[0] % Math.max(1, hosts.length);
       const pickContestants = (hostId: CanonicalModelId): CanonicalModelId[] => {
@@ -214,7 +218,7 @@ export const LiveTrivia: React.FC = () => {
         let hostId: CanonicalModelId = hostOrder[0];
         setRound(index); setHost(hostId); setQuestion(null); setAttempts([]); setCurrentContestant(-1); setPhase('generating');
         const previous = record.rounds.map(item => item.question);
-        const topic = TOPICS[(seed + index * 3) % TOPICS.length];
+        const topic = shuffledTopics[index % shuffledTopics.length];
         const difficulty = (['easy', 'medium', 'hard'] as const)[index % 3];
         let nextQuestion: LiveQuestion | null = null;
         let cast: CanonicalModelId[] = [];
