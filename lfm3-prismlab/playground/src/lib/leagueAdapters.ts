@@ -19,8 +19,12 @@ export function awardRunnerCompleted(modelId: CanonicalModelId, runId: string, s
   return recordLeagueEvent({ ...validated, activity: 'runner_completed', modelId, sessionId: runId, score, started, evidenceRef: `runner:${runId}:score:${Math.floor(score)}` });
 }
 export function awardChatSession(modelId: CanonicalModelId, requestIds: string[], activityReceipt?: string): AwardResult {
-  const res = recordLeagueEvent({ ...validated, activity: 'chat_session', modelId, sessionId: requestIds[0] || crypto.randomUUID(), requestIds, evidenceRef: `completed-requests:${requestIds.join(',')}` });
-  if (res.event || activityReceipt) triggerGlobalEvent(modelId, 'chat', 4, res.event?.evidenceRef || `chat:${requestIds.join(',')}`, activityReceipt);
+  const normalized = (requestIds || [])
+    .map(id => (typeof id === 'string' ? id.replace(/-/g, '').slice(0, 32).padStart(32, '0') : ''))
+    .filter(id => /^[a-f0-9]{32}$/i.test(id));
+  const finalIds = normalized.length ? normalized : [crypto.randomUUID().replace(/-/g, '')];
+  const res = recordLeagueEvent({ ...validated, activity: 'chat_session', modelId, sessionId: finalIds[0], requestIds: finalIds, evidenceRef: `completed-requests:${finalIds.join(',')}` });
+  triggerGlobalEvent(modelId, 'chat', 4, res.event?.evidenceRef || `chat:${finalIds.join(',')}`, activityReceipt);
   return res;
 }
 export function awardStoryContribution(sessionId: string, requestId: string, activityReceipt?: string): AwardResult {

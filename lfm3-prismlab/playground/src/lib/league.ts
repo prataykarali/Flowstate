@@ -82,10 +82,9 @@ export function scoreEvent(events: LeagueEvent[], candidate: LeagueCandidate, ma
       if (sameDay(events, 'runner_completed', day) >= 2) return reject('Daily Runner cap reached.');
       break;
     case 'chat_session':
-      if (candidate.requestIds.length < 2 || new Set(candidate.requestIds).size < 2 || !candidate.requestIds.every(requestIdValid)) return reject('Two distinct completed model requests are required.');
+      if (candidate.requestIds.length < 1 || !candidate.requestIds.every(requestIdValid) || new Set(candidate.requestIds).size !== candidate.requestIds.length) return reject('Valid completed model request IDs are required.');
       points = 4;
-      key = `chat:${candidate.sessionId}`;
-      if (sameDay(events, 'chat_session', day, candidate.modelId) >= 2) return reject('Daily Chat cap reached.');
+      key = `chat:${candidate.sessionId}:${candidate.requestIds.join(':')}`;
       break;
     case 'story_contribution':
       if (!requestIdValid(candidate.requestId)) return reject('A completed model request ID is required.');

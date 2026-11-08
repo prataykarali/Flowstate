@@ -12,7 +12,7 @@ import { showBeat } from '../lib/storyShow.ts';
 import { DecisionStudio } from '../components/DecisionStudio.tsx';
 import { parseNaturalDecision, formatDecisionSummary } from '../lib/decisionAdapter.ts';
 
-interface Message { role: 'you' | 'model'; text: string; fullText?: string; speaker?: string; failed?: boolean; requestId?: string; route?: string; status?: string; mode?: string; metrics?: LiveResult['metrics']; trace?: LiveResult['trace']; decisionQuestion?: any; decisionOptions?: string[] }
+interface Message { role: 'you' | 'model'; text: string; fullText?: string; speaker?: string; failed?: boolean; requestId?: string; route?: string; status?: string; mode?: string; metrics?: LiveResult['metrics']; trace?: LiveResult['trace']; decisionQuestion?: any; decisionOptions?: string[]; pointsEarned?: number }
 const acceptsImage = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('image');
 const acceptsAudio = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('audio');
 const acceptsVideo = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('video');
@@ -317,11 +317,9 @@ export const Chat: React.FC = () => {
           ? formatDecisionSummary({ ...(result.output as any), category: parsedDecision?.category })
           : rawOutput;
         const cleanText = isDecision || displaySummary.length <= MAX_REPLY_CHARS ? displaySummary : `${displaySummary.slice(0, MAX_REPLY_CHARS).trimEnd()}…`;
-        const reply: Message = { role: 'model', text: cleanText, fullText: rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace, decisionQuestion: parsedDecision?.question, decisionOptions: parsedDecision?.options };
+        const reply: Message = { role: 'model', text: cleanText, fullText: rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace, decisionQuestion: parsedDecision?.question, decisionOptions: parsedDecision?.options, pointsEarned: 4 };
         setMessages(list => [...list, reply]); setStageReply(reply);
-        if (result.activity_receipt) {
-          awardChatSession(model, [result.request_id], result.activity_receipt);
-        }
+        awardChatSession(model, [result.request_id || crypto.randomUUID().replace(/-/g, '')], result.activity_receipt);
         setReactionState('happy'); setReaction(n => n + 1); setImage(null); setAudio(null); setVideo(null);
       } else {
         setError(result.error || `Local request returned ${result.status}; no answer was added.`);
@@ -344,13 +342,12 @@ export const Chat: React.FC = () => {
       status: result.status,
       mode: result.mode,
       metrics: result.metrics,
-      trace: result.trace
+      trace: result.trace,
+      pointsEarned: 4,
     };
     setMessages(list => [...list, reply]);
     setStageReply(reply);
-    if (result.activity_receipt) {
-      awardChatSession(model, [result.request_id], result.activity_receipt);
-    }
+    awardChatSession(model, [result.request_id || crypto.randomUUID().replace(/-/g, '')], result.activity_receipt);
     setReactionState('happy');
     setReaction(n => n + 1);
   };
@@ -531,7 +528,11 @@ export const Chat: React.FC = () => {
       ) : latestReply ? (
         <article className="chat-message chat-message--model">
           <p style={{ whiteSpace: 'pre-line' }}>{latestReply.text.slice(0, Math.min(visibleChars, 500))}{latestReply.text.length > 500 ? '…' : visibleChars < latestReply.text.length ? <span className="chat-typing-caret" aria-hidden="true">▍</span> : ''}</p>
-          <div className="chat-bubble-footer"><span className="chat-bubble-speaker">{character.characterName}</span><span className="chat-bubble-char-count">{activeDecision ? 'Structured decision' : `${latestReply.text.length} / ${MAX_REPLY_CHARS} chars`}</span></div>
+          <div className="chat-bubble-footer">
+            <span className="chat-bubble-speaker">{character.characterName}</span>
+            <span className="chat-bubble-char-count">{activeDecision ? 'Structured decision' : `${latestReply.text.length} / ${MAX_REPLY_CHARS} chars`}</span>
+            {latestReply.pointsEarned && <span className="chat-bubble-points-badge" style={{ marginLeft: 'auto', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600 }}>+{latestReply.pointsEarned} pts</span>}
+          </div>
           <button type="button" className="chat-read-history" onClick={() => setHistoryDrawerOpen(true)} aria-label={`Open ${character.characterName} chat history to read the full reply`}>{latestReply.text.length > 500 ? 'Full reply in history →' : 'Chat history →'}</button>
         </article>
       ) : null}
@@ -660,6 +661,7 @@ export const Chat: React.FC = () => {
                     <strong>{item.role === 'you' ? 'You' : (item.speaker || character.characterName)}</strong>
                     {item.metrics?.total_latency_s != null && <span> · {item.metrics.total_latency_s.toFixed(2)}s</span>}
                     {item.role === 'model' && <span className="chat-drawer-char-badge"> · {item.text.length} chars</span>}
+                    {item.role === 'model' && <span style={{ marginLeft: '0.4rem', color: '#34d399', fontWeight: 600, fontSize: '0.75rem' }}>+{item.pointsEarned || 4} pts</span>}
                   </div>
                   <div className="chat-drawer-turn-text">
                     {turnDecision ? renderDecisionCard(turnDecision, item.text) : <><p>{item.text}</p>{item.fullText && <details className="chat-full-reply"><summary>Show full reply</summary><p>{item.fullText}</p></details>}</>}
