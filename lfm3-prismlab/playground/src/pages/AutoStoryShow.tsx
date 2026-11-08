@@ -109,6 +109,25 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const [, setReactionState] = React.useState<'idle' | 'thinking' | 'happy' | 'sad'>('idle');
   const [pending, setPending] = React.useState(false);
   const [rateLimitCountdown, setRateLimitCountdown] = React.useState<number | null>(null);
+  const [storyCooldownRemaining, setStoryCooldownRemaining] = React.useState<number>(() => {
+    try {
+      const until = Number(localStorage.getItem('prismlab_story_cooldown_until') || '0');
+      return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    } catch {
+      return 0;
+    }
+  });
+
+  React.useEffect(() => {
+    const timer = window.setInterval(() => {
+      try {
+        const until = Number(localStorage.getItem('prismlab_story_cooldown_until') || '0');
+        const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+        setStoryCooldownRemaining(remaining);
+      } catch {}
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const showRef = React.useRef<ShowRecord | null>(show);
   const phaseRef = React.useRef<ShowPhase>(phase);
@@ -231,7 +250,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
 
     const totalTurns = current?.turnOrder.length || 20;
     const turnNum = currentTurnIdx + 1;
-    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Inference queue busy; resuming in ${retryAfter}s…`);
+    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Shared models busy with another visitor; resuming in ${retryAfter}s…`);
 
     let remaining = retryAfter;
     countdownIntervalRef.current = window.setInterval(() => {
@@ -246,7 +265,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         resumeFromRateLimit();
       } else {
         setRateLimitCountdown(remaining);
-        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Inference queue busy; resuming in ${remaining}s…`);
+        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Shared models busy with another visitor; resuming in ${remaining}s…`);
       }
     }, 1000);
   };
@@ -263,6 +282,13 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       setPhase(complete ? 'completed' : 'failed');
       setMessage(complete ? 'Live show complete! All turns recorded for replay.' : 'Show ended with incomplete turns.');
       setModeLabel('Completed');
+      if (complete) {
+        try {
+          const cooldownUntil = Date.now() + 180 * 1000;
+          localStorage.setItem('prismlab_story_cooldown_until', String(cooldownUntil));
+          setStoryCooldownRemaining(180);
+        } catch {}
+      }
       return;
     }
 
@@ -373,17 +399,17 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           }
           break;
         } catch (execErr) {
-          const is503 = (execErr instanceof ApiError && execErr.status === 503) || /queue is full|timed out/i.test(String(execErr));
+          const is503 = (execErr instanceof ApiError && execErr.status === 503) || /queue is full|timed out|busy/i.test(String(execErr));
           const is429 = (execErr instanceof ApiError && execErr.status === 429) || /rate limit|compute budget/i.test(String(execErr));
-          if (is503 && retries < 3) {
+          if ((is503 || is429) && retries < 10) {
             retries += 1;
-            const delayMs = 1500 * (2 ** (retries - 1));
-            setMessage(`Queue saturated; retrying turn in ${(delayMs / 1000).toFixed(1)}s (retry ${retries}/3)…`);
+            const delayMs = Math.min(5000, 1500 * retries);
+            setMessage(`Models busy with another visitor's turn; waiting in queue (${retries}/10, retrying in ${(delayMs / 1000).toFixed(1)}s)…`);
             await new Promise(r => setTimeout(r, delayMs));
             if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
             continue;
           }
-          if (is429) {
+          if (is429 || is503) {
             pauseForRateLimit(execErr, index);
             return;
           }
@@ -728,6 +754,10 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   };
 
   const startWithConfig = (newConfig: ShowConfig, useSelectedCount = turnCountCustomized) => {
+    if (storyCooldownRemaining > 0) {
+      setMessage(`Cooldown active: Please wait ${storyCooldownRemaining}s before starting another full story show.`);
+      return;
+    }
     const selectedPack = newConfig.scenarioId ? getEvidencePackForTheme(newConfig.theme) : null;
     const savedShows = readShows();
     const previousTexts = savedShows.flatMap(s => s.turns.filter(t => t.status === 'completed' && t.output).map(t => t.output!));
@@ -933,12 +963,28 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             </select>
           </label>
 
+          {storyCooldownRemaining > 0 && (
+            <div className="chat-story-cooldown-notice" style={{ padding: '8px 12px', background: 'rgba(59, 130, 246, 0.12)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '6px', margin: '8px 0', fontSize: '0.85rem' }}>
+              ✦ Full story completed! Next story available in <strong>{storyCooldownRemaining}s</strong> (3-minute cooldown between full story sessions).
+            </div>
+          )}
+
           <div className="chat-story-one-click-row">
-            <button type="button" className="chat-story-primary chat-story-start-random" onClick={() => startWithConfig(config)}>
-              ▶ Start Story
+            <button
+              type="button"
+              className="chat-story-primary chat-story-start-random"
+              onClick={() => startWithConfig(config)}
+              disabled={storyCooldownRemaining > 0}
+            >
+              {storyCooldownRemaining > 0 ? `▶ Cooldown (${storyCooldownRemaining}s)` : '▶ Start Story'}
             </button>
-            <button type="button" className="chat-story-secondary" onClick={startRandomShow}>
-              Start Random Show
+            <button
+              type="button"
+              className="chat-story-secondary"
+              onClick={startRandomShow}
+              disabled={storyCooldownRemaining > 0}
+            >
+              {storyCooldownRemaining > 0 ? `Cooldown (${storyCooldownRemaining}s)` : 'Start Random Show'}
             </button>
           </div>
 
@@ -1059,10 +1105,10 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           </div>
 
           {phase === 'paused_rate_limit' && (
-            <div className="chat-story-rate-limit-banner" style={{ padding: '8px 12px', background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.4)', borderRadius: '6px', margin: '8px 0', fontSize: '0.875rem' }}>
-              <strong>Compute Allowance Replenishing</strong>
+            <div className="chat-story-rate-limit-banner" style={{ padding: '8px 12px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '6px', margin: '8px 0', fontSize: '0.875rem' }}>
+              <strong>Models In Use · In Queue</strong>
               <p style={{ margin: '4px 0' }}>
-                Your Story is safely preserved at Turn {Math.min(show.turns.length + 1, show.turnOrder.length)} of {show.turnOrder.length}. Your compute allowance is temporarily exhausted. {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Automatic resume in ${rateLimitCountdown}s, or click Resume when ready.` : 'Allowance replenished! You can resume now.'}
+                Another visitor is currently using the shared inference models. Your story is safely preserved at Turn {Math.min(show.turns.length + 1, show.turnOrder.length)} of {show.turnOrder.length}. {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resuming turn automatically in ${rateLimitCountdown}s, or click Resume when ready.` : 'Queue cleared! Resuming now.'}
               </p>
             </div>
           )}

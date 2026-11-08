@@ -22,9 +22,9 @@ class Ticket:
 
 
 class AdmissionQueue:
-    def __init__(self, waiting_limit: int = 3, per_visitor_limit: int = 60,
+    def __init__(self, waiting_limit: int = 3, per_visitor_limit: int = 1000000,
                  rate_window_s: int = 600, wait_timeout_s: int = 600,
-                 compute_budget_s: float = 300.0):
+                 compute_budget_s: float = 864000.0):
         self.waiting_limit = waiting_limit
         self.per_visitor_limit = per_visitor_limit
         self.rate_window_s = rate_window_s
@@ -130,7 +130,7 @@ class AdmissionQueue:
                 retry_after = max(5, int((active_waiting + 1) * 6))
                 raise HTTPException(
                     503,
-                    "Inference queue is full; try again shortly",
+                    "Models are busy with another visitor's turn; you are in queue. Try again shortly",
                     headers={
                         "Retry-After": str(retry_after),
                         "X-Queue-Active": str(int(self._active is not None and not self._active.cancelled)),

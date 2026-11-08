@@ -49,6 +49,25 @@ export const LiveTrivia: React.FC = () => {
   const [stopping, setStopping] = useState(false);
   const [pausePending, setPausePending] = useState(false);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
+  const [triviaCooldownRemaining, setTriviaCooldownRemaining] = useState<number>(() => {
+    try {
+      const until = Number(localStorage.getItem('prismlab_trivia_cooldown_until') || '0');
+      return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    } catch {
+      return 0;
+    }
+  });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      try {
+        const until = Number(localStorage.getItem('prismlab_trivia_cooldown_until') || '0');
+        const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+        setTriviaCooldownRemaining(remaining);
+      } catch {}
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   const runningRef = useRef(false);
   const cancelRef = useRef(false);
   const pauseRef = useRef(false);
@@ -109,7 +128,7 @@ export const LiveTrivia: React.FC = () => {
       retryAfter = Math.min(4, Math.max(2, err.retryAfter));
     }
     setRateLimitCountdown(retryAfter);
-    setError(`Model is busy with inference; waiting in queue (${retryAfter}s)…`);
+    setError(`Models are currently busy with another visitor's turn; waiting in queue (${retryAfter}s)…`);
     rateLimitSkipRef.current = false;
 
     while (retryAfter > 0 && !cancelRef.current && !rateLimitSkipRef.current) {
@@ -134,6 +153,10 @@ export const LiveTrivia: React.FC = () => {
   };
 
   const start = async (existingMatch?: LiveMatch) => {
+    if (triviaCooldownRemaining > 0 && !existingMatch) {
+      setError(`Cooldown active: Please wait ${triviaCooldownRemaining}s before starting another match.`);
+      return;
+    }
     if (runningRef.current) return;
     runningRef.current = true; cancelRef.current = false; pauseRef.current = false; setPausePending(false); setStopping(false); setError(''); setShowWinnerModal(false);
     rateLimitSkipRef.current = false;
@@ -280,6 +303,11 @@ export const LiveTrivia: React.FC = () => {
         matchRef.current = record;
         if (!cancelRef.current) {
           try { localStorage.removeItem(ACTIVE_TRIVIA_STORAGE_KEY); } catch {}
+          try {
+            const cooldownUntil = Date.now() + 120 * 1000;
+            localStorage.setItem('prismlab_trivia_cooldown_until', String(cooldownUntil));
+            setTriviaCooldownRemaining(120);
+          } catch {}
         }
         saveMatch(record); setMatch(record); setPhase(cancelRef.current ? 'cancelled' : 'completed');
         if (!cancelRef.current) setShowWinnerModal(true);
@@ -391,7 +419,7 @@ export const LiveTrivia: React.FC = () => {
       <section className="s4-question-board" aria-labelledby="s4-question-title"><div className="s4-question-top"><span>Question {round + 1}</span><span>{question ? `${question.topic} · ${question.difficulty}` : 'Generating'}</span></div><h2 id="s4-question-title">{question?.question || 'The questioner is preparing a fresh question…'}</h2><div className="s4-answer-list" aria-label="Answer options">{LETTERS.map(letter => <div key={letter} className={`s4-answer-row ${reveal && question?.correct_option === letter ? 'is-key' : ''}`}><span>{letter}</span>{question?.options[letter] || 'Awaiting generated option'}</div>)}</div><div className="s4-question-footer" role="status">{reveal && question ? <><strong>Host-key agreement: {question.correct_option}</strong><p>{question.explanation}</p></> : isQueueWaiting ? `⏳ Model inference is busy with another turn. You are in queue (retrying in ${rateLimitCountdown}s)…` : phase === 'paused' ? 'Paused. Resume to continue the autonomous match.' : phase === 'answering' ? 'Answers arrive sequentially. The host key is hidden until all three calls finish.' : phase === 'generating' ? 'Generating and validating a new MCQ.' : phase === 'completed' ? <div className="s4-completed-footer"><strong>{isZeroScore ? 'Match Complete · No Winner' : `Champion: ${winnerSummary} (${maxScore} pts)`}</strong><span> · Match complete. Championship standings updated.</span><button type="button" className="btn btn-secondary s4-winner-view-btn" onClick={() => setShowWinnerModal(true)}>View Results</button></div> : error || 'Start a live match. The arena chooses 5–7 questions automatically.'}</div></section>
       <aside className="s4-host" aria-label="Questioner"><h2>Questioner</h2><div className="s4-host-bubble">{hostLine}</div><div className="s4-host-figure"><Mascot model={MODELS[host]} motion={phase === 'completed' ? 'celebrating' : 'idle'} showAuthoredLine={false} interactive={false} /></div><strong>{MODELS[host].name}</strong><small>Host · {question?.backendModelId || 'local model'} · no points this round</small></aside>
     </div>
-    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <button type="button" className="btn btn-primary" onClick={() => void start()}>Start live match</button> : phase === 'paused' && !runningRef.current ? <><button type="button" className="btn btn-primary" onClick={() => void start(match || undefined)}>▶ Resume Match (Round {(match?.rounds.length || 0) + 1}/{match?.length || '?'})</button><button type="button" className="btn btn-secondary" onClick={discardMatch}>✕ New Match</button></> : <><button type="button" className="btn btn-secondary" disabled={stopping} onClick={phase === 'paused' || pausePending ? resume : pause}>{isQueueWaiting ? 'In queue…' : phase === 'paused' ? 'Resume' : pausePending ? 'Resume (Pausing…)' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
+    <div className="s4-trivia-controls"><div><p>Scores measure agreement with the host model’s locked answer key. Questions are not independently fact-checked.</p>{error && <p role="alert">{error}</p>}{gateway && !gateway.gateway_enabled && <p>{gateway.reason}</p>}{match && <details><summary>Match trace</summary><small>Match {match.id} · {match.status} · {match.rounds.length} generated questions</small>{match.rounds.map(item => <p key={item.question.id}><small>Round {item.index + 1}: host {item.question.backendModelId} · request {item.question.requestId} · {item.attempts.map(a => `${a.backendModelId}: ${a.status} ${a.requestId || 'no request ID'}`).join(' · ')}</small></p>)}</details>}</div><div className="s4-live-actions">{!active ? <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>{triviaCooldownRemaining > 0 && <small style={{ color: 'var(--color-text-muted, #94a3b8)', fontSize: '0.8rem' }}>Match completed · Cooldown: {triviaCooldownRemaining}s remaining</small>}<button type="button" className="btn btn-primary" disabled={triviaCooldownRemaining > 0} onClick={() => void start()}>{triviaCooldownRemaining > 0 ? `Cooldown (${triviaCooldownRemaining}s)` : 'Start live match'}</button></div> : phase === 'paused' && !runningRef.current ? <><button type="button" className="btn btn-primary" onClick={() => void start(match || undefined)}>▶ Resume Match (Round {(match?.rounds.length || 0) + 1}/{match?.length || '?'})</button><button type="button" className="btn btn-secondary" onClick={discardMatch}>✕ New Match</button></> : <><button type="button" className="btn btn-secondary" disabled={stopping} onClick={phase === 'paused' || pausePending ? resume : pause}>{isQueueWaiting ? 'In queue…' : phase === 'paused' ? 'Resume' : pausePending ? 'Resume (Pausing…)' : 'Pause'}</button><button type="button" className="btn btn-secondary" disabled={stopping} onClick={stop}>{stopping ? 'Stopping after current call…' : phase === 'paused' ? 'Stop match' : 'Stop after current call'}</button></>}</div></div>
     <TriviaWinnerModal
       isOpen={showWinnerModal}
       onClose={() => setShowWinnerModal(false)}
