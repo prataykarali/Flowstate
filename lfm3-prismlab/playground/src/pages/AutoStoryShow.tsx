@@ -84,21 +84,37 @@ export interface AutoStoryView {
 export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; onHistory: () => void }> = ({ onState, onHistory }) => {
   const [config, setConfig] = React.useState<ShowConfig>(() => ({ ...DEFAULT_SHOW_CONFIG, modelIds: [...DEFAULT_SHOW_CONFIG.modelIds] }));
   const [turnCountCustomized, setTurnCountCustomized] = React.useState(false);
-  const [show, setShow] = React.useState<ShowRecord | null>(null);
+  const [show, setShow] = React.useState<ShowRecord | null>(() => {
+    try {
+      const all = readShows();
+      const inProgress = all.find(s => s.mode === 'live_local_show' && (s.status === 'active' || s.status === 'parked' || s.status === 'paused_rate_limit'));
+      return inProgress || null;
+    } catch {
+      return null;
+    }
+  });
   const [saved, setSaved] = React.useState(readShows);
-  const [phase, setPhaseState] = React.useState<ShowPhase>('configuring');
-  const [message, setMessage] = React.useState('Choose a genre to start a new story.');
+  const [phase, setPhaseState] = React.useState<ShowPhase>(() => {
+    if (!show) return 'configuring';
+    if (show.status === 'paused_rate_limit') return 'paused_rate_limit';
+    return 'paused';
+  });
+  const [message, setMessage] = React.useState<string>(() => {
+    if (!show) return 'Choose a genre to start a new story.';
+    if (show.status === 'paused_rate_limit') return `Your Story is saved at Turn ${show.turns.length + 1} of ${show.config.turnCount}.`;
+    return `Story paused at Turn ${show.turns.length + 1} of ${show.config.turnCount}. Click "Resume" to continue.`;
+  });
   const [preview, setPreview] = React.useState('');
-  const [modeLabel, setModeLabel] = React.useState<string>('');
+  const [modeLabel, setModeLabel] = React.useState<string>(() => show ? 'Paused' : '');
   const [, setReaction] = React.useState(0);
   const [, setReactionState] = React.useState<'idle' | 'thinking' | 'happy' | 'sad'>('idle');
   const [pending, setPending] = React.useState(false);
   const [rateLimitCountdown, setRateLimitCountdown] = React.useState<number | null>(null);
 
-  const showRef = React.useRef<ShowRecord | null>(null);
-  const phaseRef = React.useRef<ShowPhase>('configuring');
+  const showRef = React.useRef<ShowRecord | null>(show);
+  const phaseRef = React.useRef<ShowPhase>(phase);
   const pendingRef = React.useRef(false);
-  const pausedRef = React.useRef(false);
+  const pausedRef = React.useRef(!!show);
   const stoppedRef = React.useRef(false);
   const timerRef = React.useRef<number | null>(null);
   const countdownIntervalRef = React.useRef<number | null>(null);
@@ -110,15 +126,6 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   React.useEffect(() => {
     onState({ show, phase, preview, message, pending, modeLabel });
   }, [show, phase, preview, message, pending, modeLabel, onState]);
-
-  React.useEffect(() => {
-    // Clear slate on initial load as requested
-    if (typeof localStorage !== 'undefined' && !sessionStorage.getItem('prismlab_slate_cleared_v1')) {
-      clearShows();
-      sessionStorage.setItem('prismlab_slate_cleared_v1', '1');
-      setSaved([]);
-    }
-  }, []);
 
   React.useEffect(() => {
     mountedRef.current = true;
@@ -140,6 +147,21 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
         } catch {}
       }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const handleGlobalResume = (e: Event) => {
+      const detail = (e as CustomEvent)?.detail;
+      if (!detail || !detail.activity || detail.activity === 'STORY') {
+        void resume();
+      }
+    };
+    window.addEventListener('prismlab_resume_activity', handleGlobalResume);
+    window.addEventListener('prismlab_resume_story', handleGlobalResume);
+    return () => {
+      window.removeEventListener('prismlab_resume_activity', handleGlobalResume);
+      window.removeEventListener('prismlab_resume_story', handleGlobalResume);
     };
   }, []);
 
@@ -192,12 +214,12 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       countdownIntervalRef.current = null;
     }
 
-    let retryAfter = 30;
+    let retryAfter = 2;
     if (err instanceof ApiError && typeof err.retryAfter === 'number' && err.retryAfter > 0) {
-      retryAfter = Math.min(600, Math.max(2, err.retryAfter));
+      retryAfter = Math.min(3, Math.max(1, err.retryAfter));
     } else if (err instanceof Error) {
       const match = err.message.match(/(\d+)\s*(?:s|sec|second)/i);
-      if (match) retryAfter = Math.min(600, Math.max(2, parseInt(match[1], 10)));
+      if (match) retryAfter = Math.min(3, Math.max(1, parseInt(match[1], 10)));
     }
 
     const current = showRef.current;
@@ -210,7 +232,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
 
     const totalTurns = current?.turnOrder.length || 20;
     const turnNum = currentTurnIdx + 1;
-    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Your compute allowance is temporarily exhausted. Auto-resuming in ${retryAfter}s…`);
+    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Inference queue busy; resuming in ${retryAfter}s…`);
 
     let remaining = retryAfter;
     countdownIntervalRef.current = window.setInterval(() => {
@@ -225,7 +247,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         resumeFromRateLimit();
       } else {
         setRateLimitCountdown(remaining);
-        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Your compute allowance is temporarily exhausted. Auto-resuming in ${remaining}s…`);
+        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Inference queue busy; resuming in ${remaining}s…`);
       }
     }, 1000);
   };
@@ -771,24 +793,41 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   };
 
   const resume = async () => {
-    if (!showRef.current || stoppedRef.current) return;
+    if (!showRef.current) return;
+    stoppedRef.current = false;
+    pausedRef.current = false;
+    pendingRef.current = false;
+    setPending(false);
+    if (countdownIntervalRef.current !== null) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    setRateLimitCountdown(null);
+
     if (phaseRef.current === 'paused_rate_limit' || showRef.current.status === 'paused_rate_limit') {
       resumeFromRateLimit();
       return;
     }
-    if (showRef.current.status === 'parked') {
+    if (showRef.current.status === 'parked' || showRef.current.status === 'active') {
       try {
         await resumeParkedActivity(showRef.current.showId);
-      } catch {}
+      } catch {
+        try {
+          await startActivity('STORY', showRef.current.showId, undefined, {
+            theme: showRef.current.config.theme,
+            turn: showRef.current.turns.length,
+            turnCount: showRef.current.config.turnCount,
+          });
+        } catch {}
+      }
       commit({ ...showRef.current, status: 'active', updatedAt: new Date().toISOString() });
       window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
     }
     pausedRef.current = false;
-    setMessage('Resuming the autonomous show.');
-    if (!pendingRef.current) {
-      setPhase('preparing');
-      schedule(0);
-    }
+    stoppedRef.current = false;
+    setMessage('Resuming the autonomous show…');
+    setPhase('preparing');
+    schedule(0);
   };
 
   const stop = () => {
@@ -985,7 +1024,22 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                 </button>
               </div>
               {saved.slice(0, 5).map(item => (
-                <button type="button" key={item.showId} onClick={() => replay(item)}>
+                <button
+                  type="button"
+                  key={item.showId}
+                  onClick={() => {
+                    if (item.mode === 'live_local_show' && (item.status === 'parked' || item.status === 'active')) {
+                      showRef.current = item;
+                      setShow(item);
+                      setPhase('paused');
+                      setMessage(`Story paused at Turn ${item.turns.length + 1} of ${item.turnOrder.length}. Click "Resume" to continue.`);
+                      stoppedRef.current = false;
+                      pausedRef.current = true;
+                    } else {
+                      replay(item);
+                    }
+                  }}
+                >
                   {item.config.theme} · {item.turns.length}/{item.turnOrder.length} turns · {item.status}
                 </button>
               ))}
@@ -1016,7 +1070,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             {show.mode === 'live_local_show' && (
               <>
                 {phase === 'paused' || phase === 'paused_rate_limit' ? (
-                  <button type="button" onClick={resume} disabled={pending}>
+                  <button type="button" onClick={resume}>
                     ▶ Resume {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `(${rateLimitCountdown}s)` : ''}
                   </button>
                 ) : (

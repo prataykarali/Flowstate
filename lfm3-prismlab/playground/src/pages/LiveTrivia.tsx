@@ -30,7 +30,10 @@ export const LiveTrivia: React.FC = () => {
   const [length, setLength] = useState<number | null>(() => match?.length || null);
   const [phase, setPhase] = useState<Phase>(() => match ? 'paused' : 'idle');
   const [round, setRound] = useState(() => match ? match.rounds.length : 0);
-  const [host, setHost] = useState<CanonicalModelId>('text');
+  const [host, setHost] = useState<CanonicalModelId>(() => {
+    const list: CanonicalModelId[] = ['text', 'vision', 'omni'];
+    return list[Math.floor(Math.random() * list.length)];
+  });
   const [contestants, setContestants] = useState<CanonicalModelId[]>(['vision', 'audio', 'omni']);
   const [question, setQuestion] = useState<LiveQuestion | null>(() => {
     if (!match || !match.rounds.length) return null;
@@ -101,25 +104,19 @@ export const LiveTrivia: React.FC = () => {
   }, []);
 
   const handleRateLimitPause = async (err: unknown, resumePhase: Phase) => {
-    let retryAfter = 30;
+    let retryAfter = 2;
     if (err instanceof ApiError && typeof err.retryAfter === 'number' && err.retryAfter > 0) {
-      retryAfter = Math.min(600, Math.max(2, err.retryAfter));
-    } else if (err instanceof Error) {
-      const match = err.message.match(/(\d+)\s*(?:s|sec|second)/i);
-      if (match) retryAfter = Math.min(600, Math.max(2, parseInt(match[1], 10)));
+      retryAfter = Math.min(3, Math.max(1, err.retryAfter));
     }
     setPhase('paused');
     setRateLimitCountdown(retryAfter);
-    setError(`Compute allowance exhausted; pausing match for ${retryAfter}s until replenishment…`);
+    setError(`Inference queue busy; retrying in ${retryAfter}s…`);
     rateLimitSkipRef.current = false;
 
     while (retryAfter > 0 && !cancelRef.current && !rateLimitSkipRef.current) {
       await new Promise(r => setTimeout(r, 1000));
       retryAfter -= 1;
       setRateLimitCountdown(retryAfter);
-      if (retryAfter > 0) {
-        setError(`Compute allowance replenishing (${retryAfter}s remaining)…`);
-      }
     }
     setRateLimitCountdown(null);
     setError('');
@@ -164,6 +161,8 @@ export const LiveTrivia: React.FC = () => {
       const hosts = HOSTS.filter(id => eligible.includes(id));
       if (!hosts.length || eligible.length < 4) throw new Error('Four distinct eligible local models are required.');
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] % TOPICS.length;
+      // Randomize initial host so match doesn't always start with 'text'
+      const startHostIndex = crypto.getRandomValues(new Uint32Array(1))[0] % Math.max(1, hosts.length);
       const pickContestants = (hostId: CanonicalModelId): CanonicalModelId[] => {
         const pool = eligible.filter(id => id !== hostId);
         // Give models without an answer this match the first available stage spots.
@@ -185,9 +184,10 @@ export const LiveTrivia: React.FC = () => {
       }
       for (let index = startRound; index < matchLength; index += 1) {
         await waitIfPaused('generating');
-        // Rotate hosts across eligible models (text, vision, omni) so text gets rounds to compete and score
+        // Properly cycle through the 3 hosts starting from the randomized initial host
+        const preferredHost = hosts.length ? hosts[(startHostIndex + index) % hosts.length] : 'text';
         const hostOrder: CanonicalModelId[] = hosts.length
-          ? [hosts[index % hosts.length], ...hosts.filter(h => h !== hosts[index % hosts.length])]
+          ? [preferredHost, ...hosts.filter(h => h !== preferredHost)]
           : ['text'];
         let hostId: CanonicalModelId = hostOrder[0];
         setRound(index); setHost(hostId); setQuestion(null); setAttempts([]); setCurrentContestant(-1); setPhase('generating');
