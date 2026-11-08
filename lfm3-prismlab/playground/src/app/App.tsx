@@ -23,6 +23,7 @@ const AppContent: React.FC = () => {
   const [visitedRoutes, setVisitedRoutes] = React.useState<Set<RouteId>>(() => new Set([currentRoute]));
 
   React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
     setVisitedRoutes(prev => {
       if (prev.has(currentRoute)) return prev;
       const next = new Set(prev);

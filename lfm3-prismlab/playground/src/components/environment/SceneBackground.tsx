@@ -8,6 +8,8 @@ interface SceneBackgroundProps {
   variant?: 'hero' | 'world' | 'arena';
 }
 
+const cachedLoadedPosters = new Set<string>();
+
 export const SceneBackground: React.FC<SceneBackgroundProps> = ({ route, variant = 'hero' }) => {
   const { videoEnabled } = useExperience();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -19,7 +21,18 @@ export const SceneBackground: React.FC<SceneBackgroundProps> = ({ route, variant
   const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
   const shouldPlay = scene.motion === 'video' && videoEnabled && !reducedMotion && !saveData && visible && !failed;
 
-  useEffect(() => { setFailed(false); setPlaying(false); }, [route]);
+  // Double-buffering: keep previous poster rendered underneath so there is never a blank flash
+  const [activePoster, setActivePoster] = useState(scene.poster);
+  const [prevPoster, setPrevPoster] = useState<string | null>(null);
+
+  useEffect(() => {
+    setFailed(false);
+    setPlaying(false);
+    if (scene.poster !== activePoster) {
+      setPrevPoster(activePoster);
+      setActivePoster(scene.poster);
+    }
+  }, [route, scene.poster, activePoster]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -47,10 +60,32 @@ export const SceneBackground: React.FC<SceneBackgroundProps> = ({ route, variant
 
   return (
     <div className={`scene-background scene-background--${variant} scene-background--${route}`} aria-hidden="true" style={{ backgroundPosition: scene.position }}>
-      <img className="scene-poster" src={scene.poster} alt="" draggable={false} style={{ objectPosition: scene.position }} />
+      {prevPoster && prevPoster !== activePoster && (
+        <img
+          className="scene-poster scene-poster--prev"
+          src={prevPoster}
+          alt=""
+          draggable={false}
+          style={{ objectPosition: scene.position, zIndex: 0 }}
+        />
+      )}
+      <img
+        key={activePoster}
+        className="scene-poster scene-poster--active"
+        src={activePoster}
+        alt=""
+        draggable={false}
+        loading="eager"
+        decoding="async"
+        onLoad={() => {
+          cachedLoadedPosters.add(activePoster);
+          setPrevPoster(null);
+        }}
+        style={{ objectPosition: scene.position, zIndex: 1 }}
+      />
       {shouldPlay && <video key={route} ref={videoRef} className={`scene-video ${playing ? 'is-playing' : ''}`} src={scene.video} poster={scene.poster} autoPlay muted loop playsInline preload="none" disablePictureInPicture
-        onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} style={{ objectPosition: scene.position }} />}
-      <div className="scene-readability" />
+        onPlaying={() => setPlaying(true)} onError={() => { setFailed(true); setPlaying(false); }} style={{ objectPosition: scene.position, zIndex: 2 }} />}
+      <div className="scene-readability" style={{ zIndex: 3 }} />
     </div>
   );
 };

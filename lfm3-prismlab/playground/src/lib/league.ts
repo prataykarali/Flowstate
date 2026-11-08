@@ -48,7 +48,7 @@ export interface LeagueEvent {
 }
 export interface AwardResult { events: LeagueEvent[]; event: LeagueEvent | null; reason: string | null }
 
-const requestIdValid = (value: string) => /^[a-f0-9]{32}$/i.test(value);
+const requestIdValid = (value: string) => typeof value === 'string' && /^[a-f0-9]{32}$/i.test(value);
 const dayOf = (timestamp: string) => {
   const date = new Date(timestamp);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;

@@ -8,7 +8,6 @@ import {
   buildShowPrompt,
   createShow,
   DEFAULT_SHOW_CONFIG,
-  chooseRandomTurnCount,
   detectRepetition,
   evaluateGenreTurn,
   extractStoryWorldState,
@@ -756,7 +755,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     pausedRef.current = false;
     retryCountRef.current = 0;
 
-    const next = createShow({ ...newConfig, turnCount: useSelectedCount ? newConfig.turnCount : chooseRandomTurnCount() });
+    const chooseStoryTurnCount = () => 10 + Math.floor(Math.random() * 3);
+    const next = createShow({ ...newConfig, turnCount: useSelectedCount ? newConfig.turnCount : chooseStoryTurnCount() });
     commit(next);
     void startActivity('STORY', next.showId, undefined, { theme: next.config.theme, turns: next.turnOrder.length });
     setPhase('preparing');
@@ -769,10 +769,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const available = choices.length ? choices : STORY_THEMES;
     const randomTheme = available[Math.floor(Math.random() * available.length)];
     previousThemeRef.current = randomTheme;
+    const chooseStoryTurnCount = () => 10 + Math.floor(Math.random() * 3);
     const randomConfig: ShowConfig = {
       theme: randomTheme,
       opening: '',
-      turnCount: chooseRandomTurnCount(),
+      turnCount: chooseStoryTurnCount(),
       modelIds: SHOW_CAPABILITIES.map(capability => capability.modelId),
       playback: 'automatic',
       maxTokens: 128,
@@ -922,7 +923,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         <div className="chat-story-setup">
           <div className="chat-story-inline-head">
             <strong>✦ Auto Story</strong>
-            <span>{config.modelIds.length} models · {turnCountCustomized ? `${config.turnCount} turns` : 'random 10–20 turns'}. Choose any genre; each model receives the previous story context.</span>
+            <span>{config.modelIds.length} models · {turnCountCustomized ? `${config.turnCount} turns` : 'random 10–12 turns'}. Choose any genre; each model receives the previous story context.</span>
           </div>
 
           <label className="chat-story-opening">
@@ -950,8 +951,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                   if (e.target.value === 'random') setTurnCountCustomized(false);
                   else { setTurnCountCustomized(true); setConfig({ ...config, turnCount: Number(e.target.value) }); }
                 }}>
-                  <option value="random">Random (10–20)</option>
-                  {Array.from({ length: 11 }, (_, i) => i + 10).map(count => <option key={count}>{count}</option>)}
+                  <option value="random">Random (10–12)</option>
+                  {[10, 11, 12].map(count => <option key={count} value={count}>{count}</option>)}
                 </select>
               </label>
               <label>

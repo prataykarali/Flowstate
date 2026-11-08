@@ -32,16 +32,24 @@ def stream_text(
     auth_token: str | None = None,
     timeout_s: float = 180,
     max_tokens: int = 256,
+    response_format: dict | None = None,
 ) -> TextStream:
     """Stream OpenAI-style SSE; TTFT means first visible text delta."""
+    messages = [{"role": "user", "content": prompt}]
+    if response_format:
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant. Output valid JSON only."},
+            {"role": "user", "content": prompt},
+        ]
     payload = {
         "model": model_id,
-        "messages": [{"role": "user", "content": prompt}],
+        "messages": messages,
         "temperature": 0.1,
         "max_tokens": max_tokens,
         "stream": True,
         "stream_options": {"include_usage": True},
         "chat_template_kwargs": {"enable_thinking": False},
+        **({"response_format": response_format} if response_format else {}),
     }
 
     req = Request(
@@ -285,6 +293,7 @@ def execute(
             auth_token=getattr(manager.specs["text"], "auth_token", None),
             timeout_s=getattr(manager.specs["text"], "timeout_s", 180),
             max_tokens=max_tokens,
+            response_format=request.response_format,
         )
 
         trace.append(TraceStep(

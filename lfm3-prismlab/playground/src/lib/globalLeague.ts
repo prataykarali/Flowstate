@@ -184,11 +184,25 @@ export async function recordGlobalEvent(
             trivia_points: activityType.startsWith('trivia') ? row.trivia_points + awarded : row.trivia_points,
             unranked: false,
           };
-        }).sort((a, b) => b.total_points - a.total_points).map((row, idx) => ({ ...row, rank: idx + 1 }));
+        });
+        let currentRank = 1;
+        const sorted = [...nextStandings].sort((a, b) => {
+          if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+          return a.model_id.localeCompare(b.model_id);
+        });
+        const rankedStandings = sorted.map((item, index) => {
+          if (item.total_points === 0) {
+            return { ...item, rank: null, unranked: true };
+          }
+          if (index > 0 && item.total_points < sorted[index - 1].total_points) {
+            currentRank = index + 1;
+          }
+          return { ...item, rank: currentRank, unranked: false };
+        });
 
         currentState = {
           ...currentState,
-          standings: nextStandings,
+          standings: rankedStandings,
           allUnranked: false,
           updatedAt: new Date().toISOString(),
         };
@@ -240,12 +254,12 @@ if (typeof window !== 'undefined') {
     }
   });
 
-  // Poll every 25 seconds
+  // Poll every 4 seconds for near real-time synchronization
   window.setInterval(() => {
     if (!document.hidden) {
       void fetchGlobalStandings();
     }
-  }, 25_000);
+  }, 4_000);
 }
 
 export function getGlobalStandingsSnapshot(): GlobalStandingsState {

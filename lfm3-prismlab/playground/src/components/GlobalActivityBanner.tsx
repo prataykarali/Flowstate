@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import type { RouteId } from '../app/routes.ts';
-import { getCurrentActivity, parkActivity, resumeParkedActivity, stopActivity, type ActivitySessionInfo } from '../lib/api.ts';
+import { getCurrentActivity, parkActivity, resumeParkedActivity, stopActivity, startActivity, type ActivitySessionInfo } from '../lib/api.ts';
 import { readShows, type ShowRecord } from '../lib/storyShow.ts';
 
 export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => void }> = ({ onNavigate }) => {
   const [activity, setActivity] = useState<ActivitySessionInfo | null>(null);
   const [parked, setParked] = useState<ActivitySessionInfo | null>(null);
   const [localShow, setLocalShow] = useState<ShowRecord | null>(null);
+  const [localTrivia, setLocalTrivia] = useState<{ id: string; length: number; rounds: unknown[]; status: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const checkStatus = async () => {
@@ -22,6 +23,23 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
         setLocalShow(current);
       } else {
         setLocalShow(null);
+      }
+
+      // Check local trivia records
+      try {
+        const rawTrivia = localStorage.getItem('prismlab_active_trivia_match_v1');
+        if (rawTrivia) {
+          const parsed = JSON.parse(rawTrivia);
+          if (parsed && (parsed.status === 'running' || parsed.status === 'paused') && parsed.rounds?.length < parsed.length) {
+            setLocalTrivia(parsed);
+          } else {
+            setLocalTrivia(null);
+          }
+        } else {
+          setLocalTrivia(null);
+        }
+      } catch {
+        setLocalTrivia(null);
       }
     } catch {}
   };
@@ -40,25 +58,24 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
   }, []);
 
   const session = activity || parked;
-  if (!session && !localShow) return null;
+  if (!session && !localShow && !localTrivia) return null;
 
   const isStory = session ? session.activity_type === 'STORY' : !!localShow;
-  const isTrivia = session ? session.activity_type === 'TRIVIA' : false;
-  const isParked = (session && session.status === 'parked') || (localShow?.status === 'parked');
+  const isTrivia = session ? session.activity_type === 'TRIVIA' : (!isStory && !!localTrivia);
+  const isParked = (session && session.status === 'parked') || (localShow?.status === 'parked') || (localTrivia?.status === 'paused');
 
-  const turnInfo = localShow
-    ? `Turn ${localShow.turns.length}/${localShow.config.turnCount}`
-    : session?.metadata && typeof session.metadata.turn === 'number'
-    ? `Turn ${session.metadata.turn}`
-    : '';
+  const turnInfo = isStory
+    ? (localShow ? `Turn ${localShow.turns.length}/${localShow.config.turnCount}` : (session?.metadata && typeof session.metadata.turn === 'number' ? `Turn ${session.metadata.turn}` : ''))
+    : (localTrivia ? `Round ${localTrivia.rounds.length}/${localTrivia.length}` : (session?.metadata && typeof session.metadata.round === 'number' ? `Round ${session.metadata.round}` : ''));
 
-  const themeLabel: string = localShow?.config.theme || (typeof session?.metadata?.theme === 'string' ? session.metadata.theme : '') || (isStory ? 'Story' : 'Match');
+  const themeLabel: string = isStory
+    ? (localShow?.config.theme || (typeof session?.metadata?.theme === 'string' ? session.metadata.theme : 'Story'))
+    : 'Trivia Match';
 
   const handleReturn = () => {
     if (isStory) {
       if (onNavigate) onNavigate('chat');
       else window.location.hash = '#chat';
-      // Notify chat to activate story mode
       window.dispatchEvent(new CustomEvent('prismlab_open_story'));
     } else if (isTrivia) {
       if (onNavigate) onNavigate('trivia');
@@ -67,16 +84,21 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
   };
 
   const handleSaveAndExit = async () => {
-    if (!session && !localShow) return;
+    if (!session && !localShow && !localTrivia) return;
     setLoading(true);
     try {
-      const sessId = session?.session_id || localShow?.showId;
+      const sessId = session?.session_id || localShow?.showId || localTrivia?.id;
       if (sessId) {
         await parkActivity(sessId, {
-          theme: localShow?.config.theme,
-          turn: localShow?.turns.length,
-          turnCount: localShow?.config.turnCount,
+          theme: isStory ? localShow?.config.theme : 'Trivia Match',
+          turn: isStory ? localShow?.turns.length : localTrivia?.rounds.length,
+          turnCount: isStory ? localShow?.config.turnCount : localTrivia?.length,
         });
+      }
+      if (localTrivia && localTrivia.status === 'running') {
+        const paused = { ...localTrivia, status: 'paused' };
+        localStorage.setItem('prismlab_active_trivia_match_v1', JSON.stringify(paused));
+        setLocalTrivia(paused);
       }
       window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
       await checkStatus();
@@ -88,12 +110,21 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
   const handleResume = async () => {
     setLoading(true);
     try {
-      const sessId = session?.session_id || localShow?.showId;
+      const sessId = session?.session_id || localShow?.showId || localTrivia?.id;
       if (sessId && isParked) {
-        await resumeParkedActivity(sessId);
+        try {
+          await resumeParkedActivity(sessId);
+        } catch {
+          try {
+            await startActivity(isStory ? 'STORY' : 'TRIVIA', sessId);
+          } catch {}
+        }
       }
       handleReturn();
       window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
+      window.dispatchEvent(new CustomEvent('prismlab_resume_activity', { detail: { activity: isStory ? 'STORY' : 'TRIVIA' } }));
+      if (isStory) window.dispatchEvent(new CustomEvent('prismlab_resume_story'));
+      else window.dispatchEvent(new CustomEvent('prismlab_resume_trivia'));
       await checkStatus();
     } finally {
       setLoading(false);
@@ -103,9 +134,13 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
   const handleStop = async () => {
     setLoading(true);
     try {
-      const sessId = session?.session_id || localShow?.showId;
+      const sessId = session?.session_id || localShow?.showId || localTrivia?.id;
       if (sessId) {
         await stopActivity(sessId, 'user_stopped');
+      }
+      if (localTrivia) {
+        localStorage.removeItem('prismlab_active_trivia_match_v1');
+        setLocalTrivia(null);
       }
       window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
       await checkStatus();
@@ -140,7 +175,7 @@ export const GlobalActivityBanner: React.FC<{ onNavigate?: (route: RouteId) => v
         <span>
           <strong>{isParked ? 'Saved & Parked' : 'In Progress'}:</strong>{' '}
           {themeLabel} {isStory ? 'Story' : 'Trivia'} {turnInfo ? `(${turnInfo})` : ''}
-          {isParked ? ' is saved. Single-activity lock is released.' : ' is paused. Lock is active.'}
+          {isParked ? ' is saved. Single-activity lock is released.' : ' is running in background. Lock is active.'}
         </span>
       </div>
 

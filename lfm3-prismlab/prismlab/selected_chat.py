@@ -31,12 +31,21 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
     if not state.ready and auto_start:
         manager.start(model)
         deadline = time.monotonic() + startup_timeout_s
+        mismatch_since = None
         while time.monotonic() < deadline:
+            owned = manager._owned.get(model)
+            if owned is not None and owned.poll() is not None:
+                raise RuntimeError(f"Server process terminated unexpectedly with code {owned.returncode}")
             state = manager.probe(model)
             if state.ready:
                 break
-            if state.state in {"mismatch", "unverified"}:
-                raise RuntimeError(state.detail)
+            if state.state == "mismatch":
+                if mismatch_since is None:
+                    mismatch_since = time.monotonic()
+                elif time.monotonic() - mismatch_since > 6.0:
+                    raise RuntimeError(state.detail)
+            else:
+                mismatch_since = None
             time.sleep(0.5)
     if not state.ready:
         raise RuntimeError(f"Selected model is {state.state}: {state.detail}")
@@ -84,6 +93,13 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
                 {"role": "user", "content": parts},
             ],
         }
+        resp_fmt = getattr(request, "response_format", None)
+        if resp_fmt:
+            payload["response_format"] = resp_fmt
+            payload["messages"][0]["content"] = "You are a helpful assistant. Output valid JSON only."
+        elif "json only" in request.text.lower() or "return compact json" in request.text.lower():
+            payload["response_format"] = {"type": "json_object"}
+            payload["messages"][0]["content"] = "You are a helpful assistant. Output valid JSON only."
         endpoint = "/v1/chat/completions"
 
     from contextlib import nullcontext

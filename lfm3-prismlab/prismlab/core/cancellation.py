@@ -11,7 +11,7 @@ _abort_flags: dict[int, bool] = {}
 
 def register_upstream(ident: int, response: Any) -> None:
     with _lock:
-        if _abort_flags.get(ident):
+        if _abort_flags.pop(ident, None):
             try:
                 response.close()
             except Exception:
@@ -29,7 +29,7 @@ def unregister_upstream(ident: int) -> None:
 def abort_upstream(ident: int) -> bool:
     with _lock:
         _abort_flags[ident] = True
-        resp = _sockets.get(ident)
+        resp = _sockets.pop(ident, None)
         if resp is not None:
             try:
                 resp.close()
@@ -37,3 +37,4 @@ def abort_upstream(ident: int) -> bool:
             except Exception:
                 pass
         return False
+

@@ -24,3 +24,25 @@ export const SCENES: Record<RouteId, SceneAsset> = {
   championship: scene('07_championship', 'center 52%', 'Grand Prism arena', 'video'),
   settings: scene('08_settings', 'center 47%', 'Cozy observatory control room', 'still')
 };
+
+export const ALL_BACKGROUND_POSTERS: string[] = [
+  '/assets/environment/observatory-garden.webp',
+  '/assets/chat-stage-v2.webp',
+  '/assets/environment/01_model_world.webp',
+  '/assets/environment/02_playground.webp',
+  '/assets/environment/03_trivia.webp',
+  '/assets/environment/04_arcade.webp',
+  '/assets/environment/05_research.webp',
+  '/assets/environment/06_architecture.webp',
+  '/assets/environment/07_championship.webp',
+  '/assets/environment/08_settings.webp'
+];
+
+if (typeof window !== 'undefined') {
+  // Preload all environment posters in browser cache so tab switching is instantaneous
+  ALL_BACKGROUND_POSTERS.forEach((src) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = src;
+  });
+}

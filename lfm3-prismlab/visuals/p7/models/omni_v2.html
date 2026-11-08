@@ -420,5 +420,21 @@ updateFocus('all');
   }
 })();
 </script>
+<script id="p7_playground_nav_guard">
+(()=>{
+  'use strict';
+  function handlePlaygroundHash() {
+    if (window.location.hash === '#playground') {
+      const path = window.location.pathname;
+      const marker = path.indexOf('/research/p7/models/');
+      const altMarker = path.indexOf('/assets/research/p7/models/');
+      const base = marker >= 0 ? path.slice(0, marker) + '/' : altMarker >= 0 ? path.slice(0, altMarker) + '/' : '/';
+      window.location.href = base + '#playground';
+    }
+  }
+  window.addEventListener('hashchange', handlePlaygroundHash);
+  if (window.location.hash === '#playground') handlePlaygroundHash();
+})();
+</script>
 </body>
 </html>

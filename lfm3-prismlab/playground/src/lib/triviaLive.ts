@@ -167,8 +167,8 @@ export function validateQuestion(
   };
 }
 
-export function validateAnswer(output: LiveResult['output'], modelId: CanonicalModelId, question?: LiveQuestion): Letter | null {
-  if (modelId === 'd1' || modelId === 'd1_omni') {
+export function validateAnswer(output: LiveResult['output'], _modelId: CanonicalModelId, question?: LiveQuestion): Letter | null {
+  if (_modelId === 'd1' || _modelId === 'd1_omni') {
     if (
       output &&
       typeof output === 'object' &&
@@ -218,7 +218,28 @@ export function validateAnswer(output: LiveResult['output'], modelId: CanonicalM
     if (LETTERS.includes(candidate)) return candidate;
   }
 
-  // If question is passed and output is the literal option text (e.g. "Mars" when B is "Mars")
+  // Leading letter followed by delimiter: e.g. "A) 997", "B. 991", "C: 977", "(D) 953", "**B** - 991"
+  const leadMatch = trimmed.match(/^[*"'`(\[]*([A-D])[*"'`)\]`]*\s*[:.)\-\—]\s*(.*)$/i);
+  if (leadMatch) {
+    const cand = leadMatch[1].toUpperCase() as Letter;
+    if (LETTERS.includes(cand)) {
+      const rest = leadMatch[2].trim();
+      // If question options are available, ensure rest is either empty or matches/contains option text
+      if (!rest) return cand;
+      if (question?.options) {
+        const optText = normalize(question.options[cand]);
+        const restNorm = normalize(rest);
+        if (restNorm === optText || restNorm.includes(optText) || optText.includes(restNorm)) {
+          return cand;
+        }
+      } else {
+        // If no question options provided, accept leading letter with delimiter
+        return cand;
+      }
+    }
+  }
+
+  // If question is passed and output is the literal option text (e.g. "two" when B is "two", or "Four" when D is "Four")
   if (question?.options) {
     const norm = normalize(trimmed);
     const matches: Letter[] = [];
@@ -228,6 +249,16 @@ export function validateAnswer(output: LiveResult['output'], modelId: CanonicalM
       }
     }
     if (matches.length === 1) return matches[0];
+
+    // Substring match if unambiguous
+    const containsMatches: Letter[] = [];
+    for (const letter of LETTERS) {
+      const optNorm = normalize(question.options[letter]);
+      if (optNorm.length >= 3 && (norm === optNorm || norm.includes(optNorm))) {
+        containsMatches.push(letter);
+      }
+    }
+    if (containsMatches.length === 1) return containsMatches[0];
   }
 
   return null;

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RouteId } from '../app/routes.ts';
 import { Navigation } from './Navigation.tsx';
 import { SceneBackground } from './environment/SceneBackground.tsx';
 import { GlobalActivityBanner } from './GlobalActivityBanner.tsx';
+import { OfflineGatewayModal } from './OfflineGatewayModal.tsx';
+import { getGatewayStatus, subscribeGatewayStatus, registerOfflineModalTrigger, type GatewayStatus } from '../lib/api.ts';
 
 interface AppShellProps {
   currentRoute: RouteId;
@@ -11,28 +13,82 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, children }) => {
+  const [gatewayStatus, setGatewayStatus] = useState<GatewayStatus | null>(null);
+  const [isOfflineModalOpen, setIsOfflineModalOpen] = useState(false);
+  const hasPromptedInitialOfflineRef = useRef(false);
+
+  // Subscribe to gateway status updates across the application
+  useEffect(() => {
+    const unsubscribeStatus = subscribeGatewayStatus((status) => {
+      setGatewayStatus(status);
+      const isOffline = status.health_state === 'OFFLINE';
+      if (isOffline && !hasPromptedInitialOfflineRef.current) {
+        hasPromptedInitialOfflineRef.current = true;
+        setIsOfflineModalOpen(true);
+      }
+    });
+
+    const unsubscribeTrigger = registerOfflineModalTrigger(() => {
+      setIsOfflineModalOpen(true);
+    });
+
+    // Initial status probe
+    void getGatewayStatus(false).then((status) => {
+      setGatewayStatus(status);
+      const isOffline = status.health_state === 'OFFLINE';
+      if (isOffline && !hasPromptedInitialOfflineRef.current) {
+        hasPromptedInitialOfflineRef.current = true;
+        setIsOfflineModalOpen(true);
+      }
+    });
+
+    // Periodic check every 25 seconds
+    const interval = window.setInterval(() => {
+      if (!document.hidden) {
+        void getGatewayStatus(false).then(setGatewayStatus);
+      }
+    }, 25_000);
+
+    const onVisibility = () => {
+      if (!document.hidden) {
+        void getGatewayStatus(true).then(setGatewayStatus);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      unsubscribeStatus();
+      unsubscribeTrigger();
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  const isOffline = gatewayStatus?.health_state === 'OFFLINE';
+  const isBusy = gatewayStatus?.health_state === 'BUSY' || !!gatewayStatus?.inference_busy || (gatewayStatus?.queue?.active ?? 0) > 0;
+
   return (
-    <div className="app-shell">
+    <div className={`app-shell route-${currentRoute}`}>
       {/* Public Beta Notice Banner */}
       <div
         className="beta-notice-banner"
         role="region"
         aria-label="Beta Notice"
         style={{
-          background: 'rgba(192, 132, 252, 0.12)',
-          borderBottom: '1px solid rgba(192, 132, 252, 0.25)',
+          background: 'rgba(23, 23, 23, 0.88)',
+          borderBottom: '1px solid var(--prismlab-panel-border)',
           padding: '6px 16px',
           fontSize: '12px',
           textAlign: 'center',
-          color: 'var(--text-main)',
+          color: 'var(--prismlab-panel-text)',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           gap: '8px'
         }}
       >
-        <span style={{ color: 'var(--accent-lilac)', fontWeight: 600 }}>✦ Public Research Beta:</span>
-        <span style={{ color: 'var(--text-dim)' }}>
+        <span style={{ color: 'var(--prismlab-panel-accent)', fontWeight: 600 }}>✦ Public Research Beta:</span>
+        <span style={{ color: 'var(--prismlab-panel-muted)' }}>
           PrismLab is an experimental AI research playground. Inference runs on limited CPU hardware, so responses may be queued and service may occasionally be unavailable.
         </span>
       </div>
@@ -67,17 +123,30 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, ch
               <span className="brand-title">PrismLab</span>
             </div>
           </a>
-          
         </div>
 
         {/* Global Navigation */}
         <Navigation currentRoute={currentRoute} onNavigate={onNavigate} />
 
-        {/* System Status Indicator */}
-        <div className="header-status">
-          <span style={{ color: 'var(--accent-mint)' }}>●</span>
-          <span style={{ color: 'var(--text-muted)' }}>6 models registered</span>
-        </div>
+        {/* System Status Indicator Pill */}
+        <button
+          type="button"
+          className={`header-status-badge ${isOffline ? 'is-offline' : isBusy ? 'is-busy' : 'is-online'}`}
+          onClick={() => {
+            if (isOffline) {
+              setIsOfflineModalOpen(true);
+            } else {
+              void getGatewayStatus(true).then(setGatewayStatus);
+            }
+          }}
+          title={isOffline ? 'Host laptop is offline. Click for details and offline activities.' : isBusy ? 'Inference queue is currently busy' : 'Local CPU Inference Gateway is online'}
+          aria-label={isOffline ? 'Host laptop is offline. Click to open details.' : 'Inference gateway status'}
+        >
+          <span className="status-dot" />
+          <span className="status-label">
+            {isOffline ? 'Host AI Offline · Info' : isBusy ? 'Inference Busy' : 'Live CPU Gateway'}
+          </span>
+        </button>
       </header>
 
       {/* Main Page Content */}
@@ -86,15 +155,23 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, ch
         {children}
       </main>
 
+      {/* Offline Gateway Modal Dialog */}
+      <OfflineGatewayModal
+        isOpen={isOfflineModalOpen}
+        onClose={() => setIsOfflineModalOpen(false)}
+        onNavigate={onNavigate}
+        gatewayStatus={gatewayStatus}
+      />
+
       {/* Footer */}
       <footer
         style={{
-          borderTop: '1px solid var(--border-subtle)',
+          borderTop: '1px solid var(--prismlab-panel-border)',
           padding: '24px 20px',
           textAlign: 'center',
           fontSize: 13,
-          color: 'var(--text-dim)',
-          background: 'rgba(8, 7, 17, 0.95)'
+          color: 'var(--prismlab-panel-muted)',
+          background: 'rgba(9, 9, 11, 0.95)'
         }}
       >
         <p>

@@ -98,10 +98,13 @@ export default async function handler(request, response) {
     if (allZero) {
       return { ...item, rank: null, unranked: true };
     }
+    if (item.total_points === 0) {
+      return { ...item, rank: null, unranked: true };
+    }
     if (index > 0 && item.total_points < sorted[index - 1].total_points) {
       currentRank = index + 1;
     }
-    return { ...item, rank: currentRank, unranked: item.total_points === 0 };
+    return { ...item, rank: currentRank, unranked: false };
   });
 
   return response.status(200).json({

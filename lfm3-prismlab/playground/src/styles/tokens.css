@@ -20,6 +20,18 @@
   --accent-rose: #fb7185;
   --accent-amber: #fbbf24;
 
+  /* Capacity-inspired Scoped Neutral Refinement Tokens */
+  --prismlab-panel-canvas: #09090b;
+  --prismlab-panel-surface: #171717;
+  --prismlab-panel-surface-raised: #1c1c1c;
+  --prismlab-panel-surface-subtle: #232323;
+  --prismlab-panel-border: #27272a;
+  --prismlab-panel-border-subtle: rgba(255, 255, 255, 0.08);
+  --prismlab-panel-text: #fafafa;
+  --prismlab-panel-muted: #a1a1aa;
+  --prismlab-panel-accent: #f6894a;
+  --prismlab-panel-success: #00c950;
+
   /* Typography */
   --text-main: #f8fafc;
   --text-muted: #94a3b8;

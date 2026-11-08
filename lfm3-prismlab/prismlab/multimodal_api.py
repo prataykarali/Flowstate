@@ -147,7 +147,7 @@ def parse_payload(payload):
     max_tokens = payload.get("max_tokens")
 
     if max_tokens is not None:
-        if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or not (16 <= max_tokens <= 256):
+        if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or not (4 <= max_tokens <= 256):
             raise HTTPException(422, "Invalid max_tokens")
 
     if task not in TASKS:
@@ -164,7 +164,7 @@ def parse_payload(payload):
         if (set(decision_question) != {"instructions", "criteria"}
             or not isinstance(decision_question["instructions"], str)
             or not 1 <= len(decision_question["instructions"]) <= 200
-            or not isinstance(criteria, dict) or not 2 <= len(criteria) <= 4
+            or not isinstance(criteria, dict) or not 2 <= len(criteria) <= 8
             or any(not isinstance(k, str) or not k.isidentifier() or len(k) > 30
                    or not isinstance(v, str) or not 1 <= len(v) <= 200
                    for k, v in criteria.items())):
@@ -209,7 +209,7 @@ def parse_payload(payload):
     return task, prompt, media, selected, model
 
 
-def run_local(task, prompt, media, selected, model=None, decision_question=None, max_tokens=None, on_token=None):
+def run_local(task, prompt, media, selected, model=None, decision_question=None, max_tokens=None, on_token=None, response_format=None):
     on_demand = os.getenv("PRISMLAB_ON_DEMAND") == "1"
     if on_demand:
         from prismlab.on_demand import runtime_specs
@@ -220,9 +220,19 @@ def run_local(task, prompt, media, selected, model=None, decision_question=None,
 
     if on_demand:
         from prismlab.on_demand import warm_manager, touch_model
-        manager = warm_manager("multimodal", specs)
+        if model == "text":
+            from prismlab.runtime_config import TextRuntimeConfig
+            text_spec = TextRuntimeConfig.from_env().runtime_spec()
+            manager = warm_manager("text", [text_spec])
+        else:
+            manager = warm_manager("multimodal", specs)
     else:
-        manager = LifecycleManager(specs, max_managed=1, log_dir="results/p6/server_logs")
+        if model == "text":
+            from prismlab.runtime_config import TextRuntimeConfig
+            text_spec = TextRuntimeConfig.from_env().runtime_spec()
+            manager = LifecycleManager([text_spec], max_managed=1, log_dir="results/p6/server_logs")
+        else:
+            manager = LifecycleManager(specs, max_managed=1, log_dir="results/p6/server_logs")
 
     try:
         with tempfile.TemporaryDirectory(
@@ -240,6 +250,7 @@ def run_local(task, prompt, media, selected, model=None, decision_question=None,
                 text=prompt,
                 media=tuple(refs),
                 decision_question=decision_question,
+                response_format=response_format,
             )
 
             if model is not None:

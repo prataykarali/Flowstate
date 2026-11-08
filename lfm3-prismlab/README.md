@@ -133,7 +133,7 @@ llama-server -hf LiquidAI/LFM3-VL-2B-GGUF:Q4_0 \
 
 # Terminal 2: Text Server (LFM3-1.7B on port 8080)
 llama-server -hf LiquidAI/LFM3-1.7B-GGUF:Q4_K_M \
-  --alias lfm3-text --host 127.0.0.1 --port 8080 -c 2048 -ngl 0
+  --alias lfm3-1.7b --host 127.0.0.1 --port 8080 -c 2048 -ngl 0
 ```
 
 ### 4.3 Python API Quickstart
@@ -235,3 +235,7 @@ Models run on demand on local hardware; these results **do not** imply continuou
 **Research sequence:** [P4 multimodal holdout](docs/p4/P4_FINAL_REPORT.md) · [P5 decision pilot](docs/p5/README.md) · [P6 orchestration](docs/p6/README.md) · [P7 reproducible figures](docs/p7/figures/) · [P7 notebook](notebooks/PrismLab_P7_Final_Research_Synthesis_v1_1.ipynb).
 
 **Decision safety caveat:** In P5.7, one of five auto-recommended cases was incorrectly labeled (`X03`: technical → billing, confidence approximately 0.92). The 0.90 threshold was selected post hoc; reported probabilities are not calibrated for autonomous action. No external action was executed.
+
+## Public deployment
+
+The supported deployment is a Vercel Playground frontend with self-hosted inference on this Ubuntu laptop through Tailscale Funnel. See [local backend + Vercel deployment](deploy/local/README.md).

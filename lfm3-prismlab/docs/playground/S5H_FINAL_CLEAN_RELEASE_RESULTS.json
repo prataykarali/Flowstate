@@ -1,0 +1,360 @@
+{
+  "timestamp": "2026-11-08T09:15:29Z",
+  "production_url": "https://prismlab-playground-rho.vercel.app",
+  "gateway_url": "http://127.0.0.1:8000",
+  "reset_epoch": 1794122392,
+  "sections": {
+    "step0_clean_slate_baseline": {
+      "status": "PASS",
+      "baseline_standings": [
+        {
+          "model_id": "audio",
+          "display_name": "Echo",
+          "model_family": "LFM3-Audio-2B",
+          "total_points": 201,
+          "chat_points": 0,
+          "story_points": 1,
+          "trivia_points": 200,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:39:32.331167+00:00",
+          "rank": 1,
+          "unranked": false
+        },
+        {
+          "model_id": "d1",
+          "display_name": "Prism Thinker",
+          "model_family": "d1-2B",
+          "total_points": 115,
+          "chat_points": 4,
+          "story_points": 1,
+          "trivia_points": 100,
+          "rating_points": 10,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:40:24.384065+00:00",
+          "rank": 2,
+          "unranked": false
+        },
+        {
+          "model_id": "omni",
+          "display_name": "Omni Pup",
+          "model_family": "LFM3-Omni-2B",
+          "total_points": 105,
+          "chat_points": 4,
+          "story_points": 1,
+          "trivia_points": 100,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:40:10.573193+00:00",
+          "rank": 3,
+          "unranked": false
+        },
+        {
+          "model_id": "text",
+          "display_name": "Prism Pure",
+          "model_family": "LFM3-1.7B",
+          "total_points": 15,
+          "chat_points": 0,
+          "story_points": 15,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:41:30.64752+00:00",
+          "rank": 4,
+          "unranked": false
+        },
+        {
+          "model_id": "d1_omni",
+          "display_name": "Sherlock Omni",
+          "model_family": "d1-Omni-2B",
+          "total_points": 5,
+          "chat_points": 4,
+          "story_points": 1,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:41:23.560858+00:00",
+          "rank": 5,
+          "unranked": false
+        },
+        {
+          "model_id": "vision",
+          "display_name": "Spectra",
+          "model_family": "LFM3-VL-2B",
+          "total_points": 5,
+          "chat_points": 4,
+          "story_points": 1,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T08:38:30.489137+00:00",
+          "rank": 5,
+          "unranked": false
+        }
+      ],
+      "pre_epoch_rejection_code": 403,
+      "pre_epoch_rejection_message": "Receipt issued prior to Championship clean-slate reset epoch; replay rejected."
+    },
+    "step1_six_model_chat": {
+      "status": "PASS",
+      "models": {
+        "text": {
+          "status": 200,
+          "latency_s": 6.169,
+          "tokens": 0,
+          "effective_tps": 0.0,
+          "receipt": "eyJhY3QiOiJjaGF0IiwiY3R4IjoiIiwiZGlnIjoiOTdkM2FiMTJjMjhkYzQyYzdjY2ZhYmVkZTE4YmZiZDgiLCJleHAiOjE3OTQxMjk2MzgsImlhdCI6MTc5NDEyOTMzOCwibW9kIjoidGV4dCIsInJlcSI6ImJiOTc3M2RlYjI4NTQxODZiMDc1OWI3ZjBkZWRiMTRjIiwidmlzIjoiNWYyZTBlOTczZWQzZTI2MzdjZmZhZmI2NTNhYzY0NjcifQ.c549f597b446bffbdc4da2b68c75d853baea59d9d08d553cab5791ff2d0020f5",
+          "visitor_id": "5f2e0e973ed3e2637cffafb653ac6467",
+          "output_sample": "The first law states that energy cannot be created or destroyed, only transformed from one form to another, while the se"
+        },
+        "vision": {
+          "status": 200,
+          "latency_s": 12.459,
+          "receipt": "eyJhY3QiOiJjaGF0IiwiY3R4IjoiIiwiZGlnIjoiMWYyOWZjNzFmM2IyNzFjNWMxMTRhZmQ5MGE0YjU1OTIiLCJleHAiOjE3OTQxMjk2NTMsImlhdCI6MTc5NDEyOTM1MywibW9kIjoibGZtMy12aXNpb24iLCJyZXEiOiIyNWI2NWNjMDljOGQ0YmJmYTE4MWZkYmJhYTY5Y2M0MSIsInZpcyI6ImRmMzIwYzAxOWQ0MjUwNWZmMjZkMTE2ZmIyZTQ5NmVkIn0.fb2b6e38da459f062646b1f789937ea7785be00e4eba9284c80b96075a1976d2",
+          "visitor_id": "df320c019d42505ff26d116fb2e496ed",
+          "output_sample": "The image shows a split-screen view of a woman sitting at a desk with a laptop, alongside a colorful graphic featuring t"
+        },
+        "audio": {
+          "status": 200,
+          "latency_s": 10.22,
+          "receipt": "eyJhY3QiOiJhdWRpb19xYSIsImN0eCI6IiIsImRpZyI6Ijc3MGVlNzAyYmY3NWI5ZjY0M2E5ZDgyOGE5ZThmNmY4IiwiZXhwIjoxNzk0MTI5NjY2LCJpYXQiOjE3OTQxMjkzNjYsIm1vZCI6ImxmbTMtYXVkaW8iLCJyZXEiOiI2YTVjZjRhZjY4ZDU0YWNhYWNjZmQ3ZmRlOGRhZjEyZSIsInZpcyI6ImM3ZjM5NzQ2OWJiMWQxOTZlYzU1OTdkMTNjZTEzZTZlIn0.2b16c0f60f6d537c74ceea0ec3d478722d690365035408bc57aec5d4f8bccbaa",
+          "visitor_id": "c7f397469bb1d196ec5597d13ce13e6e",
+          "output_sample": "A man asks which color is the right most rectangle."
+        },
+        "omni": {
+          "status": 200,
+          "latency_s": 12.892,
+          "receipt": "eyJhY3QiOiJhdWRpb19xYSIsImN0eCI6IiIsImRpZyI6IjZhYjBlOWViMjAwYzJkOWZhNTIzNTYxZWFmMDFjZjJhIiwiZXhwIjoxNzk0MTI5NjgyLCJpYXQiOjE3OTQxMjkzODIsIm1vZCI6ImxmbTMtb21uaSIsInJlcSI6IjY5OWEzYmJkZWUzYTQ5MjE4NGNlMjBkODcyMWVjNDM5IiwidmlzIjoiYzIxNDE3Y2M0ZjM2Y2IzNjE3MTdhMGZkOTBhNDUwZWQifQ.b99a301af88051206bc284bf0cc37fe4a67e67b913c17fe329d0909695a8f647",
+          "visitor_id": "c21417cc4f36cb361717a0fd90a450ed",
+          "output_sample": "Yellow."
+        },
+        "d1": {
+          "status": 200,
+          "latency_s": 8.342,
+          "receipt": "eyJhY3QiOiJkZWNpc2lvbiIsImN0eCI6IiIsImRpZyI6IjFhZDdlMjllMzY0ZmYzMmQyNDAwNWY5NzRhYmU4OTA4IiwiZXhwIjoxNzk0MTI5Njk0LCJpYXQiOjE3OTQxMjkzOTQsIm1vZCI6ImQxIiwicmVxIjoiOWM2NzY1MDRlMjcyNGI2MDlhZGU5NTYwNzU1Yzc0MmQiLCJ2aXMiOiI5ZjUyNGQ3NjllM2NiNzJjMmIyNGM0ZjJiMjZlYzU5NiJ9.d4ee3d2fd1977ccc5bc122430c38d3119cac62d49eb842bc7f2277b2ed75fe9f",
+          "visitor_id": "9f524d769e3cb72c2b24c4f2b26ec596",
+          "output": {
+            "predicted_route": "python",
+            "confidence": 0.9933129846070403,
+            "probabilities": {
+              "python": 0.9933129846070403,
+              "rust": 0.006687015392959602
+            },
+            "exploratory_gate_passed": true,
+            "human_review_required": true,
+            "external_action_executed": false
+          }
+        },
+        "d1_omni": {
+          "status": 200,
+          "latency_s": 13.651,
+          "receipt": "eyJhY3QiOiJkZWNpc2lvbiIsImN0eCI6IiIsImRpZyI6IjE2ZThkMTI3ZTQ2YTc4M2NhYzg4ZGM0MzkyNjA4ZGYyIiwiZXhwIjoxNzk0MTI5NzEwLCJpYXQiOjE3OTQxMjk0MTAsIm1vZCI6ImQxLW9tbmkiLCJyZXEiOiJlZDIzNzIxYmI3ZmQ0M2RmYTJjOTI5ZjlhZWQyMGRmMSIsInZpcyI6IjhkM2I2YmM1MmU2ZjQ0NjRiZjU5NGZlODdhMjJjOTk3In0.52c7ed8eaf88f648100723acf5efeb799d9ae95471e1bbd2b8260f207a5733a3",
+          "visitor_id": "8d3b6bc52e6f4464bf594fe87a22c997",
+          "output": {
+            "predicted_route": "normal_intact",
+            "confidence": 0.8177838871646298,
+            "probabilities": {
+              "damaged_defect": 0.18221611283537023,
+              "normal_intact": 0.8177838871646298
+            },
+            "exploratory_gate_passed": false,
+            "human_review_required": true,
+            "external_action_executed": false
+          }
+        }
+      }
+    },
+    "step2_decision_adapter_regressions": {
+      "P0_movie_night": {
+        "status": "PASS",
+        "predicted": "movie_night",
+        "probabilities": {
+          "movie_night": 0.5985462397649758,
+          "sleep_over": 0.4014537602350242
+        }
+      },
+      "comparison_python_rust": {
+        "status": "PASS",
+        "predicted": "python",
+        "probabilities": {
+          "python": 0.8776158545266485,
+          "rust": 0.12238414547335152
+        }
+      },
+      "preference_followup": {
+        "status": "PASS",
+        "predicted": "movie_night",
+        "probabilities": {
+          "movie_night": 0.5508997008843735,
+          "sleep_over": 0.4491002991156266
+        }
+      },
+      "condition_followup": {
+        "status": "PASS",
+        "predicted": "sleep_over",
+        "probabilities": {
+          "movie_night": 0.444428487599744,
+          "sleep_over": 0.555571512400256
+        }
+      },
+      "topic_change": {
+        "status": "PASS",
+        "predicted": "restaurant",
+        "probabilities": {
+          "picnic": 0.47329573860862395,
+          "restaurant": 0.526704261391376
+        }
+      },
+      "identity_greeting": {
+        "status": "PASS",
+        "type": "conversational_greeting"
+      },
+      "generative_redirect": {
+        "status": "PASS",
+        "type": "generative_redirect_pure"
+      }
+    },
+    "step3_story_lifecycle": {
+      "status": "PASS",
+      "session_id": "sess_story_b941783c0606",
+      "turn1_latency": 12.237,
+      "turn2_latency": 11.487,
+      "park_releases_lock": true,
+      "casual_chat_while_parked": true,
+      "resume_reacquires_lock": true,
+      "story_scoring_turn_awarded": null,
+      "story_scoring_complete_awarded": null
+    },
+    "step4_trivia_lifecycle": {
+      "status": "PASS",
+      "session_id": "sess_trivia_df632c173db8",
+      "host_latency": 5.428,
+      "contestant_latency": 7.342,
+      "trivia_points_awarded": null
+    },
+    "step5_media_video": {
+      "status": "PASS",
+      "video_file": "H01_cars_beep_before_marker.mp4",
+      "results": {
+        "vision_video": {
+          "status": 200,
+          "latency_s": 32.813,
+          "output_sample": "The video begins with a red square on a black background, which then transitions to a nighttime street scene. The scene "
+        },
+        "omni_video": {
+          "status": 200,
+          "latency_s": 39.421,
+          "output_sample": "The video begins with a black screen, followed by a bright red square appearing in the top-left corner. This red square "
+        },
+        "video_gating_verified": {
+          "vision": true,
+          "omni": true,
+          "d1": true,
+          "d1_omni": true,
+          "text": false,
+          "audio": false
+        }
+      }
+    },
+    "step6_anti_cheat_security": {
+      "status": "PASS",
+      "forged_receipt_rejected_403": true,
+      "cross_model_rejected_403": true,
+      "cross_activity_rejected_403": true,
+      "rating_points_awarded": 10,
+      "repeat_rating_points_zero": true
+    },
+    "step7_final_standings": {
+      "status": "PASS",
+      "data_source": "supabase_postgres",
+      "all_unranked": false,
+      "positive_models_count": 6,
+      "standings": [
+        {
+          "model_id": "audio",
+          "display_name": "Echo",
+          "model_family": "LFM3-Audio-2B",
+          "total_points": 301,
+          "chat_points": 0,
+          "story_points": 1,
+          "trivia_points": 300,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:18:19.470511+00:00",
+          "rank": 1,
+          "unranked": false
+        },
+        {
+          "model_id": "d1",
+          "display_name": "Prism Thinker",
+          "model_family": "d1-2B",
+          "total_points": 129,
+          "chat_points": 8,
+          "story_points": 1,
+          "trivia_points": 100,
+          "rating_points": 20,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:19:42.972029+00:00",
+          "rank": 2,
+          "unranked": false
+        },
+        {
+          "model_id": "omni",
+          "display_name": "Omni Pup",
+          "model_family": "LFM3-Omni-2B",
+          "total_points": 109,
+          "chat_points": 8,
+          "story_points": 1,
+          "trivia_points": 100,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:19:37.756102+00:00",
+          "rank": 3,
+          "unranked": false
+        },
+        {
+          "model_id": "text",
+          "display_name": "Prism Pure",
+          "model_family": "LFM3-1.7B",
+          "total_points": 26,
+          "chat_points": 0,
+          "story_points": 26,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:18:01.544182+00:00",
+          "rank": 4,
+          "unranked": false
+        },
+        {
+          "model_id": "d1_omni",
+          "display_name": "Sherlock Omni",
+          "model_family": "d1-Omni-2B",
+          "total_points": 9,
+          "chat_points": 8,
+          "story_points": 1,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:19:40.391394+00:00",
+          "rank": 5,
+          "unranked": false
+        },
+        {
+          "model_id": "vision",
+          "display_name": "Spectra",
+          "model_family": "LFM3-VL-2B",
+          "total_points": 9,
+          "chat_points": 8,
+          "story_points": 1,
+          "trivia_points": 0,
+          "rating_points": 0,
+          "other_eligible_points": 0,
+          "last_activity_at": "2026-11-08T09:19:35.86305+00:00",
+          "rank": 5,
+          "unranked": false
+        }
+      ]
+    }
+  }
+}

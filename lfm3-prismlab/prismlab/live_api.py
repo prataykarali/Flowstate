@@ -29,7 +29,7 @@ class TextInput(BaseModel):
     max_tokens: int = Field(default=256, ge=32, le=256)
 
 
-def _run_text(prompt: str, on_token=None, max_tokens: int = 256) -> dict:
+def _run_text(prompt: str, on_token=None, max_tokens: int = 256, response_format=None) -> dict:
     """Runs in a worker thread, never on the API event loop."""
     on_demand = os.getenv("PRISMLAB_ON_DEMAND") == "1"
     spec = TextRuntimeConfig.from_env().runtime_spec()
@@ -44,7 +44,7 @@ def _run_text(prompt: str, on_token=None, max_tokens: int = 256) -> dict:
         manager = LifecycleManager([spec], max_managed=1, log_dir="results/p6/server_logs")
         active_ctx = nullcontext()
 
-    request = PrismRequest(task="chat", text=prompt)
+    request = PrismRequest(task="chat", text=prompt, response_format=response_format)
 
     try:
         with active_ctx:

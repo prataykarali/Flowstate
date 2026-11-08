@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +7,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const playgroundRoot = resolve(__dirname, '..');
 const projectRoot = resolve(playgroundRoot, '..');
+
+const benchmarkSummaryPath = resolve(projectRoot, 'results/p7/final/benchmark_summary.csv');
+if (!existsSync(benchmarkSummaryPath)) {
+  console.log('Canonical research sources not present (e.g. Vercel deployment); keeping committed researchData.json');
+  process.exit(0);
+}
 
 // Robust RFC-4180 CSV parser supporting quoted newlines and escaped quotes
 function parseCSV(text) {
@@ -67,7 +73,6 @@ function calculateMedian(numbers) {
 console.log('Building research dataset from canonical sources...');
 
 // 1. P7 Benchmark Summary
-const benchmarkSummaryPath = resolve(projectRoot, 'results/p7/final/benchmark_summary.csv');
 const benchmarkRows = parseCSV(readFileSync(benchmarkSummaryPath, 'utf8'));
 const benchmarkSummary = benchmarkRows.slice(1).filter(r => r.length > 1).map(r => ({
   phase: r[0],

@@ -16,22 +16,18 @@ export const Championship: React.FC = () => {
   const [spots, setSpots] = useState<Array<{ left: number; top: number }>>([]);
   const [compact, setCompact] = useState(() => window.innerWidth < 750);
   const [boardTab, setBoardTab] = useState<'standings' | 'contributions'>('standings');
-  const [refreshing, setRefreshing] = useState(false);
 
   const global = useGlobalStandings();
 
   useEffect(() => {
     void fetchGlobalStandings(true);
+    const timer = window.setInterval(() => {
+      if (!document.hidden) {
+        void fetchGlobalStandings(true);
+      }
+    }, 3000);
+    return () => window.clearInterval(timer);
   }, []);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await fetchGlobalStandings(true);
-    } finally {
-      setRefreshing(false);
-    }
-  };
 
   useEffect(() => {
     const refresh = () => {
@@ -117,22 +113,13 @@ export const Championship: React.FC = () => {
         </div>
         <div className="s4-championship-metrics">
           <span title={global.updatedAt ? `Last updated: ${new Date(global.updatedAt).toLocaleTimeString()}` : 'Connecting…'}>
-            ● {global.dataSource === 'supabase_postgres' ? 'Supabase Live Sync' : 'Global Sync Active'}
+            ● {global.dataSource === 'supabase_postgres' ? 'Supabase Live Sync · Real-time' : 'Global Sync Active · Real-time'}
           </span>
           {global.updatedAt && (
             <span style={{ fontSize: '0.8rem', opacity: 0.75, display: 'inline-block', margin: '0 4px' }}>
               Updated {new Date(global.updatedAt).toLocaleTimeString()}
             </span>
           )}
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing || global.isLoading}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-          >
-            <span style={{ display: 'inline-block', transform: refreshing ? 'rotate(360deg)' : 'none', transition: refreshing ? 'transform 0.6s linear infinite' : 'none' }}>↻</span>
-            {refreshing ? 'Syncing…' : 'Refresh Rankings'}
-          </button>
           <button type="button" onClick={() => setRatingOpen(true)}>★ Rate models</button>
         </div>
       </header>

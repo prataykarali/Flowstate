@@ -43,6 +43,7 @@ Thumbs.db
 # Temporary traces and logs
 *.tmp
 *.log
+.prismlab-local/
 
 # Curation: Exclude raw un-sanitized comparison logs, versioned runs, and per-case raw traces
 # (Preserves local raw evidence while keeping the release commit lightweight and clean)

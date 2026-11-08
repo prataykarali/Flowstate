@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { isTriviaRunning } from '../lib/triviaLock.ts';
 
 export type RouteId =
   | 'world'
@@ -42,11 +41,6 @@ export function useHashRoute(): [RouteId, (newRoute: RouteId) => void] {
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (isTriviaRunning() && getRouteFromHash() !== 'trivia') {
-        window.location.hash = '#trivia';
-        setCurrentRoute('trivia');
-        return;
-      }
       setCurrentRoute(getRouteFromHash());
     };
 
@@ -55,7 +49,6 @@ export function useHashRoute(): [RouteId, (newRoute: RouteId) => void] {
   }, []);
 
   const navigate = (newRoute: RouteId) => {
-    if (isTriviaRunning() && newRoute !== 'trivia') return;
     window.location.hash = `#${newRoute}`;
     setCurrentRoute(newRoute);
   };

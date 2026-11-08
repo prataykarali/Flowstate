@@ -26,6 +26,7 @@ export interface ExecuteRequest {
   model?: CanonicalModelId;
   decision_question?: { instructions: string; criteria: Record<string, string> };
   max_tokens?: number;
+  response_format?: { type: string };
   job_id?: string;
   activity_session_id?: string;
   checkpoint?: { turn_index: number; activity_type?: string; state?: Record<string, unknown> };
@@ -136,6 +137,36 @@ export async function authHeaders(): Promise<Record<string, string>> {
   }
 }
 
+export type GatewayStatusListener = (status: GatewayStatus) => void;
+const gatewayStatusListeners = new Set<GatewayStatusListener>();
+
+export function subscribeGatewayStatus(listener: GatewayStatusListener): () => void {
+  gatewayStatusListeners.add(listener);
+  if (cachedOnline) listener(cachedOnline);
+  else if (cachedOffline) listener(cachedOffline);
+  return () => { gatewayStatusListeners.delete(listener); };
+}
+
+export function notifyGatewayStatus(status: GatewayStatus): void {
+  gatewayStatusListeners.forEach((l) => {
+    try { l(status); } catch (e) { console.error('Status listener error:', e); }
+  });
+}
+
+export type OfflineModalTrigger = () => void;
+const offlineModalTriggers = new Set<OfflineModalTrigger>();
+
+export function registerOfflineModalTrigger(trigger: OfflineModalTrigger): () => void {
+  offlineModalTriggers.add(trigger);
+  return () => { offlineModalTriggers.delete(trigger); };
+}
+
+export function triggerOfflineModal(): void {
+  offlineModalTriggers.forEach((t) => {
+    try { t(); } catch (e) { console.error(e); }
+  });
+}
+
 let nextStatusProbe = 0;
 let statusFailures = 0;
 let cachedOffline: GatewayStatus | null = null;
@@ -169,6 +200,7 @@ export async function getGatewayStatus(force = false): Promise<GatewayStatus> {
       : 'OFFLINE';
     cachedOnline = status;
     cachedOnlineExpires = Date.now() + 10_000;
+    notifyGatewayStatus(status);
     return status;
   } catch (err) {
     cachedOnline = null;
@@ -179,14 +211,15 @@ export async function getGatewayStatus(force = false): Promise<GatewayStatus> {
       tokenExpiresAt = 0;
       nextStatusProbe = Date.now() + 2_000;
       cachedOffline = {
-        gateway_enabled: true,
-        backend_available: true,
+        gateway_enabled: false,
+        backend_available: false,
         backend_live_enabled: false,
         text_model_available: false,
         multimodal_model_available: false,
         reason: 'Session authentication renewing…',
         health_state: 'UNKNOWN'
       };
+      notifyGatewayStatus(cachedOffline);
       return cachedOffline;
     }
     if (lockIsBusy?.()) {
@@ -204,16 +237,20 @@ export async function getGatewayStatus(force = false): Promise<GatewayStatus> {
     statusFailures += 1;
     // Bounded backoff: max 10s (never 300s)
     nextStatusProbe = Date.now() + Math.min(10_000, 2_000 * (2 ** Math.min(statusFailures - 1, 2)));
-    const isTransient = statusFailures <= 2;
+    const isNetworkError = err instanceof TypeError || (err instanceof Error && /failed to fetch|network|refused|timeout|abort/i.test(err.message));
+    const isOffline = isNetworkError || statusFailures >= 2;
     cachedOffline = {
-      gateway_enabled: isTransient,
-      backend_available: isTransient,
-      backend_live_enabled: isTransient,
-      text_model_available: isTransient,
-      multimodal_model_available: isTransient,
-      reason: isTransient ? 'Inference queue busy; retrying status…' : 'Live AI is currently offline. Games, research, and recorded replays remain available.',
-      health_state: isTransient ? 'UNKNOWN' : 'OFFLINE'
+      gateway_enabled: false,
+      backend_available: false,
+      backend_live_enabled: false,
+      text_model_available: false,
+      multimodal_model_available: false,
+      reason: isOffline
+        ? 'PrismLab host laptop is currently offline. Games, research desk, and replays remain available.'
+        : 'Inference gateway busy; retrying status…',
+      health_state: isOffline ? 'OFFLINE' : 'UNKNOWN'
     };
+    notifyGatewayStatus(cachedOffline);
     return cachedOffline;
   }
 }
@@ -244,8 +281,8 @@ export function validateRequest(request: ExecuteRequest): string | null {
   if (!request.prompt.trim() && !request.image && !request.audio && !request.video) return 'Enter text or attach supported media.';
   if (!request.model && request.task === 'decision' && request.image && !request.audio) return 'Image-only decision is not validated by the automatic router.';
   if ([request.image,request.audio,request.video].filter(Boolean).length > 1 && !request.required_media?.length) return 'Mixed media requires explicit selection.';
-  if (request.max_tokens != null && (!Number.isInteger(request.max_tokens) || request.max_tokens < 16 || request.max_tokens > 128)) {
-    return 'max_tokens must be 16–128.';
+  if (request.max_tokens != null && (!Number.isInteger(request.max_tokens) || request.max_tokens < 4 || request.max_tokens > 256)) {
+    return 'max_tokens must be 4–256.';
   }
   return null;
 }
@@ -268,14 +305,28 @@ async function post<T>(path: string, body: unknown, jobId?: string): Promise<T> 
     ...await authHeaders()
   };
   if (jobId) headers['X-Job-Id'] = jobId;
-  return await jsonResponse<T>(await fetch(`${API}${path}`, { method:'POST', headers, body:JSON.stringify(body), cache:'no-store' }));
+  try {
+    return await jsonResponse<T>(await fetch(`${API}${path}`, { method:'POST', headers, body:JSON.stringify(body), cache:'no-store' }));
+  } catch (err) {
+    if (err instanceof TypeError || (err instanceof Error && /failed to fetch|network|refused/i.test(err.message))) {
+      triggerOfflineModal();
+    }
+    throw err;
+  }
 }
 
 async function get<T>(path: string): Promise<T> {
   const headers: Record<string, string> = {
     ...await authHeaders()
   };
-  return await jsonResponse<T>(await fetch(`${API}${path}`, { method:'GET', headers, cache:'no-store' }));
+  try {
+    return await jsonResponse<T>(await fetch(`${API}${path}`, { method:'GET', headers, cache:'no-store' }));
+  } catch (err) {
+    if (err instanceof TypeError || (err instanceof Error && /failed to fetch|network|refused/i.test(err.message))) {
+      triggerOfflineModal();
+    }
+    throw err;
+  }
 }
 
 export async function executeLocal(request: ExecuteRequest): Promise<LiveResult> {

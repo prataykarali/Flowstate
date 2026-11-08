@@ -222,24 +222,24 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
 
   return (
     <div className="decision-studio" style={{
-      background: 'rgba(16, 9, 36, 0.92)',
-      border: '1px solid rgba(206, 175, 255, 0.28)',
+      background: 'rgba(23, 23, 23, 0.94)',
+      border: '1px solid var(--prismlab-panel-border, #27272a)',
       borderRadius: '16px',
       padding: '16px 20px',
       margin: '12px 0',
-      color: '#f3e8ff',
+      color: 'var(--prismlab-panel-text, #fafafa)',
       backdropFilter: 'blur(16px)',
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)'
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
     }}>
       {/* Studio Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid var(--prismlab-panel-border, #27272a)', paddingBottom: '10px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '18px' }}>⚖️</span>
           <div>
-            <strong style={{ fontSize: '14px', letterSpacing: '0.02em', color: '#fff' }}>
+            <strong style={{ fontSize: '14px', letterSpacing: '0.02em', color: 'var(--prismlab-panel-text, #fafafa)' }}>
               {character.characterName} Decision Studio
             </strong>
-            <span style={{ fontSize: '11px', color: '#ceb7ff', display: 'block' }}>
+            <span style={{ fontSize: '11px', color: 'var(--prismlab-panel-muted, #a1a1aa)', display: 'block' }}>
               Native System-1 Logit Probability Evaluation · Zero Autoregressive Hallucination
             </span>
           </div>
@@ -251,9 +251,9 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
               type="button"
               onClick={() => handleTemplateChange(key)}
               style={{
-                background: templateKey === key ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.06)',
-                border: templateKey === key ? '1px solid #c084fc' : '1px solid rgba(255, 255, 255, 0.12)',
-                color: templateKey === key ? '#fff' : '#d8b4fe',
+                background: templateKey === key ? 'rgba(246, 137, 74, 0.2)' : 'var(--prismlab-panel-surface-subtle, #232323)',
+                border: templateKey === key ? '1px solid var(--prismlab-panel-accent, #f6894a)' : '1px solid var(--prismlab-panel-border, #27272a)',
+                color: templateKey === key ? '#fff' : 'var(--prismlab-panel-muted, #a1a1aa)',
                 borderRadius: '8px',
                 padding: '4px 10px',
                 fontSize: '11px',
@@ -355,11 +355,11 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
             placeholder="Describe the operational incident, alert, or situation…"
             style={{
               width: '100%',
-              background: 'rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'var(--prismlab-panel-surface-subtle, #232323)',
+              border: '1px solid var(--prismlab-panel-border, #27272a)',
               borderRadius: '8px',
               padding: '8px 10px',
-              color: '#fff',
+              color: 'var(--prismlab-panel-text, #fafafa)',
               fontSize: '12px',
               fontFamily: 'inherit',
               resize: 'vertical'
@@ -377,11 +377,11 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
             placeholder="Formulate the precise decision directive…"
             style={{
               width: '100%',
-              background: 'rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              background: 'var(--prismlab-panel-surface-subtle, #232323)',
+              border: '1px solid var(--prismlab-panel-border, #27272a)',
               borderRadius: '8px',
               padding: '8px 10px',
-              color: '#fff',
+              color: 'var(--prismlab-panel-text, #fafafa)',
               fontSize: '12px',
               fontFamily: 'inherit',
               resize: 'vertical'
@@ -392,7 +392,7 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
 
       {/* Multimodal Audio Option for d1_omni */}
       {model === 'd1_omni' && (
-        <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'var(--prismlab-panel-surface-subtle, #232323)', border: '1px solid var(--prismlab-panel-border, #27272a)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '12px', color: '#f0abfc', fontWeight: 600 }}>🎙️ Multimodal Audio Evidence:</span>
           <input
             type="file"
@@ -415,9 +415,9 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
               type="button"
               onClick={addChoice}
               style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: '#e9d5ff',
+                background: 'var(--prismlab-panel-surface-subtle, #232323)',
+                border: '1px solid var(--prismlab-panel-border, #27272a)',
+                color: 'var(--prismlab-panel-text, #fafafa)',
                 borderRadius: '6px',
                 padding: '2px 8px',
                 fontSize: '11px',
@@ -430,7 +430,7 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: choices.length === 2 ? '1fr 1fr' : choices.length === 3 ? '1fr 1fr 1fr' : '1fr 1fr 1fr 1fr', gap: '8px' }}>
           {choices.map((c, i) => (
-            <div key={i} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px' }}>
+            <div key={i} style={{ background: 'var(--prismlab-panel-surface-raised, #1c1c1c)', border: '1px solid var(--prismlab-panel-border, #27272a)', borderRadius: '8px', padding: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                 <input
                   type="text"
@@ -558,18 +558,18 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
 
           {explanationDraft && (
             <div style={{
-              background: 'rgba(15, 23, 42, 0.8)',
-              border: '1px solid rgba(250, 204, 21, 0.3)',
+              background: 'var(--prismlab-panel-surface-raised, #1c1c1c)',
+              border: '1px solid var(--prismlab-panel-border, #27272a)',
               borderRadius: '10px',
               padding: '10px 14px',
               fontSize: '12px',
               color: '#fef08a',
               lineHeight: 1.5
             }}>
-              <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#eab308', fontWeight: 700, marginBottom: '4px' }}>
+              <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--prismlab-panel-accent, #f6894a)', fontWeight: 700, marginBottom: '4px' }}>
                 ✦ Autoregressive Explanation (LFM3-1.7B) — Separately generated reasoning, not d1 native logits
               </div>
-              <p style={{ margin: 0, color: '#f8fafc' }}>{explanationDraft}</p>
+              <p style={{ margin: 0, color: 'var(--prismlab-panel-text, #fafafa)' }}>{explanationDraft}</p>
             </div>
           )}
         </div>

@@ -36,6 +36,7 @@ class PrismRequest:
     media: tuple[MediaRef, ...] = ()
     request_id: str = field(default_factory=lambda: uuid4().hex)
     decision_question: dict | None = None
+    response_format: dict | None = None
 
     def __post_init__(self) -> None:
         if self.task not in TASKS:

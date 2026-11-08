@@ -15,9 +15,12 @@ const MODEL_MAP = {
   'lfm3-audio': 'audio',
   'audio': 'audio',
   'lfm3-omni-2b': 'omni',
+  'lfm3-omni': 'omni',
   'omni': 'omni',
   'd1-2b': 'd1',
   'd1': 'd1',
+  'd1-omni': 'd1_omni',
+  'd1-omni-2b': 'd1_omni',
   'd1_omni-2b': 'd1_omni',
   'd1_omni': 'd1_omni',
 };
@@ -105,6 +108,14 @@ export default async function handler(request, response) {
     const verified = verifyReceipt(activity_receipt, sessionSecret);
     if (!verified) {
       return response.status(403).json({ error: 'Invalid, forged, or expired activity receipt' });
+    }
+
+    // Safe scoring reset epoch boundary: reject any historical receipts issued before reset
+    const resetEpoch = parseInt(process.env.SCORING_RESET_EPOCH || '1794122000', 10);
+    if (resetEpoch > 0 && verified.iat < resetEpoch) {
+      return response.status(403).json({
+        error: 'Receipt issued prior to Championship clean-slate reset epoch; replay rejected.'
+      });
     }
 
     // 1. Authorize authentic visitor ownership from cryptographically verified receipt

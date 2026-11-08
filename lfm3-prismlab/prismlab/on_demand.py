@@ -163,7 +163,7 @@ def runtime_specs() -> list[RuntimeSpec]:
     port = urlparse(base).port
     threads = text.cpu_threads
     context = text.context_size
-    specs = [text_spec]
+    specs = []
     for key, (repo, model_name, projector_name, alias) in MODELS.items():
         model = _cached_or_override(key, "MODEL", repo, model_name)
         projector = _cached_or_override(key, "MMPROJ", repo, projector_name)

@@ -12,7 +12,7 @@ import { showBeat } from '../lib/storyShow.ts';
 import { DecisionStudio } from '../components/DecisionStudio.tsx';
 import { parseNaturalDecision, formatDecisionSummary } from '../lib/decisionAdapter.ts';
 
-interface Message { role: 'you' | 'model'; text: string; fullText?: string; speaker?: string; failed?: boolean; requestId?: string; route?: string; status?: string; mode?: string; metrics?: LiveResult['metrics']; trace?: LiveResult['trace'] }
+interface Message { role: 'you' | 'model'; text: string; fullText?: string; speaker?: string; failed?: boolean; requestId?: string; route?: string; status?: string; mode?: string; metrics?: LiveResult['metrics']; trace?: LiveResult['trace']; decisionQuestion?: any; decisionOptions?: string[] }
 const acceptsImage = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('image');
 const acceptsAudio = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('audio');
 const acceptsVideo = (id: CanonicalModelId) => MODELS[id].inputModalities.includes('video');
@@ -256,14 +256,14 @@ export const Chat: React.FC = () => {
         hasImage: !!image,
         hasAudio: !!audio,
         hasVideo: !!video,
-      });
+      }, messages);
 
-      if (parsedDecision.kind === 'conversational' || parsedDecision.kind === 'generative_redirect') {
+      if (parsedDecision.kind === 'conversational' || parsedDecision.kind === 'generative_redirect' || parsedDecision.kind === 'clarification') {
         const reply: Message = {
           role: 'model',
           text: parsedDecision.message || '',
           speaker: character.characterName,
-          route: parsedDecision.kind === 'generative_redirect' ? 'Generative Recommendation' : 'Role Overview',
+          route: parsedDecision.kind === 'generative_redirect' ? 'Generative Recommendation' : parsedDecision.kind === 'clarification' ? 'Decision Clarification' : 'Role Overview',
           status: 'completed',
         };
         setMessages(list => [...list, reply]); setStageReply(reply);
@@ -313,12 +313,15 @@ export const Chat: React.FC = () => {
       if (result.status === 'completed' && result.output != null) {
         const rawOutput = typeof result.output === 'object' ? JSON.stringify(result.output, null, 2) : outputText(result.output).trim();
         const isDecision = model === 'd1' || model === 'd1_omni';
-        const displaySummary = isDecision && typeof result.output === 'object' ? formatDecisionSummary(result.output as any) : rawOutput;
+        const displaySummary = isDecision && typeof result.output === 'object'
+          ? formatDecisionSummary({ ...(result.output as any), category: parsedDecision?.category })
+          : rawOutput;
         const cleanText = isDecision || displaySummary.length <= MAX_REPLY_CHARS ? displaySummary : `${displaySummary.slice(0, MAX_REPLY_CHARS).trimEnd()}…`;
-        const reply: Message = { role: 'model', text: cleanText, fullText: rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace };
+        const reply: Message = { role: 'model', text: cleanText, fullText: rawOutput, speaker: character.characterName, requestId: result.request_id, route: result.route?.join(' → ') || result.model || 'Local model', status: result.status, mode: result.mode, metrics: result.metrics, trace: result.trace, decisionQuestion: parsedDecision?.question, decisionOptions: parsedDecision?.options };
         setMessages(list => [...list, reply]); setStageReply(reply);
-        const completedIds = [...messages.filter(item => item.role === 'model' && item.status === 'completed' && item.requestId).map(item => item.requestId!), result.request_id];
-        if (completedIds.length >= 2) awardChatSession(model, completedIds, result.activity_receipt);
+        if (result.activity_receipt) {
+          awardChatSession(model, [result.request_id], result.activity_receipt);
+        }
         setReactionState('happy'); setReaction(n => n + 1); setImage(null); setAudio(null); setVideo(null);
       } else {
         setError(result.error || `Local request returned ${result.status}; no answer was added.`);
@@ -345,8 +348,9 @@ export const Chat: React.FC = () => {
     };
     setMessages(list => [...list, reply]);
     setStageReply(reply);
-    const completedIds = [...messages.filter(item => item.role === 'model' && item.status === 'completed' && item.requestId).map(item => item.requestId!), result.request_id];
-    if (completedIds.length >= 2) awardChatSession(model, completedIds, result.activity_receipt);
+    if (result.activity_receipt) {
+      awardChatSession(model, [result.request_id], result.activity_receipt);
+    }
     setReactionState('happy');
     setReaction(n => n + 1);
   };
@@ -526,7 +530,7 @@ export const Chat: React.FC = () => {
         <p className="chat-error" role="alert">{error}</p>
       ) : latestReply ? (
         <article className="chat-message chat-message--model">
-          {activeDecision ? <p>{activeDecision.predicted_route ? `Suggested route: ${activeDecision.predicted_route}. ` : ''}{activeDecision.human_review_required ? 'Human review required.' : ''}</p> : <p>{latestReply.text.slice(0, Math.min(visibleChars, 500))}{latestReply.text.length > 500 ? '…' : visibleChars < latestReply.text.length ? <span className="chat-typing-caret" aria-hidden="true">▍</span> : ''}</p>}
+          <p style={{ whiteSpace: 'pre-line' }}>{latestReply.text.slice(0, Math.min(visibleChars, 500))}{latestReply.text.length > 500 ? '…' : visibleChars < latestReply.text.length ? <span className="chat-typing-caret" aria-hidden="true">▍</span> : ''}</p>
           <div className="chat-bubble-footer"><span className="chat-bubble-speaker">{character.characterName}</span><span className="chat-bubble-char-count">{activeDecision ? 'Structured decision' : `${latestReply.text.length} / ${MAX_REPLY_CHARS} chars`}</span></div>
           <button type="button" className="chat-read-history" onClick={() => setHistoryDrawerOpen(true)} aria-label={`Open ${character.characterName} chat history to read the full reply`}>{latestReply.text.length > 500 ? 'Full reply in history →' : 'Chat history →'}</button>
         </article>

@@ -10,13 +10,19 @@
  * Emits src/data/architecture/architectureData.json
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const playgroundRoot = resolve(__dirname, '..');
 const projectRoot = resolve(playgroundRoot, '..');
+
+const componentMapsPath = resolve(projectRoot, 'results/p7/architecture/component_maps.json');
+if (!existsSync(componentMapsPath)) {
+  console.log('Canonical architecture sources not present (e.g. Vercel deployment); keeping committed architectureData.json');
+  process.exit(0);
+}
 
 console.log('Building canonical architecture dataset from P7 artifacts...');
 

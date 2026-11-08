@@ -226,11 +226,34 @@ class LifecycleManager:
                 process.kill()
                 process.wait(timeout=timeout)
 
+        if key in self.specs:
+            self._wait_port_free(self.specs[key].base_url)
+
         return True
 
     def close(self) -> None:
         for key in list(self._owned):
             self.stop(key)
+
+    @staticmethod
+    def _wait_port_free(base_url: str, timeout: float = 3.0) -> None:
+        try:
+            import socket
+            import time
+            from urllib.parse import urlparse
+            port = urlparse(base_url).port
+            if not port:
+                return
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(0.2)
+                    res = s.connect_ex(("127.0.0.1", port))
+                    if res != 0:
+                        return
+                time.sleep(0.1)
+        except Exception:
+            pass
 
     @staticmethod
     def _free_port(base_url: str) -> None:

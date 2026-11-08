@@ -1,0 +1,13 @@
+flowchart TD
+  A["Text tokens"] --> B["Token embeddings"]
+  B --> C["LFM3 tri-hybrid backbone<br/>24 layers in total"]
+  subgraph OPS["Verified operator mix — not layer execution order"]
+    G["13 gated short convolution<br/>kernel 7"]
+    S["5 sliding-window attention<br/>window 256"]
+    L["6 global attention"]
+  end
+  C -. "Uses the following operator counts" .-> G
+  C -.-> S
+  C -.-> L
+  C --> D["LM head / token scores"]
+  D --> E["Autoregressive text decoding"]

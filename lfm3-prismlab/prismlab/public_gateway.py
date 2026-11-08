@@ -16,7 +16,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from prismlab.core.cancellation import abort_upstream
+from prismlab.core.cancellation import abort_upstream, unregister_upstream
 from prismlab.live_api import _run_text
 from prismlab.multimodal_api import MAX_BODY, parse_payload, run_local
 from prismlab.on_demand import available_routes
@@ -143,21 +143,31 @@ def _text_job(body: dict) -> Callable:
     tokens = body.get("max_tokens", 128)
     if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 1000:
         raise HTTPException(422, "Prompt must be 1–1,000 characters")
-    if not isinstance(tokens, int) or isinstance(tokens, bool) or not 16 <= tokens <= 128:
-        raise HTTPException(422, "max_tokens must be 16–128")
+    if not isinstance(tokens, int) or isinstance(tokens, bool) or not 4 <= tokens <= 256:
+        raise HTTPException(422, "max_tokens must be 4–256")
     return lambda on_token=None: _run_text(prompt, on_token=on_token, max_tokens=tokens)
 
 
 def _execute_job(body: dict) -> Callable:
     tokens = body.get("max_tokens", 128)
-    if not isinstance(tokens, int) or isinstance(tokens, bool) or not 16 <= tokens <= 128:
-        raise HTTPException(422, "max_tokens must be 16–128")
+    if not isinstance(tokens, int) or isinstance(tokens, bool) or not 4 <= tokens <= 256:
+        raise HTTPException(422, "max_tokens must be 4–256")
     body = {**body, "max_tokens": tokens}
     task, prompt, media, selected, model = parse_payload(body)
     if model is not None and model not in available_routes():
         raise HTTPException(503, f"Live inference for {model} is not installed on this host")
-    return lambda on_token=None: run_local(task, prompt, media, selected, model,
-                                            body.get("decision_question"), body.get("max_tokens"), on_token)
+    rf = body.get("response_format")
+    def _call_run_local(on_token=None):
+        if rf is not None:
+            try:
+                return run_local(task, prompt, media, selected, model,
+                                 body.get("decision_question"), body.get("max_tokens"), on_token,
+                                 response_format=rf)
+            except TypeError:
+                pass
+        return run_local(task, prompt, media, selected, model,
+                         body.get("decision_question"), body.get("max_tokens"), on_token)
+    return _call_run_local
 
 
 async def _wait(ticket: Ticket, request: Request) -> None:
@@ -281,9 +291,11 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
 
         def worker():
             handle.thread_ident = threading.get_ident()
+            unregister_upstream(handle.thread_ident)
             try:
                 return job()
             finally:
+                unregister_upstream(handle.thread_ident)
                 handle.worker_finished_event.set()
 
         exec_started = time.perf_counter()
@@ -296,7 +308,8 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
         task.add_done_callback(on_done)
 
         try:
-            result = await asyncio.shield(task)
+            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "75.0"))
+            result = await asyncio.wait_for(asyncio.shield(task), timeout=job_timeout)
             verified_act = "chat"
             if active_sess:
                 verified_act = active_sess.activity_type.lower()
@@ -325,6 +338,13 @@ async def _run_json(request: Request, job: Callable, payload: dict | None = None
                     output=result.get("output") if isinstance(result, dict) else str(result),
                     state_data=cp.get("state"),
                 )
+        except asyncio.TimeoutError:
+            if handle.thread_ident is not None:
+                abort_upstream(handle.thread_ident)
+            handle.cancelled = True
+            job_rec.status = "failed"
+            job_rec.error = "Job execution timeout exceeded"
+            raise HTTPException(504, "Inference execution timeout exceeded", headers={"Retry-After": "10"})
         except asyncio.CancelledError:
             # Client navigation/disconnect: detached, worker runs to completion in background
             raise
@@ -427,6 +447,7 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
 
             def worker():
                 handle.thread_ident = threading.get_ident()
+                unregister_upstream(handle.thread_ident)
                 held = ""
                 mode = "opening"
 
@@ -493,6 +514,7 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
                         job_rec.error = "Inference unavailable"
                         loop.call_soon_threadsafe(updates.put_nowait, ("error", {"message": "Inference unavailable"}))
                 finally:
+                    unregister_upstream(handle.thread_ident)
                     handle.worker_finished_event.set()
                     loop.call_soon_threadsafe(updates.put_nowait, ("done", {}))
 
@@ -505,10 +527,20 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
             task = asyncio.create_task(asyncio.to_thread(worker))
             task.add_done_callback(on_done)
             started = True
+            job_timeout = float(os.getenv("PRISMLAB_JOB_TIMEOUT_S", "75.0"))
+            exec_deadline = asyncio.get_running_loop().time() + job_timeout
             while True:
                 # Browser navigation detachment: if client disconnected, do not cancel server job!
                 # Simply break the SSE generator, worker will continue and populate job_rec in memory.
                 if await request.is_disconnected():
+                    return
+                if asyncio.get_running_loop().time() >= exec_deadline:
+                    if handle.thread_ident is not None:
+                        abort_upstream(handle.thread_ident)
+                    handle.cancelled = True
+                    job_rec.status = "failed"
+                    job_rec.error = "Job execution timeout exceeded"
+                    yield _sse("error", {"message": "Job execution timeout exceeded", "job_id": job_id})
                     return
                 try:
                     kind, data = await asyncio.wait_for(updates.get(), timeout=10)

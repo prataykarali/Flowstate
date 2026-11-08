@@ -1,0 +1,74 @@
+{
+  "pages_tested": {
+    "world": {
+      "status": "PASS",
+      "title": "PrismLab — Interactive Model Playground",
+      "mascotsCount": 6
+    },
+    "chat": {
+      "status": "PASS",
+      "inputPresent": true,
+      "modelTabs": 0
+    },
+    "story": {
+      "status": "PASS",
+      "controls": {
+        "hasStart": false,
+        "hasSaveExit": false,
+        "hasPause": false,
+        "buttons": [
+          "Explore model ↗"
+        ]
+      }
+    },
+    "trivia": {
+      "status": "PASS",
+      "controls": {
+        "buttons": [
+          "Live Match",
+          "Deterministic Demo",
+          "Start live match"
+        ]
+      }
+    },
+    "league": {
+      "status": "PASS",
+      "data": {
+        "hasPostgresDataSource": true,
+        "presentModels": [
+          "Prism Pure",
+          "Spectra",
+          "Echo",
+          "Omni Pup",
+          "Prism Thinker",
+          "Sherlock Omni"
+        ],
+        "allSixPresent": true
+      }
+    }
+  },
+  "console_errors": [],
+  "network_errors": [
+    {
+      "requestId": "393228.108",
+      "timestamp": 12064.31774,
+      "type": "Media",
+      "errorText": "net::ERR_ABORTED",
+      "canceled": true
+    },
+    {
+      "requestId": "393228.110",
+      "timestamp": 12065.250287,
+      "type": "Media",
+      "errorText": "net::ERR_ABORTED",
+      "canceled": true
+    },
+    {
+      "requestId": "393228.111",
+      "timestamp": 12065.253809,
+      "type": "Media",
+      "errorText": "net::ERR_ABORTED",
+      "canceled": true
+    }
+  ]
+}
