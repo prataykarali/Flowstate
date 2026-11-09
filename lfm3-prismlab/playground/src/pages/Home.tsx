@@ -21,6 +21,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigateToPlayground }) => (
       </div>
     </div>
     <MascotStage onNavigateToPlayground={onNavigateToPlayground} />
-    <WorldTelemetrySection onNavigateToPlayground={onNavigateToPlayground} />
+    <WorldTelemetrySection />
   </div>
 );
