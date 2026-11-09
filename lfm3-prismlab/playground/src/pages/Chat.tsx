@@ -115,9 +115,20 @@ export const Chat: React.FC = () => {
   }, [storyView.preview]);
 
   useEffect(() => {
+    const checkStoryStorage = () => {
+      if (sessionStorage.getItem('prismlab_open_story') === 'true') {
+        sessionStorage.removeItem('prismlab_open_story');
+        setStoryMode(true);
+      }
+    };
+    checkStoryStorage();
     const handleOpenStory = () => setStoryMode(true);
     window.addEventListener('prismlab_open_story', handleOpenStory);
-    return () => window.removeEventListener('prismlab_open_story', handleOpenStory);
+    window.addEventListener('hashchange', checkStoryStorage);
+    return () => {
+      window.removeEventListener('prismlab_open_story', handleOpenStory);
+      window.removeEventListener('hashchange', checkStoryStorage);
+    };
   }, []);
 
   const [activeActivity, setActiveActivity] = useState<ActivitySessionInfo | null>(null);

@@ -1,23 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { Mascot } from '../components/mascots/Mascot.tsx';
-import { MODEL_LIST, MODELS, type CanonicalModelId } from '../data/models.ts';
-import { generateText, getGatewayStatus, outputText, type GatewayStatus } from '../lib/api.ts';
-import { awardStoryContribution, awardStorySession } from '../lib/leagueAdapters.ts';
-interface Turn { by:'You'|'LFM3-1.7B'; text:string; requestId?:string; latencyS?:number|null; route?:string }
-export function buildStoryPrompt(turns:Turn[],draft:string){
-  const pieces=[...turns.map(t=>`${t.by}: ${t.text}`),`You: ${draft}`];let truncated=false;
-  let prompt=`Continue this fictional story in one short paragraph of at most 60 words. Do not repeat the text.\n${pieces.join('\n')}`;
-  while(prompt.length>1000&&pieces.length>1){pieces.shift();truncated=true;prompt=`Continue this fictional story in one short paragraph of at most 60 words. Earlier turns omitted.\n${pieces.join('\n')}`;}
-  if(prompt.length>1000)throw new Error('Your turn exceeds the local text endpoint context limit.');
-  return {prompt,truncated};
+import { useEffect } from 'react';
+
+export function StoryRelay() {
+  useEffect(() => {
+    sessionStorage.setItem('prismlab_open_story', 'true');
+    window.location.hash = '#chat';
+    window.dispatchEvent(new CustomEvent('prismlab_open_story'));
+  }, []);
+
+  return null;
 }
-export function StoryRelay(){
-  const [companion,setCompanion]=useState<CanonicalModelId>('text'),[turns,setTurns]=useState<Turn[]>([]),[draft,setDraft]=useState(''),[status,setStatus]=useState<GatewayStatus|null>(null),[pending,setPending]=useState(false),[message,setMessage]=useState(''),[reaction,setReaction]=useState(0),[reactionState,setReactionState]=useState<'idle'|'thinking'|'sad'|'happy'>('idle');
-  const sessionId = useRef(crypto.randomUUID());
-  const [finished, setFinished] = useState(false);
-  useEffect(()=>{getGatewayStatus(true).then(setStatus);},[]);const available=!!status?.gateway_enabled&&!!status.backend_live_enabled&&(!!status.text_model_available || !!status.on_demand_routes?.includes('text'));
-  const manual=()=>{if(finished||!draft.trim()||turns.length>=12)return;setTurns(t=>[...t,{by:'You',text:draft.trim()}]);setDraft('');setMessage('Manual turn added; no model was called.');};
-  const generate=async()=>{if(pending||finished||!available||!draft.trim()||turns.length>=12)return;let built;try{built=buildStoryPrompt(turns,draft.trim());}catch(e){setMessage(e instanceof Error?e.message:'Prompt too long.');return;}setPending(true);setReactionState('thinking');setReaction(n=>n+1);setMessage(built.truncated?'Earlier turns omitted from the 1,000-character model context.':'Awaiting local LFM3-1.7B.');setTurns(t=>[...t,{by:'You',text:draft.trim()}]);setDraft('');try{const result=await generateText(built.prompt);if(result.status==='completed'&&result.output&&outputText(result.output).trim()){setTurns(t=>[...t,{by:'LFM3-1.7B',text:outputText(result.output),requestId:result.request_id,latencyS:result.metrics.total_latency_s,route:result.route?.join(' → ') || result.model}]);const awarded=awardStoryContribution(sessionId.current,result.request_id);setMessage(`Local continuation received · ${result.request_id}${awarded.event ? ` · +${awarded.event.pointsEarned} League points for Prism Pure` : ''}`);setReactionState('happy');setReaction(n=>n+1);setTimeout(()=>{setReactionState('idle');setReaction(n=>n+1);},1200);}else {setMessage(`Local result ${result.status}; no continuation added.`);setReactionState(result.status==='review'?'thinking':'sad');setReaction(n=>n+1);}}catch(e){setMessage(e instanceof Error?e.message:'Local generation failed. Your turn remains visible.');setReactionState('sad');setReaction(n=>n+1);}finally{setPending(false);getGatewayStatus().then(setStatus);}};
-  const finish=()=>{const ids=turns.filter(turn=>turn.by==='LFM3-1.7B'&&turn.requestId).map(turn=>turn.requestId!);if(ids.length<2)return;const awarded=awardStorySession(sessionId.current,ids);setFinished(true);setMessage(awarded.event?`Story finished · +${awarded.event.pointsEarned} League points for Prism Pure.`:`Story finished. ${awarded.reason||''}`);};
-  return <section className="glass-panel s1-story"><p className="eyebrow">02 / Text-first relay</p><h2>Story Relay</h2><p>Your companion is visual; the existing text endpoint always calls LFM3-1.7B.</p><label>Companion<select value={companion} onChange={e=>setCompanion(e.target.value as CanonicalModelId)}>{MODEL_LIST.map(m=><option key={m.id} value={m.id}>{m.characterName}</option>)}</select></label><div className="companion-mascot"><Mascot model={MODELS[companion]} reactionSignal={reaction} reactionState={reactionState} motion={pending ? 'switching' : 'idle'} /></div><p role="status">{status?.reason||'Checking local runtime…'} {message}</p><ol className="s1-story-history">{turns.map((t,i)=><li key={i}><strong>{t.by}{t.requestId?` · ${t.requestId}`:''}{t.route?` · ${t.route}`:''}{t.latencyS!=null?` · ${t.latencyS.toFixed(2)} s`:''}</strong><p>{t.text}</p></li>)}</ol><label>Your next turn<textarea maxLength={900} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Once upon a time…" /></label><p>{turns.length}/12 turns · context capped at 1,000 characters.</p><div className="s1-game-controls"><button disabled={!available||pending||finished||!draft.trim()||turns.length>=12} onClick={generate}>{pending?'Generating…':'Generate next turn'}</button><button disabled={finished||!draft.trim()||turns.length>=12} onClick={manual}>Add manual turn</button><button disabled={pending||finished||turns.filter(turn=>turn.requestId).length<2} onClick={finish}>Finish story</button><button onClick={()=>{sessionId.current=crypto.randomUUID();setFinished(false);setTurns([]);setDraft('');setMessage('Story restarted.');}}>Restart</button><button onClick={()=>getGatewayStatus().then(setStatus)}>Refresh runtime</button></div></section>;
-}
+
