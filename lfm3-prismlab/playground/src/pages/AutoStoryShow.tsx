@@ -781,6 +781,13 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         void stopActivity(final.showId, completed ? 'completed' : 'failed');
         setPhase(stoppedRef.current ? 'stopped' : completed ? 'completed' : 'failed');
         setMessage(completed ? `Live show complete! ${qualityAudit.label}` : 'Show ended without a validated ending (narrative failure recorded).');
+        if (completed && !stoppedRef.current) {
+          window.setTimeout(() => {
+            if (mountedRef.current && !stoppedRef.current) {
+              setShowWinnerModal(true);
+            }
+          }, 1200);
+        }
       } else if (stoppedRef.current) {
         setPhase('stopped');
         setMessage('Show stopped. Completed turns remain saved.');
@@ -1242,13 +1249,13 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                 )}
               </>
             )}
-            {phase === 'completed' && (
+            {(phase === 'completed' || show?.status === 'completed') && (
               <button
                 type="button"
                 className="chat-story-primary"
                 onClick={() => setShowWinnerModal(true)}
               >
-                🏆 View Standings
+                🏆 View Max Point Earner
               </button>
             )}
             <button type="button" onClick={restart}>+ New Story</button>

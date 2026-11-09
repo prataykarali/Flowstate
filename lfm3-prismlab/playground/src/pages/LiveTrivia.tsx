@@ -10,7 +10,7 @@ import { setTriviaRunning } from '../lib/triviaLock.ts';
 import { cancelActiveInference } from '../lib/inferenceLock.ts';
 
 type Phase = 'idle' | 'generating' | 'answering' | 'revealing' | 'paused' | 'completed' | 'cancelled' | 'failed';
-const HOSTS: CanonicalModelId[] = ['text'];
+const HOSTS: CanonicalModelId[] = ['text', 'vision', 'omni'];
 
 const ACTIVE_TRIVIA_STORAGE_KEY = 'prismlab_active_trivia_match_v1';
 
@@ -178,9 +178,10 @@ export const LiveTrivia: React.FC = () => {
       const state = await getGatewayStatus(true);
       setGateway(state);
       if (!state.gateway_enabled || !(state.backend_live_enabled || state.auto_start_available)) throw new Error(state.reason || 'Local inference is unavailable.');
-      if (state.inference_busy && state.queue && state.queue.waiting >= (state.queue.waiting_limit || 3)) throw new Error('Inference queue is currently full. Please try again shortly.');
-      const eligible = LIVE_MODELS.filter(id => state.on_demand_routes?.includes(id));
-      const hosts = HOSTS.filter(id => eligible.includes(id));
+      const eligible = LIVE_MODELS.filter(id => !state.on_demand_routes || state.on_demand_routes.length === 0 || state.on_demand_routes.includes(id));
+      const hosts = (HOSTS.filter(id => eligible.includes(id)).length > 0)
+        ? HOSTS.filter(id => eligible.includes(id))
+        : HOSTS;
       // Shuffle topics so every round in this match gets a completely unique, exciting domain!
       const shuffledTopics = [...TOPICS];
       for (let i = shuffledTopics.length - 1; i > 0; i -= 1) {

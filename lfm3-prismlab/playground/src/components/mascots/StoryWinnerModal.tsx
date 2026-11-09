@@ -83,7 +83,7 @@ export const StoryWinnerModal: React.FC<StoryWinnerModalProps> = ({
   const isZeroScore = maxScore === 0;
   const winners = isZeroScore ? [] : sorted.filter(r => r.points === maxScore);
   const isTie = winners.length > 1;
-  const winnerTitle = isZeroScore ? 'Story Exhibition' : isTie ? 'Joint Story MVPs' : 'Story MVP';
+  const winnerTitle = isZeroScore ? 'Story Exhibition' : isTie ? 'Joint Max Point Earners' : 'Max Point Earner · Story MVP';
   const winnerNames = isZeroScore
     ? 'No Points Awarded'
     : winners.map(w => w.characterName).join(' & ');
@@ -105,7 +105,7 @@ export const StoryWinnerModal: React.FC<StoryWinnerModalProps> = ({
         <div className="s4-winner-head">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <p className="eyebrow" style={{ margin: 0 }}>Auto Story · Final Standings</p>
+              <p className="eyebrow" style={{ margin: 0 }}>Auto Story · Max Point Earner</p>
             </div>
             <h2>{winnerTitle}</h2>
           </div>
@@ -129,7 +129,7 @@ export const StoryWinnerModal: React.FC<StoryWinnerModalProps> = ({
             ))}
           </div>
           <div className="s4-winner-summary-meta">
-            <span className="s4-winner-badge-pill">{isTie ? 'Shared MVP' : isZeroScore ? 'Exhibition' : 'Top Contributor'}</span>
+            <span className="s4-winner-badge-pill">{isTie ? 'Joint Max Points' : isZeroScore ? 'Exhibition' : 'Max Point Earner'}</span>
             <strong className="s4-winner-hero-name">{winnerNames}</strong>
             <span className="s4-winner-hero-score">{maxScore} points</span>
           </div>
