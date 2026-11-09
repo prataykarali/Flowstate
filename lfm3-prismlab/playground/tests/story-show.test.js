@@ -31,6 +31,7 @@ const {
   planShow,
   validateShowConfig,
   validateDecisionJson,
+  recoverDecisionData,
   presentDecisionOutput,
   buildShowPrompt,
   appendShowTurn,
@@ -313,6 +314,32 @@ test('structured decision output must be complete and probabilistically valid', 
   assert.equal(validateDecisionJson(JSON.stringify({ predicted_route: 'technical', confidence: 0.7, probabilities: { billing: 0.1, technical: 0.7, shipping: 0.1, other: 0.9 } })).valid, false);
   assert.match(presentDecisionOutput(validDecision), /technical 70%/);
   assert.doesNotMatch(presentDecisionOutput(validDecision), /latch|culprit|tamper/);
+});
+
+test('decision model JSON is robust against markdown fences, unclosed braces, and prose clipping', () => {
+  // 1. Markdown code fences are cleanly unpacked
+  const fenced = `\`\`\`json\n${validDecision}\n\`\`\``;
+  assert.equal(validateDecisionJson(fenced).valid, true);
+
+  // 2. sanitizeTurnOutput preserves JSON intact without sentence truncation or trailing periods
+  const sanitized = sanitizeTurnOutput(validDecision);
+  assert.equal(validateDecisionJson(sanitized).valid, true);
+  assert.equal(sanitized.endsWith('}'), true);
+
+  // 3. recoverDecisionData recovers unclosed braces from token truncation
+  const unclosed = '{"predicted_route": "confront", "confidence": 0.7, "probabilities": {"confront": 0.7, "reveal": 0.3}';
+  const labels = ['confront', 'reveal'];
+  const recovered = recoverDecisionData(unclosed, labels);
+  assert.ok(recovered);
+  assert.equal(recovered.valid, true);
+  assert.equal(recovered.predicted_route, 'confront');
+
+  // 4. recoverDecisionData recovers raw label match when JSON truncated mid-probabilities
+  const truncatedMid = '{"predicted_route": "confront", "confidence": 0.7, "probabilities": {"con';
+  const recoveredMid = recoverDecisionData(truncatedMid, labels);
+  assert.ok(recoveredMid);
+  assert.equal(recoveredMid.valid, true);
+  assert.equal(recoveredMid.predicted_route, 'confront');
 });
 
 test('random turn count spans inclusive 10 through 20 with strict clamping', () => {

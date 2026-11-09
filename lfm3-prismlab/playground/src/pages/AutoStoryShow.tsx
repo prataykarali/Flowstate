@@ -20,6 +20,7 @@ import {
   saveShow,
   showBeat,
   validateDecisionJson,
+  recoverDecisionData,
   sanitizeTurnOutput,
   stripEchoedPrefix,
   SHOW_CAPABILITIES,
@@ -396,7 +397,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               audio,
               required_media: image && audio ? capability.media : undefined,
               decision_question: decisionQuestion,
-              max_tokens: capability.role === 'decision_assistant' ? 48 : 128,
+              max_tokens: capability.role === 'decision_assistant' ? 160 : 128,
               job_id: turnId,
               activity_session_id: current.showId,
               checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
@@ -486,62 +487,64 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         throw new Error('Writer returned no text.');
       }
 
-      // Sanitize turn output for all models (strip planning tags, act headers, bracket cues)
-      rawOutput = sanitizeTurnOutput(rawOutput);
+      // Sanitize turn output for prose models (strip planning tags, act headers, bracket cues)
+      if (capability.role !== 'decision_assistant') {
+        rawOutput = sanitizeTurnOutput(rawOutput);
 
-      // Clean single-take sentence trimming
-      if (modelId === 'text') {
-        const sentencePunct = rawOutput.match(/^.*[.!?](?=\s|$)/s)?.[0]?.trim();
-        if (sentencePunct && sentencePunct.length >= 40) {
-          rawOutput = sentencePunct;
-          result = { ...result, output: sentencePunct };
-        }
-      }
-
-      // Strip echoed prefix or repeated opening sentences for all models
-      const allPriorOutputs = [
-        current.config.opening,
-        ...current.turns.filter(t => t.status === 'completed' && t.output).map(t => t.output!)
-      ].filter(Boolean);
-      const deEchoed = stripEchoedPrefix(rawOutput, allPriorOutputs, built.prompt);
-      if (deEchoed) {
-        rawOutput = deEchoed;
-        result = { ...result, output: deEchoed };
-      }
-
-      // If candidate was purely an echo or emptied by prefix stripping, run bounded single retry
-      if (rawOutput.length < 25 && retryCountRef.current === 0) {
-        retryCountRef.current = 1;
-        try {
-          const retryPrompt = modelId === 'text'
-            ? `Continue the story with what happens next. Advance the plot. Do not repeat previous sentences or opening lines. Write 2–3 new sentences.`
-            : `Provide your distinct perspective for this scene without repeating any prior sentences or character dialogue.`;
-          const retakeResult = await (modelId === 'text'
-            ? generateTextStream(retryPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)))
-            : executeLocalStream({
-                model: modelId,
-                task: modelId === 'audio' && !pack ? 'chat' : capability.task,
-                prompt: retryPrompt,
-                image,
-                audio,
-                required_media: image && audio ? capability.media : undefined,
-                decision_question: decisionQuestion,
-                max_tokens: capability.role === 'decision_assistant' ? 48 : 128,
-                job_id: turnId,
-                activity_session_id: current.showId,
-                checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
-              }, () => {})
-          );
-          const retakeRaw = retakeResult.output == null ? '' : outputText(retakeResult.output).trim();
-          if (retakeRaw) {
-            const cleanedRetake = stripEchoedPrefix(sanitizeTurnOutput(retakeRaw), allPriorOutputs, retryPrompt);
-            if (cleanedRetake) {
-              rawOutput = cleanedRetake;
-              result = { ...retakeResult, output: cleanedRetake };
-            }
+        // Clean single-take sentence trimming
+        if (modelId === 'text') {
+          const sentencePunct = rawOutput.match(/^.*[.!?](?=\s|$)/s)?.[0]?.trim();
+          if (sentencePunct && sentencePunct.length >= 40) {
+            rawOutput = sentencePunct;
+            result = { ...result, output: sentencePunct };
           }
-        } catch {
-          // Keep current rawOutput if retake fails
+        }
+
+        // Strip echoed prefix or repeated opening sentences for prose models
+        const allPriorOutputs = [
+          current.config.opening,
+          ...current.turns.filter(t => t.status === 'completed' && t.output).map(t => t.output!)
+        ].filter(Boolean);
+        const deEchoed = stripEchoedPrefix(rawOutput, allPriorOutputs, built.prompt);
+        if (deEchoed) {
+          rawOutput = deEchoed;
+          result = { ...result, output: deEchoed };
+        }
+
+        // If candidate was purely an echo or emptied by prefix stripping, run bounded single retry
+        if (rawOutput.length < 25 && retryCountRef.current === 0) {
+          retryCountRef.current = 1;
+          try {
+            const retryPrompt = modelId === 'text'
+              ? `Continue the story with what happens next. Advance the plot. Do not repeat previous sentences or opening lines. Write 2–3 new sentences.`
+              : `Provide your distinct perspective for this scene without repeating any prior sentences or character dialogue.`;
+            const retakeResult = await (modelId === 'text'
+              ? generateTextStream(retryPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)))
+              : executeLocalStream({
+                  model: modelId,
+                  task: modelId === 'audio' && !pack ? 'chat' : capability.task,
+                  prompt: retryPrompt,
+                  image,
+                  audio,
+                  required_media: image && audio ? capability.media : undefined,
+                  decision_question: decisionQuestion,
+                  max_tokens: 128,
+                  job_id: turnId,
+                  activity_session_id: current.showId,
+                  checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
+                }, () => {})
+            );
+            const retakeRaw = retakeResult.output == null ? '' : outputText(retakeResult.output).trim();
+            if (retakeRaw) {
+              const cleanedRetake = stripEchoedPrefix(sanitizeTurnOutput(retakeRaw), allPriorOutputs, retryPrompt);
+              if (cleanedRetake) {
+                rawOutput = cleanedRetake;
+                result = { ...retakeResult, output: cleanedRetake };
+              }
+            }
+          } catch {
+            // Keep current rawOutput if retake fails
+          }
         }
       }
 
@@ -613,7 +616,19 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
 
       // Handle structured decision models
       if (capability.role === 'decision_assistant') {
-        const parsedData = validateDecisionJson(rawOutput, decisionQuestion ? Object.keys(decisionQuestion.criteria) : undefined);
+        const decisionLabels = decisionQuestion ? Object.keys(decisionQuestion.criteria) : undefined;
+        let parsedData = validateDecisionJson(rawOutput, decisionLabels);
+        if (!parsedData.valid) {
+          const recovered = recoverDecisionData(rawOutput, decisionLabels);
+          if (recovered && recovered.valid) {
+            parsedData = recovered;
+            rawOutput = JSON.stringify({
+              predicted_route: recovered.predicted_route,
+              confidence: recovered.confidence,
+              probabilities: recovered.probabilities
+            }, null, 2);
+          }
+        }
         decisionData = parsedData;
         if (!decisionData.valid) {
           const rejectedTurn: ShowTurn = {

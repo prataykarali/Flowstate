@@ -334,7 +334,22 @@ export function createShow(config: ShowConfig, showId = crypto.randomUUID(), now
 }
 
 export function validateDecisionJson(rawOutput: string, labels: readonly string[] = ['billing', 'technical', 'shipping', 'other']): ValidatedDecision {
-  const trimmed = rawOutput.trim();
+  let trimmed = rawOutput.trim();
+
+  // Strip markdown code fence wrappers if present
+  if (trimmed.startsWith('```')) {
+    trimmed = trimmed.replace(/^```[a-z]*\s*/i, '').replace(/\s*```$/i, '').trim();
+  }
+
+  // Extract outermost JSON object if enclosed within other text
+  if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
+    const firstBrace = trimmed.indexOf('{');
+    const lastBrace = trimmed.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      trimmed = trimmed.slice(firstBrace, lastBrace + 1).trim();
+    }
+  }
+
   try {
     if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) {
       return { predicted_route: 'other', confidence: 0, probabilities: {}, valid: false, rawText: rawOutput, error: 'Output is not complete JSON (missing closing brace or truncated).' };
@@ -372,6 +387,91 @@ export function validateDecisionJson(rawOutput: string, labels: readonly string[
       error: `JSON parsing failed: ${e instanceof Error ? e.message : 'Malformed JSON'}`
     };
   }
+}
+
+/**
+ * Robust recovery for decision model votes that were truncated,
+ * enclosed in commentary, or slightly malformed in closing braces.
+ */
+export function recoverDecisionData(rawOutput: string, labels: readonly string[] = ['billing', 'technical', 'shipping', 'other']): ValidatedDecision | null {
+  if (!rawOutput || !labels.length) return null;
+
+  // 1. Direct validation attempt
+  const direct = validateDecisionJson(rawOutput, labels);
+  if (direct.valid) return direct;
+
+  let text = rawOutput.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```[a-z]*\s*/i, '').replace(/\s*```$/i, '').trim();
+  }
+
+  // 2. Try closing unclosed braces
+  const firstBrace = text.indexOf('{');
+  if (firstBrace !== -1) {
+    let candidate = text.slice(firstBrace).trim();
+    candidate = candidate.replace(/,\s*$/, '');
+    const opens = (candidate.match(/\{/g) || []).length;
+    const closes = (candidate.match(/\}/g) || []).length;
+    if (opens > closes) {
+      const patched = candidate + '}'.repeat(opens - closes);
+      const patchedCheck = validateDecisionJson(patched, labels);
+      if (patchedCheck.valid) return patchedCheck;
+    }
+  }
+
+  // 3. Regex extraction for predicted_route / choice
+  let foundRoute: string | undefined;
+  const routeMatch = text.match(/"(?:predicted_route|route|choice)"\s*:\s*"([^"]+)"/i);
+  if (routeMatch && labels.includes(routeMatch[1])) {
+    foundRoute = routeMatch[1];
+  } else {
+    for (const label of labels) {
+      if (new RegExp(`"\\b${label}\\b"`, 'i').test(text) || new RegExp(`\\b${label}\\b`, 'i').test(text)) {
+        foundRoute = label;
+        break;
+      }
+    }
+  }
+
+  if (!foundRoute) return null;
+
+  // Extract confidence if present
+  let confidence = 0.7;
+  const confMatch = text.match(/"confidence"\s*:\s*([0-9]*\.?[0-9]+)/i);
+  if (confMatch) {
+    const val = parseFloat(confMatch[1]);
+    if (Number.isFinite(val) && val >= 0 && val <= 1) {
+      confidence = Math.round(val * 100) / 100;
+    }
+  }
+
+  // Synthesize normalized probabilities
+  const remaining = Math.max(0, 1 - confidence);
+  const otherCount = Math.max(1, labels.length - 1);
+  const otherShare = Math.round((remaining / otherCount) * 100) / 100;
+  const probabilities: Record<string, number> = {};
+
+  let sum = 0;
+  for (const label of labels) {
+    if (label === foundRoute) {
+      probabilities[label] = confidence;
+    } else {
+      probabilities[label] = otherShare;
+    }
+    sum += probabilities[label];
+  }
+  if (sum !== 1 && labels.length > 0) {
+    const diff = 1 - sum;
+    probabilities[foundRoute] = Math.max(0, Math.min(1, Math.round((confidence + diff) * 100) / 100));
+  }
+
+  return {
+    predicted_route: foundRoute,
+    confidence: probabilities[foundRoute] ?? confidence,
+    probabilities,
+    valid: true,
+    rawText: rawOutput
+  };
 }
 
 export function presentDecisionOutput(output: string, _theme = ''): string | null {
@@ -902,6 +1002,17 @@ export function chooseFreshNameInitial(previousOpenings: string[], random = Math
 export function sanitizeTurnOutput(text: string): string {
   if (!text || typeof text !== 'string') return '';
   let trimmed = text.trim();
+
+  // If the content is a JSON object or decision dictionary, preserve it intact without sentence clipping
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    const candidate = trimmed.slice(firstBrace, lastBrace + 1);
+    if (candidate.includes('predicted_route') || candidate.includes('probabilities') || candidate.includes('route')) {
+      return candidate;
+    }
+  }
+
   // Strip code blocks and markdown headings
   trimmed = trimmed.replace(/^```[a-z]*\n/i, '').replace(/```$/i, '').trim();
   trimmed = trimmed.replace(/^#+\s+[^\n]+\n/g, '').trim();
