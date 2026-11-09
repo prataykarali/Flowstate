@@ -74,21 +74,9 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, ch
         className="beta-notice-banner"
         role="region"
         aria-label="Beta Notice"
-        style={{
-          background: 'rgba(23, 23, 23, 0.88)',
-          borderBottom: '1px solid var(--prismlab-panel-border)',
-          padding: '6px 16px',
-          fontSize: '12px',
-          textAlign: 'center',
-          color: 'var(--prismlab-panel-text)',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '8px'
-        }}
       >
-        <span style={{ color: 'var(--prismlab-panel-accent)', fontWeight: 600 }}>✦ Public Research Beta:</span>
-        <span style={{ color: 'var(--prismlab-panel-muted)' }}>
+        <span className="beta-notice-tag">✦ Public Research Beta:</span>
+        <span className="beta-notice-text">
           PrismLab is an experimental AI research playground. Inference runs on limited CPU hardware, so responses may be queued and service may occasionally be unavailable.
         </span>
       </div>
@@ -143,8 +131,11 @@ export const AppShell: React.FC<AppShellProps> = ({ currentRoute, onNavigate, ch
           aria-label={isOffline ? 'Host laptop is offline. Click to open details.' : 'Inference gateway status'}
         >
           <span className="status-dot" />
-          <span className="status-label">
+          <span className="status-label status-label-full">
             {isOffline ? 'Host AI Offline · Info' : isBusy ? 'Inference Busy' : 'Live CPU Gateway'}
+          </span>
+          <span className="status-label status-label-short">
+            {isOffline ? 'Offline' : isBusy ? 'Busy' : 'Online'}
           </span>
         </button>
       </header>

@@ -3,7 +3,7 @@ import { recordLeagueEvent, type AwardResult } from './league.ts';
 
 const validated = { completionStatus: 'completed' as const, validationStatus: 'validated' as const };
 
-function triggerGlobalEvent(modelId: CanonicalModelId, activityType: 'chat' | 'story_turn' | 'story_complete' | 'trivia_correct' | 'trivia_match', points: number, ref?: string, receipt?: string) {
+function triggerGlobalEvent(modelId: CanonicalModelId, activityType: 'chat' | 'story_turn' | 'story_complete' | 'trivia_correct' | 'trivia_match' | 'runner_completed' | 'arcade', points: number, ref?: string, receipt?: string) {
   if (typeof window !== 'undefined') {
     import('./globalLeague.ts').then(m => m.recordGlobalEvent(modelId, activityType, points, ref, receipt)).catch(() => {});
   }
@@ -15,8 +15,12 @@ export function awardTriviaCorrect(modelId: CanonicalModelId, sessionId: string,
   if (res.event || activityReceipt) triggerGlobalEvent(modelId, 'trivia_correct', 100, res.event?.evidenceRef || `trivia:${sessionId}:${questionId}`, activityReceipt);
   return res;
 }
-export function awardRunnerCompleted(modelId: CanonicalModelId, runId: string, score: number, started: boolean): AwardResult {
-  return recordLeagueEvent({ ...validated, activity: 'runner_completed', modelId, sessionId: runId, score, started, evidenceRef: `runner:${runId}:score:${Math.floor(score)}` });
+export function awardRunnerCompleted(modelId: CanonicalModelId, runId: string, score: number, started: boolean, activityReceipt?: string): AwardResult {
+  const res = recordLeagueEvent({ ...validated, activity: 'runner_completed', modelId, sessionId: runId, score, started, evidenceRef: `runner:${runId}:score:${Math.floor(score)}` });
+  if (res.event) {
+    triggerGlobalEvent(modelId, 'runner_completed', res.event.pointsEarned, res.event.evidenceRef, activityReceipt);
+  }
+  return res;
 }
 export function awardChatSession(modelId: CanonicalModelId, requestIds: string[], activityReceipt?: string): AwardResult {
   const normalized = (requestIds || [])

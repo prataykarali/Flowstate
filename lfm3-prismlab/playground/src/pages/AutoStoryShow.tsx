@@ -1,6 +1,6 @@
 import React from 'react';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
-import { executeLocalStream, generateTextStream, getGatewayStatus, outputText, ApiError, startActivity, stopActivity, parkActivity, resumeParkedActivity, type LiveResult, type MediaPayload } from '../lib/api.ts';
+import { executeLocalStream, generateTextStream, getGatewayStatus, outputText, ApiError, getCurrentActivity, startActivity, stopActivity, parkActivity, resumeParkedActivity, type LiveResult, type MediaPayload } from '../lib/api.ts';
 import { awardAutoStorySession, awardAutoStoryTurn } from '../lib/leagueAdapters.ts';
 import {
   asReplay,
@@ -20,6 +20,8 @@ import {
   saveShow,
   showBeat,
   validateDecisionJson,
+  sanitizeTurnOutput,
+  stripEchoedPrefix,
   SHOW_CAPABILITIES,
   STORY_THEMES,
   validateShowConfig,
@@ -484,12 +486,62 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         throw new Error('Writer returned no text.');
       }
 
+      // Sanitize turn output for all models (strip planning tags, act headers, bracket cues)
+      rawOutput = sanitizeTurnOutput(rawOutput);
+
       // Clean single-take sentence trimming
       if (modelId === 'text') {
         const sentencePunct = rawOutput.match(/^.*[.!?](?=\s|$)/s)?.[0]?.trim();
         if (sentencePunct && sentencePunct.length >= 40) {
           rawOutput = sentencePunct;
           result = { ...result, output: sentencePunct };
+        }
+      }
+
+      // Strip echoed prefix or repeated opening sentences for all models
+      const allPriorOutputs = [
+        current.config.opening,
+        ...current.turns.filter(t => t.status === 'completed' && t.output).map(t => t.output!)
+      ].filter(Boolean);
+      const deEchoed = stripEchoedPrefix(rawOutput, allPriorOutputs, built.prompt);
+      if (deEchoed) {
+        rawOutput = deEchoed;
+        result = { ...result, output: deEchoed };
+      }
+
+      // If candidate was purely an echo or emptied by prefix stripping, run bounded single retry
+      if (rawOutput.length < 25 && retryCountRef.current === 0) {
+        retryCountRef.current = 1;
+        try {
+          const retryPrompt = modelId === 'text'
+            ? `Continue the story with what happens next. Advance the plot. Do not repeat previous sentences or opening lines. Write 2–3 new sentences.`
+            : `Provide your distinct perspective for this scene without repeating any prior sentences or character dialogue.`;
+          const retakeResult = await (modelId === 'text'
+            ? generateTextStream(retryPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)))
+            : executeLocalStream({
+                model: modelId,
+                task: modelId === 'audio' && !pack ? 'chat' : capability.task,
+                prompt: retryPrompt,
+                image,
+                audio,
+                required_media: image && audio ? capability.media : undefined,
+                decision_question: decisionQuestion,
+                max_tokens: capability.role === 'decision_assistant' ? 48 : 128,
+                job_id: turnId,
+                activity_session_id: current.showId,
+                checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
+              }, () => {})
+          );
+          const retakeRaw = retakeResult.output == null ? '' : outputText(retakeResult.output).trim();
+          if (retakeRaw) {
+            const cleanedRetake = stripEchoedPrefix(sanitizeTurnOutput(retakeRaw), allPriorOutputs, retryPrompt);
+            if (cleanedRetake) {
+              rawOutput = cleanedRetake;
+              result = { ...retakeResult, output: cleanedRetake };
+            }
+          }
+        } catch {
+          // Keep current rawOutput if retake fails
         }
       }
 
@@ -540,14 +592,18 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         }
       }
 
-      // Creative support voices (Spectra, Echo, Omni Pup)
+      // Repetition & loop check across all models (text & creative support voices)
       let copiedTurn = false;
-      if (modelId !== 'text' && storyPerspective && capability.role !== 'decision_assistant') {
-        const earlier = current.turns.filter(turn => turn.status === 'completed' && turn.output && turn.role !== 'decision_assistant').map(turn => turn.output!);
-        const copied = (output: string) => detectRepetition(output, earlier) || copiesPreviousSentence(output, earlier);
+      if (capability.role !== 'decision_assistant') {
+        const earlierForRepetition = current.turns
+          .filter(turn => turn.status === 'completed' && turn.output && turn.role !== 'decision_assistant')
+          .map(turn => turn.output!);
+        if (current.config.opening) earlierForRepetition.unshift(current.config.opening);
+        const copied = (output: string) => detectRepetition(output, earlierForRepetition) || copiesPreviousSentence(output, earlierForRepetition);
         if (copied(rawOutput)) {
           copiedTurn = true;
           genreEvaluation = { status: 'review', issues: ['Repeated a previous passage or action; kept out of the story context.'], evidence: [] };
+          rawAttempts.push({ requestId: result.request_id, output: rawOutput, reason: 'Repeated earlier passage.' });
         }
       }
 
@@ -644,7 +700,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       }
       setPreview(finalDisplay);
 
-      const relevant = !unrelated && !copiedTurn && capability.role !== 'decision_assistant' && canonicalIssues.length === 0;
+      const relevant = !unrelated && !copiedTurn && !loopIssue && capability.role !== 'decision_assistant' && canonicalIssues.length === 0;
 
       const turn: ShowTurn = {
         turnId,
@@ -756,7 +812,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     }
   };
 
-  const startWithConfig = (newConfig: ShowConfig, useSelectedCount = turnCountCustomized) => {
+  const startWithConfig = async (newConfig: ShowConfig, useSelectedCount = turnCountCustomized) => {
     if (storyCooldownRemaining > 0) {
       setMessage(`Cooldown active: Please wait ${storyCooldownRemaining}s before starting another full story show.`);
       return;
@@ -791,9 +847,17 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const chooseStoryTurnCount = () => 10 + Math.floor(Math.random() * 3);
     const next = createShow({ ...newConfig, turnCount: useSelectedCount ? newConfig.turnCount : chooseStoryTurnCount() });
     commit(next);
-    void startActivity('STORY', next.showId, undefined, { theme: next.config.theme, turns: next.turnOrder.length });
     setPhase('preparing');
     setMessage(`New ${next.config.theme} story started · ${next.turnOrder.length} turns across ${next.config.modelIds.length} models.`);
+    try {
+      const cur = await getCurrentActivity();
+      if (cur.active && cur.activity) {
+        await stopActivity(cur.activity.session_id, 'new_story_started');
+      }
+      await startActivity('STORY', next.showId, undefined, { theme: next.config.theme, turns: next.turnOrder.length });
+    } catch (e) {
+      console.warn('startActivity error, continuing:', e);
+    }
     schedule(0);
   };
 

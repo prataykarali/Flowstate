@@ -87,6 +87,7 @@ export const Championship: React.FC = () => {
         triviaPoints: g.trivia_points,
         chatPoints: g.chat_points,
         storyPoints: g.story_points,
+        arcadePoints: g.arcade_points ?? g.other_eligible_points ?? 0,
         ratingPoints: g.rating_points,
         stars: ratings[g.model_id]?.stars || null,
         matches: localCompleted.filter(m => m.rounds.some(r => r.attempts.some(a => a.modelId === g.model_id))).length,
@@ -162,8 +163,8 @@ export const Championship: React.FC = () => {
           </div>
           <p>
             {standings.some(row => row.points > 0)
-              ? 'Shared global competition points accumulated by visitors across Chat, Story, Trivia, and Ratings.'
-              : 'All models are currently awaiting initial competition points. Interact via Chat, Story, Trivia or Ratings to score!'}
+              ? 'Shared global competition points accumulated by visitors across Trivia, Chat, Story, Arcade, and Ratings.'
+              : 'All models are currently awaiting initial competition points. Interact via Trivia, Chat, Story, Arcade, or Ratings to score!'}
           </p>
         </div>
 
@@ -215,7 +216,7 @@ export const Championship: React.FC = () => {
                 <article
                   key={model.id}
                   className={`s4-leaderboard-row ${hasEarnedRank ? `rank-${standing.rank}` : 'is-unranked'}`}
-                  title={`Trivia ${standing.triviaPoints} · Chat ${standing.chatPoints} · Story ${standing.storyPoints} · Rating ${standing.ratingPoints}`}
+                  title={`Trivia ${standing.triviaPoints} · Chat ${standing.chatPoints} · Story ${standing.storyPoints} · Arcade ${standing.arcadePoints} · Rating ${standing.ratingPoints}`}
                 >
                   <span className="s4-row-rank">{hasEarnedRank ? `#${standing.rank}` : '—'}</span>
                   <span className="s4-row-avatar"><MascotAvatar model={model} /></span>
@@ -225,7 +226,7 @@ export const Championship: React.FC = () => {
                   </span>
                   <span className="s4-row-result">
                     <strong>{standing.points ? `${standing.points.toLocaleString()} pts` : 'Awaiting activity'}</strong>
-                    <small>{standing.points ? `T${standing.triviaPoints} · C${standing.chatPoints} · S${standing.storyPoints} · R${standing.ratingPoints}` : 'No global points yet'}</small>
+                    <small>{standing.points ? `T${standing.triviaPoints} · C${standing.chatPoints} · S${standing.storyPoints} · A${standing.arcadePoints} · R${standing.ratingPoints}` : 'No global points yet'}</small>
                     {standing.points > 0 && (
                       <span className="s4-score-track">
                         <span style={{ width: `${Math.max(8, (standing.points / maxPoints) * 100)}%` }} />

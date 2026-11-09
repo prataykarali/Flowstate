@@ -47,7 +47,11 @@ const {
   generateFreshPremise,
   FIRST_NAMES,
   compactStageText,
-  evaluateGenreTurn
+  evaluateGenreTurn,
+  stripEchoedPrefix,
+  sanitizeTurnOutput,
+  chooseStoryDirections,
+  STORY_THEMES
 } = story;
 
 const sd = await import(pathToFileURL(path.join(cacheDir, 'storyDirector.js')).href);
@@ -804,4 +808,64 @@ test('Story history: max 5 last stories retained and clear slate wipes stories',
   story.clearShows(mockStorage);
   assert.equal(story.readShows(mockStorage).length, 0);
 });
+
+test('stripEchoedPrefix and sanitizeTurnOutput: The Coat on the Boat regression', () => {
+  const turn1Raw = '**Title: The Coat on the Boat** The wind howled like a wounded animal as the houseboat bobbed toward the horizon, its wooden hull groaning under the relentless tide. Rain lashed the deck, turning the world into a blur of gray and black water. Inside, the air was thick with the smell of salt and decay. Bastian, the park ranger, stood at the rail, his eyes scanning the churning sea for any sign of rescue.';
+  const sanitizedTurn1 = sanitizeTurnOutput(turn1Raw);
+  assert.ok(!sanitizedTurn1.includes('**Title: The Coat on the Boat**'), 'Title header must be stripped');
+  assert.ok(sanitizedTurn1.startsWith('The wind howled like a wounded animal'), 'Sanitized text preserves first sentence');
+
+  const turn2Raw = "The wind howled as the houseboat bobbed toward the horizon, its wooden hull groaning under the relentless tide. Bastian spotted a flicker of movement near the railing, where Lorcan's coat was draped over a weathered chair. Suddenly, the boat lurched, and a splash erupted from the water, revealing a hidden compartment beneath the deck filled with shattered glass.";
+  const strippedTurn2 = stripEchoedPrefix(turn2Raw, [sanitizedTurn1]);
+  assert.ok(!strippedTurn2.toLowerCase().includes('the wind howled as the houseboat bobbed toward the horizon'), 'Echoed opening sentence must be stripped from turn 2');
+  assert.ok(strippedTurn2.includes("Bastian spotted a flicker of movement near the railing, where Lorcan's coat was draped"), 'Non-echoed core content must be preserved');
+
+  const turn3Raw = 'The wind howled as the houseboat bobbed toward the horizon, its wooden hull groaning under the relentless tide. Bastian moved toward the hidden compartment to examine the shattered glass.';
+  const strippedTurn3 = stripEchoedPrefix(turn3Raw, [sanitizedTurn1, strippedTurn2]);
+  assert.ok(!strippedTurn3.toLowerCase().includes('the wind howled as the houseboat bobbed toward the horizon'), 'Echoed opening sentence must be stripped from turn 3');
+  assert.ok(strippedTurn3.includes('Bastian moved toward the hidden compartment to examine the shattered glass.'), 'Advancing sentence must be preserved');
+
+  const resolutionRaw = '**Act IV – Resolution** Bastian secured the emergency flare and ignited the signal above the churning waves, bringing the rescue cutter into view.';
+  const sanitizedResolution = sanitizeTurnOutput(resolutionRaw);
+  assert.ok(!sanitizedResolution.includes('**Act IV – Resolution**'), 'Act IV header must be stripped');
+  assert.ok(sanitizedResolution.startsWith('Bastian secured the emergency flare'), 'Clean prose preserved');
+});
+
+test('hasMeaningfulEnding rejects cliffhangers', () => {
+  const goal = 'rescue survivors from the derelict station';
+  // Cliffhanger endings with trailing mystery/suspense must be rejected
+  assert.equal(story.hasMeaningfulEnding('They escaped the ruined airlock, but suddenly a shadow loomed behind him in the dark.', goal), false);
+  assert.equal(story.hasMeaningfulEnding('They salvaged the core, though a cold grip tightened around her wrist.', goal), false);
+  assert.equal(story.hasMeaningfulEnding('To be continued...', goal), false);
+
+  // Definitive endings must pass
+  assert.equal(story.hasMeaningfulEnding('They secured the survivors, evacuated into the escape shuttle, and reached safety as the station fell silent.', goal), true);
+});
+
+test('chooseStoryDirections produces valid, specific directives for all 9 genres', () => {
+  const expectedGenres = [
+    'Science fiction',
+    'Detective investigation',
+    'Adventure',
+    'Romance',
+    'Horror',
+    'Tragedy',
+    'Comedy',
+    'Fantasy',
+    'Mystery'
+  ];
+
+  for (const genre of expectedGenres) {
+    const s = createShow(config({ theme: genre }));
+    const directions = chooseStoryDirections(s);
+    assert.ok(directions.criteria, `${genre} must provide criteria`);
+    const options = Object.entries(directions.criteria);
+    assert.ok(options.length > 0, `${genre} must provide at least one direction option`);
+    for (const [key, desc] of options) {
+      assert.ok(key.length > 0, `${genre} direction key must be non-empty`);
+      assert.ok(desc.length > 10, `${genre} direction description must be descriptive`);
+    }
+  }
+});
+
 

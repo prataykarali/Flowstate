@@ -9,6 +9,7 @@ export interface ModelStanding {
   chat_points: number;
   story_points: number;
   trivia_points: number;
+  arcade_points?: number;
   rating_points: number;
   other_eligible_points: number;
   last_activity_at: string | null;
@@ -20,6 +21,9 @@ export interface GlobalStandingsState {
   standings: ModelStanding[];
   allUnranked: boolean;
   totalModels: number;
+  totalVisitors?: number;
+  totalPointsAwarded?: number;
+  totalEvents?: number;
   dataSource: string;
   updatedAt: string | null;
   isLoading: boolean;
@@ -92,6 +96,9 @@ export async function fetchGlobalStandings(force = false): Promise<GlobalStandin
         standings: ModelStanding[];
         all_unranked: boolean;
         total_models: number;
+        total_visitors?: number;
+        total_points_awarded?: number;
+        total_events?: number;
         data_source: string;
         updated_at: string;
       };
@@ -100,6 +107,9 @@ export async function fetchGlobalStandings(force = false): Promise<GlobalStandin
         standings: data.standings,
         allUnranked: data.all_unranked,
         totalModels: data.total_models,
+        totalVisitors: typeof data.total_visitors === 'number' ? data.total_visitors : undefined,
+        totalPointsAwarded: typeof data.total_points_awarded === 'number' ? data.total_points_awarded : undefined,
+        totalEvents: typeof data.total_events === 'number' ? data.total_events : undefined,
         dataSource: data.data_source,
         updatedAt: data.updated_at,
         isLoading: false,
@@ -134,7 +144,7 @@ export async function fetchGlobalStandings(force = false): Promise<GlobalStandin
 
 export async function recordGlobalEvent(
   modelId: CanonicalModelId,
-  activityType: 'chat' | 'story_turn' | 'story_complete' | 'trivia_correct' | 'trivia_match',
+  activityType: 'chat' | 'story_turn' | 'story_complete' | 'trivia_correct' | 'trivia_match' | 'runner_completed' | 'arcade',
   points: number,
   sourceReceiptId?: string,
   activityReceipt?: string
@@ -182,6 +192,12 @@ export async function recordGlobalEvent(
             chat_points: activityType === 'chat' ? row.chat_points + awarded : row.chat_points,
             story_points: activityType.startsWith('story') ? row.story_points + awarded : row.story_points,
             trivia_points: activityType.startsWith('trivia') ? row.trivia_points + awarded : row.trivia_points,
+            arcade_points: (activityType === 'runner_completed' || activityType === 'arcade')
+              ? (row.arcade_points || 0) + awarded
+              : (row.arcade_points || 0),
+            other_eligible_points: (activityType === 'runner_completed' || activityType === 'arcade')
+              ? (row.other_eligible_points || 0) + awarded
+              : row.other_eligible_points,
             unranked: false,
           };
         });

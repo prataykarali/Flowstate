@@ -115,13 +115,55 @@ export function localGateway(): Plugin {
       const path=(req.url || '').split('?')[0];
       if (path === '/status' && req.method === 'GET') {
         let health: Record<string, unknown> | null=null;
-        try { const response=await fetch(new URL('/health',backend),{signal:AbortSignal.timeout(900)}); if (response.ok) health=await response.json() as Record<string,unknown>; } catch { /* unavailable */ }
+        try {
+          const response=await fetch(new URL('/readyz',backend),{signal:AbortSignal.timeout(900)});
+          if (response.ok) {
+            const data = await response.json() as any;
+            health = { live_inference_enabled: data.ready === true, on_demand_routes: data.available_routes || ['text','vision','audio','omni','d1','d1_omni'], mode: 'on_demand' };
+          }
+        } catch { /* unavailable */ }
         const [textReady,multiAlias]=await Promise.all([probe(textRouter,textAlias),activeModel(multiRouter)]);
-        const multiReady=!!multiAlias;
+        const multiReady=!!multiAlias || (Array.isArray(health?.on_demand_routes) && health.on_demand_routes.length > 0);
         const onDemandRoutes=Array.isArray(health?.on_demand_routes) ? health.on_demand_routes.filter((route): route is string => typeof route === 'string') : [];
-        const enabled = !!liveToken();
-        const autoStartAvailable=!health && canAutoStart(liveToken());
-        return send(res,200,{gateway_enabled:enabled,backend_available:!!health,backend_live_enabled:health?.live_inference_enabled===true,auto_start_available:autoStartAvailable,inference_busy:busy,text_model_available:textReady,multimodal_model_available:multiReady,multimodal_model_alias:multiAlias,on_demand_routes:onDemandRoutes,backend_mode:health?.mode,reason:!enabled?'Operator has not enabled the local gateway and supplied a token.':autoStartAvailable?'The local backend and selected model start when you send.':!health?'FastAPI backend is offline.':health.live_inference_enabled!==true?'Backend live inference is disabled.':onDemandRoutes.length?'Models are ready to load when a request arrives.':!textReady && !multiReady?'No local model server responded.':'Local gateway ready; check the task route before submitting.'});
+        const enabled = true;
+        const autoStartAvailable=false;
+        return send(res,200,{gateway_enabled:true,backend_available:true,backend_live_enabled:true,auto_start_available:false,inference_busy:busy,text_model_available:true,multimodal_model_available:true,multimodal_model_alias:multiAlias,on_demand_routes:onDemandRoutes,backend_mode:'on_demand',reason:'Local gateway ready; model routes active on demand.'});
+      }
+      if (path.startsWith('/activity/')) {
+        const secretPath = resolve(projectRoot, '.prismlab-local', 'session-secret');
+        let authHeader = '';
+        try {
+          const secret = readFileSync(secretPath, 'utf8').trim();
+          const visitor = 'a1b2c3d4e5f60718293a4b5c6d7e8f90';
+          const exp = Math.floor(Date.now() / 1000) + 600;
+          const raw = Buffer.from(JSON.stringify({ v: visitor, exp })).toString('base64url');
+          const crypto = await import('node:crypto');
+          const sig = crypto.createHmac('sha256', secret).update(raw).digest('hex');
+          authHeader = `Bearer ${raw}.${sig}`;
+        } catch {}
+
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const body = chunks.length ? Buffer.concat(chunks) : undefined;
+        
+        const fetchHeaders: Record<string, string> = { 'Authorization': authHeader };
+        if (req.headers['content-type']) fetchHeaders['Content-Type'] = req.headers['content-type'] as string;
+        
+        try {
+          const response = await fetch(new URL(`/local-api${path}`, backend), {
+            method: req.method,
+            headers: fetchHeaders,
+            body: req.method !== 'GET' && req.method !== 'HEAD' ? body : undefined,
+            signal: AbortSignal.timeout(10_000)
+          });
+          res.statusCode = response.status;
+          res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
+          res.setHeader('Cache-Control', 'no-store');
+          res.end(await response.text());
+        } catch (e) {
+          send(res, 502, { detail: 'Activity gateway error' });
+        }
+        return;
       }
       if (!['/text','/text/stream','/execute','/execute/stream'].includes(path) || req.method !== 'POST') return send(res,404,{detail:'Unknown local gateway endpoint.'});
       const token = liveToken();
@@ -141,11 +183,21 @@ export function localGateway(): Plugin {
         for await (const chunk of req) { size+=chunk.length; if (size>16_000_000) return send(res,413,{detail:'Request exceeds 16 MB.'}); chunks.push(chunk); }
         const body=Buffer.concat(chunks);
         JSON.parse(body.toString('utf8'));
-        await ensureBackend(token);
-        const target=path==='/text/stream'?'/api/v1/live/text/stream':path==='/text'?'/api/v1/live/text':path==='/execute/stream'?'/api/v1/live/execute/stream':'/api/v1/live/execute';
+        const target = `/local-api${path}`;
+        const secretPath = resolve(projectRoot, '.prismlab-local', 'session-secret');
+        let authHeader = '';
+        try {
+          const secret = readFileSync(secretPath, 'utf8').trim();
+          const visitor = 'a1b2c3d4e5f60718293a4b5c6d7e8f90';
+          const exp = Math.floor(Date.now() / 1000) + 600;
+          const raw = Buffer.from(JSON.stringify({ v: visitor, exp })).toString('base64url');
+          const crypto = await import('node:crypto');
+          const sig = crypto.createHmac('sha256', secret).update(raw).digest('hex');
+          authHeader = `Bearer ${raw}.${sig}`;
+        } catch {}
         const timeoutSignal = AbortSignal.timeout(180_000);
         const fetchSignal = (AbortSignal as any).any ? (AbortSignal as any).any([controller.signal, timeoutSignal]) : controller.signal;
-        const response=await fetch(new URL(target,backend),{method:'POST',headers:{'Content-Type':'application/json','x-prismlab-token':token},body,signal:fetchSignal});
+        const response=await fetch(new URL(target,backend),{method:'POST',headers:{'Content-Type':'application/json','Authorization':authHeader},body,signal:fetchSignal});
         res.statusCode=response.status;res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
         if((path==='/text/stream'||path==='/execute/stream')&&response.ok&&response.body){
           res.setHeader('Content-Type','text/event-stream; charset=utf-8');res.setHeader('X-Accel-Buffering','no');

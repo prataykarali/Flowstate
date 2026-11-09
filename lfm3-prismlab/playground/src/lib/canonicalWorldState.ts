@@ -231,18 +231,20 @@ export function initializeCanonicalWorldState(
   const fullPremise = `${params.premise || ''} ${params.cast?.hook || ''}`.trim();
   const directorPlan = createStoryDirectorPlan(params.theme, params.cast, fullPremise);
 
-  if (characters.length === 0 && directorPlan.characters.length > 0) {
+  if (directorPlan.characters.length > 0) {
     for (const c of directorPlan.characters) {
-      characters.push({
-        id: `char_${c.name.toLowerCase()}`,
-        name: c.name,
-        role: c.role,
-        status: 'alive',
-        location: settingLocation,
-        motivations: [`Face the crisis: ${directorPlan.primaryConflict}`],
-        knowledge: ['Initial situation'],
-        pastActions: []
-      });
+      if (!characters.some(existing => existing.name.toLowerCase() === c.name.toLowerCase())) {
+        characters.push({
+          id: `char_${c.name.toLowerCase()}`,
+          name: c.name,
+          role: c.role,
+          status: 'alive',
+          location: settingLocation,
+          motivations: [`Face the crisis: ${directorPlan.primaryConflict}`],
+          knowledge: ['Initial situation'],
+          pastActions: []
+        });
+      }
     }
   }
 
@@ -554,6 +556,30 @@ export function extractProposedEvents(
     });
   }
 
+  // 4b. Dynamic Character Discovery / Introduction
+  const introMatch = clean.match(/\b(?:introduced|approached|met|encountered|found|unmasked|spoke with|discovered)\s+(?:a\s+(?:man|woman|stranger|ranger|crewmate|detective|scientist)\s+named\s+|an?|the\s+)?([A-Z][a-z]+)\b/);
+  if (introMatch) {
+    const candidateName = introMatch[1];
+    const commonWords = new Set(['The','Then','When','After','Before','But','And','She','He','They','Suddenly','Inside','Outside','Somewhere']);
+    if (!commonWords.has(candidateName) && !characters.some(c => c.name.toLowerCase() === candidateName.toLowerCase())) {
+      events.push({
+        eventId: `evt_${worldState.storyId}_${turnIndex}_intro_${candidateName.toLowerCase()}`,
+        storyId: worldState.storyId,
+        turnIndex,
+        modelId,
+        type: 'CHARACTER_INTRODUCED',
+        actors: [candidateName],
+        description: `${candidateName} was introduced into the scene.`,
+        proposedChanges: [`Add ${candidateName} to active characters`],
+        acceptedChanges: [],
+        irreversible: false,
+        confidence: 'probable',
+        auditLog: [`Matched introduction pattern for ${candidateName}`],
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
   // 5. General Progression Beat
   // Canonical identities are independent of the writer's choice of verbs.
   // Match completed actions only; mentions of old facts do not create events.
@@ -855,6 +881,22 @@ export function applyEventsToWorldState(
           evt.acceptedChanges.push(`Character ${found.name} status updated to injured.`);
         }
       }
+    } else if (evt.type === 'CHARACTER_INTRODUCED') {
+      for (const actor of evt.actors) {
+        if (!nextCharacters.some(c => c.name.toLowerCase() === actor.toLowerCase())) {
+          nextCharacters.push({
+            id: `char_${actor.toLowerCase()}`,
+            name: actor,
+            role: 'secondary',
+            status: 'alive',
+            location: nextLocation,
+            motivations: ['Participate in the unfolding narrative'],
+            knowledge: [`Introduced in turn ${turnIndex + 1}`],
+            pastActions: [`Turn ${turnIndex + 1}: Introduced into the story`]
+          });
+          evt.acceptedChanges.push(`Character ${actor} introduced.`);
+        }
+      }
     } else if (evt.type === 'OBJECT_CONSUMED' && evt.target) {
       const foundEntity = nextEntities.find(e => e.name.toLowerCase() === evt.target!.toLowerCase() || e.id.toLowerCase() === evt.target!.toLowerCase());
       if (foundEntity) {
@@ -1014,6 +1056,9 @@ export function isTruncatedOutput(text: string): { truncated: boolean; reason?: 
 
 export function hasMeaningfulEnding(text: string, goal: string, _theme?: string): boolean {
   if (isTruncatedOutput(text).truncated) return false;
+  if (/\b(?:to be continued|who could it be\??|sudden(?:ly)?(?:,\s*|\s+)(?:an?|the|something|someone|a shadow|another|a cold|icy)\b|grip tighten(?:ed)?|hand passed through|tighten(?:ed)? around (?:his|her|their) wrist|fingers were slick|lurking in the fog|whispered behind (?:him|her|them)|eyes glint(?:ing|ed)? with malice\b)/i.test(text.slice(-180))) {
+    return false;
+  }
   const outcome = /\b(?:reached|arrived|appeared|appears|showed up|found|secured|saved|rescued|recovered|delivered|escaped|returned|won|lost|failed|succeeded|crossed|cross|made it|could not|never reached|abandoned|destroyed|resolved|confess|confessed|love|together|parted|promise|promised|forgave|forgiven|embraced|held|reconciled|separated|laughed|laugh|laughter|smiled|smile|joke|cheered|applauded|celebration|ridiculous|spectacle|absurd|amused|fun|funniest|delight|mourned|mourn|wept|grief|sorrow|accepted|acceptance|farewell|cost|lingering|memory|sacrifice|perished|died|loss|buried|survived|survivor|dread|nightmare|silence|banished|trapped|darkness|revealed|reveal|solved|solve|deduced|deduction|truth|culprit|proven|proved|explanation|unmasked|healed|restore|restored|spell|broken|shattered|peaceful|balance|stabilized|nominal|telemetry|repaired|anomaly|signal|calibrated|rebooted|orbit|self[- ]?destruct\w*|jettisoned|ejected|purged|overrode|overridden|sacrificed|concluded|sealed|contained|aftermath)\b/i.test(text);
   const goalWords = goal.toLowerCase().match(/[a-z]{4,}/g)?.filter(word => !/^(their|there|after|before|because|story|about|would|could|should|through|where|which|these|those)$/.test(word)) || [];
   const grounded = goalWords.some(word => text.toLowerCase().includes(word)) || /\b(?:goal|mission|quest|objective|destination|shelter|treasure|village|town|home|cure|journey|summit|temple|artifact|heart|love|truth|mystery|case|incident|secret|threat|danger|life|loss|festival|rehearsal|station|ship|magic|spell|curse|pastry|cake|bridge|canyon|memory|future|dawn|night|path|choice|bond|entity|nightmare|horror|shadow|creature|monster|dread|survivor|spectacle|joke|laughter|prank|misunderstanding|rumor|prop|chip|reactor|core|airlock|pod)\b/i.test(text);
@@ -1088,19 +1133,29 @@ export function detectNarrativeLoop(
     }
   }
 
-  // 2. Sentence Duplication Check (> 6 content words)
+  // 2. Sentence Duplication Check (> 6 content words) with prefix & fuzzy matching
   const currentSentences = clean.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
   for (let i = 0; i < pastTurns.length; i++) {
     const priorTurn = pastTurns[i];
     if (!priorTurn.output) continue;
     const priorSentences = priorTurn.output.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
     for (const cSent of currentSentences) {
-      if (priorSentences.some(pSent => pSent === cSent)) {
-        issues.push(`Duplicate sentence detected from turn ${i + 1}: "${cSent.slice(0, 60)}..."`);
+      const match = priorSentences.find(pSent => {
+        if (pSent === cSent) return true;
+        const cLead = cSent.slice(0, 36);
+        const pLead = pSent.slice(0, 36);
+        if (cLead.length >= 25 && pLead.length >= 25 && cLead === pLead) return true;
+        const cWords = cSent.split(/\s+/);
+        const pWords = pSent.split(/\s+/);
+        if (cWords.length >= 6 && pWords.length >= 6 && cWords.slice(0, 5).join(' ') === pWords.slice(0, 5).join(' ')) return true;
+        return false;
+      });
+      if (match) {
+        issues.push(`Duplicate sentence/prefix detected from turn ${i + 1}: "${cSent.slice(0, 60)}..."`);
         return {
           hasLoop: true,
           issues,
-          retakePromptDirective: `Do not repeat sentences from earlier turns. Write a new sentence moving the scene forward.`
+          retakePromptDirective: `Do not repeat sentences or opening phrases from earlier turns. Write a new sentence moving the scene forward.`
         };
       }
     }

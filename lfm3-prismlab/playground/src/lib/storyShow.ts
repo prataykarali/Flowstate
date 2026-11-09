@@ -658,9 +658,7 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
           ? `Start a brand-new ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Main person: ${cast.protagonist}, a ${cast.role}. Other person: ${cast.companion}. Place: ${cast.setting}. Starting problem: ${cast.hook}. Use exactly these names. Write three concise sentences, about 400–500 characters total. No title. Do not reuse earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`
           : `Start a fresh ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Stakes: ${director.initialStakes} Main person's name begins with ${show.config.nameInitial || 'a letter you choose'}. Creative seed ${show.config.openingSeed ?? 'new'}. Write three concise sentences, about 400–500 characters total. No title. Avoid earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`;
     } else if (beat === 'ending') {
-      const climaxTurn = show.turns.slice().reverse().find(t => t.modelId === 'text' && t.status === 'completed' && t.output);
-      const climaxContext = climaxTurn?.output ? ` The climax just forced a decisive choice: "${truncateWords(climaxTurn.output, 24)}".` : '';
-      intro = `End this ${genre.displayName} story. Act IV Resolution.${climaxContext} State the definitive outcome of the climax choice and the original goal. Address and conclude the principal conflict: "${director.primaryConflict}". Required ending: ${director.endingRequirements} Show the final consequence and aftermath for the characters and world; do not leave the choice open or merely repeat the climax. Write three concise sentences, about 400–500 characters total.`;
+      intro = `Conclude this ${genre.displayName} story. Act IV Resolution. State the definitive outcome resolving the principal conflict: "${director.primaryConflict}". Required ending: ${director.endingRequirements} Show the final consequence and aftermath for the characters and world; do not leave the choice open, do not repeat the climax, and do not introduce new threats or cliffhangers. Write three concise sentences, about 400–500 characters total.`;
     } else if (beat === 'climax') {
       intro = `Continue this ${genre.displayName} story at its turning point. Act III Climax. Objective: "${director.climaxObjective}". Force a decisive choice or action with immediate stakes. Write three concise sentences, about 400–500 characters total. No recap.`;
     } else {
@@ -670,7 +668,7 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
       intro = `Continue this ${genre.displayName} story. ${dirBeat.targetAct}. Objective: ${dirBeat.narrativeGoal}. Required progression: ${dirBeat.requiredProgression}. Do not repeat: ${dirBeat.avoidRepeating}. ${pendingDirection(show)}${recentClues ? `Clue: ${truncateWords(recentClues, 16)}.` : ''} Write three concise sentences, about 400–500 characters total. No recap.`;
     }
   } else if (creativeMode && cap.role !== 'decision_assistant') {
-    intro = `${supportVoice(modelId)} This is a ${genre.displayName} story. ${genre.acts[actIndex]} Add one NEW action from your perspective. Keep the same people, place and facts; preserve the conflict. Never copy sentences from the story data. Write three concise sentences, about 400–500 characters total. No recap or title.`;
+    intro = `${supportVoice(modelId)} Genre: ${genre.displayName}. Act: ${genre.acts[actIndex]}. Add one fresh observation or action from your perspective advancing the scene. DO NOT repeat or echo prior sentences or the story opening. Keep the same people, place and facts; preserve the conflict. Write three concise sentences, about 400–500 characters total. No recap or title.`;
   } else if (cap.role === 'decision_assistant') {
     intro = creativeMode
       ? `Read the ${show.config.theme} story so far and score the better next plot direction. Use only established people and actions. This is a suggestion, not a new story fact.`
@@ -710,10 +708,27 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   
   const lastAcceptedTurn = show.turns.slice().reverse().find(t => t.status === 'completed' && t.isRelevant !== false && t.output);
   if (lastAcceptedTurn && beat !== 'opening') {
-    tier1Constraints.push(`ADVANCE DIRECTLY FROM LATEST SCENE: "${truncateWords(lastAcceptedTurn.stageText || lastAcceptedTurn.output || '', 28)}"`);
-    tier1Constraints.push(`MANDATORY: Do NOT restate the opening sentence, do NOT rediscover already found items, and do NOT restart the premise. Advance forward with a NEW event.`);
+    tier1Constraints.push(`LATEST SCENE EVENT: ${truncateWords(stripEchoedPrefix(lastAcceptedTurn.stageText || lastAcceptedTurn.output || '', []), 20)}`);
+    tier1Constraints.push(`MANDATORY: Advance forward with a brand new event. DO NOT repeat or quote earlier sentences, descriptions, or the story opening.`);
   } else if (lastAccepted && beat !== 'opening' && lastAccepted.turnIndex > 0) {
     tier1Constraints.push(`Continue from latest event: ${truncateWords(lastAccepted.description, 16)}`);
+  }
+
+const MODEL_CHARACTER_NAMES: Partial<Record<CanonicalModelId, string>> = {
+  text: 'Prism Pure',
+  vision: 'Spectra',
+  audio: 'Echo',
+  omni: 'Omni Pup',
+  d1: 'Prism Thinker',
+  d1_omni: 'Sherlock Omni'
+};
+
+  if (modelId === 'text' && beat !== 'opening') {
+    const lastNonText = show.turns.slice().reverse().find(t => t.modelId !== 'text' && t.status === 'completed' && t.output);
+    if (lastNonText) {
+      const sourceName = MODEL_CHARACTER_NAMES[lastNonText.modelId] || lastNonText.modelId;
+      tier1Constraints.push(`INCORPORATE COLLABORATION: Directly acknowledge and react to the latest finding reported by ${sourceName}.`);
+    }
   }
 
   // Tier 2: Cast & Setting
@@ -727,6 +742,8 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   const firstNarrative = show.turns.find(turn => turn.modelId === 'text' && turn.status === 'completed' && turn.output);
   if (firstNarrative && beat !== 'opening') {
     tier2Foundation.push(`Opening: ${truncateWords(firstNarrative.output!, 24)}`);
+  } else if (show.config.opening && beat !== 'opening') {
+    tier2Foundation.push(`Opening: ${truncateWords(show.config.opening, 24)}`);
   }
 
   // Tier 3: Forensic Clues & Decision routing
@@ -741,9 +758,12 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
 
   // Tier 4: Recent Narrative Action
   const tier4Recent: string[] = [];
+  if (show.humanTurns && show.humanTurns.length > 0) {
+    const lastHuman = show.humanTurns[show.humanTurns.length - 1];
+    tier4Recent.push(`[Human player directive]: "${truncateWords(lastHuman.text, 25)}"`);
+  }
   const admitted = show.turns.filter(turn => turn.status === 'completed' && turn.isRelevant !== false && turn.output);
   for (const turn of admitted.slice(-3)) {
-    if (turn.turnId === firstNarrative?.turnId) continue;
     if (turn.modelId === 'text') tier4Recent.push(`[recent action]: ${truncateWords(turn.output!, 26)}`);
     else if (turn.role !== 'decision_assistant') tier4Recent.push(`[${turn.storyPerspective ? 'beat' : 'observed'} by ${turn.modelId}]: ${truncateWords(turn.output!, 20)}`);
   }
@@ -880,19 +900,140 @@ export function chooseFreshNameInitial(previousOpenings: string[], random = Math
 }
 
 export function sanitizeTurnOutput(text: string): string {
+  if (!text || typeof text !== 'string') return '';
   let trimmed = text.trim();
+  // Strip code blocks and markdown headings
   trimmed = trimmed.replace(/^```[a-z]*\n/i, '').replace(/```$/i, '').trim();
   trimmed = trimmed.replace(/^#+\s+[^\n]+\n/g, '').trim();
+
+  // Strip unwanted planning artifacts and titles (e.g. **Title: The Coat on the Boat**, Title: ...)
+  trimmed = trimmed.replace(/^\s*\*{0,2}Title:\s*[^\n*]+\*{0,2}\s*/i, '');
+  trimmed = trimmed.replace(/^\s*Title:\s*[^\n]+\n*/i, '');
+
+  // Strip Act indicators (e.g. **Act IV – Resolution**, **Act I: The Beginning**, Act II - Discovery)
+  trimmed = trimmed.replace(/^\s*\*{0,2}Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*/i, '');
+  trimmed = trimmed.replace(/^\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n]+)?\n*/i, '');
+
+  // Strip bracketed scene cues (e.g. [Scene: The Houseboat], [Setting: ...], [Chapter 1])
+  trimmed = trimmed.replace(/^\s*\[(?:Scene|Setting|Act|Note|Chapter|Turn|Stage)[^\]]*\]\s*/i, '');
+
+  // Clean raw speech disfluencies like trailing unclosed (um...)
+  trimmed = trimmed.replace(/\s*\((?:um|uh|er|ah)[^)]*\)/gi, '').trim();
+
+  // Clean leading punctuation, ellipses or dangling connective starts like "...where..." or "...but..."
+  trimmed = trimmed.replace(/^[.…\s]*(?:where|and|but|then|so)\s*[.…]+/i, '');
+  trimmed = trimmed.replace(/^[.…\s]+/, '');
+
+  // Clean mid-sentence ellipsis before capital letter (e.g., "where… Lorcan was gone." -> "where. Lorcan was gone.")
+  trimmed = trimmed.replace(/[.…]{2,}\s*([A-Z])/g, '. $1');
+
+  // Fix dangling trailing ellipses before punct (e.g. "hand… He" -> "hand. He")
+  trimmed = trimmed.replace(/[.…]{2,}\s*$/g, '.');
+
   const terminalPunct = /[.!?]"?$/;
   if (!terminalPunct.test(trimmed)) {
     const lastPunct = Math.max(trimmed.lastIndexOf('.'), trimmed.lastIndexOf('!'), trimmed.lastIndexOf('?'));
-    if (lastPunct > trimmed.length * 0.6) {
+    if (lastPunct > trimmed.length * 0.5) {
       trimmed = trimmed.slice(0, lastPunct + 1).trim();
     } else {
       trimmed = trimmed + '.';
     }
   }
+
+  // Ensure first character is capitalized
+  if (trimmed.length > 0) {
+    trimmed = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  }
+
   return trimmed;
+}
+
+/**
+ * Strips echoed opening lines, preceding turn sentences, or quoted prompt excerpts
+ * from the beginning of candidate generation to prevent runaway repetition.
+ */
+export function stripEchoedPrefix(
+  rawText: string,
+  earlierTexts: string[] = [],
+  promptText = ''
+): string {
+  const sanitized = sanitizeTurnOutput(rawText);
+  if (!sanitized) return '';
+
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  // Build reference pool of earlier sentences
+  const refSentences: string[] = [];
+  for (const t of earlierTexts) {
+    if (!t) continue;
+    const sents = t.split(/(?<=[.!?])\s+/);
+    for (const s of sents) {
+      const n = norm(s);
+      if (n.split(' ').length >= 4) refSentences.push(n);
+    }
+  }
+
+  // Also include quoted phrases from prompt
+  const quotes = promptText.match(/"([^"]{15,})"/g) || [];
+  for (const q of quotes) {
+    const n = norm(q.replace(/"/g, ''));
+    if (n.split(' ').length >= 4) refSentences.push(n);
+  }
+
+  const sentences = sanitized.split(/(?<=[.!?])\s+/);
+  const kept: string[] = [];
+  let dropping = true;
+
+  for (let i = 0; i < sentences.length; i++) {
+    const sentence = sentences[i];
+    const nSent = norm(sentence);
+    const sentWords = nSent.split(' ').filter(w => w.length > 2);
+
+    if (dropping) {
+      // 1. Check if whole sentence is an echo of any reference sentence
+      const isFullEcho = refSentences.some(ref => {
+        if (ref === nSent || ref.includes(nSent) || nSent.includes(ref)) return true;
+        const refWords = new Set(ref.split(' ').filter(w => w.length > 2));
+        if (refWords.size >= 4 && sentWords.length >= 4) {
+          const overlap = sentWords.filter(w => refWords.has(w)).length;
+          const ratio = overlap / Math.min(sentWords.length, refWords.size);
+          if (ratio >= 0.70) return true;
+        }
+        return false;
+      });
+
+      if (isFullEcho) {
+        continue; // drop echoed sentence
+      }
+
+      // 2. Check if the beginning of the sentence has a long repeated clause (e.g. "Bastian spotted a flicker of movement near the railing, where...")
+      let trimmedSentence = sentence;
+      for (const ref of refSentences) {
+        const refParts = ref.split(' ');
+        for (let len = Math.min(12, refParts.length); len >= 6; len--) {
+          const prefix = refParts.slice(0, len).join(' ');
+          if (nSent.startsWith(prefix) && nSent.length > prefix.length + 15) {
+            const words = sentence.split(/\s+/);
+            if (words.length > len + 2) {
+              const remainder = words.slice(len).join(' ');
+              if (remainder.length >= 20) {
+                trimmedSentence = remainder.charAt(0).toUpperCase() + remainder.slice(1);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      dropping = false;
+      kept.push(trimmedSentence);
+    } else {
+      kept.push(sentence);
+    }
+  }
+
+  const result = kept.join(' ').trim();
+  return sanitizeTurnOutput(result);
 }
 
 export function appendShowTurn(show: ShowRecord, turn: ShowTurn): ShowRecord {
@@ -1126,19 +1267,60 @@ const GENRE_CUSTOM_DIRECTIONS: Record<string, Record<string, string>> = {
     anchor_crossing: '{C} secures a lifeline across the fissure, allowing the crossing to proceed.',
     salvage_supplies: '{P} retrieves essential survival equipment just before it slips away.',
     push_through_storm: '{P} and {C} brace through the harsh weather to reach higher shelter.'
+  },
+  'Romance': {
+    confess_feelings: '{P} admits their true feelings to {C}, risking emotional vulnerability.',
+    misunderstanding_deepens: 'An awkward misunderstanding between {P} and {C} threatens to push them apart.',
+    share_vulnerability: '{C} confides in {P} about the past hurt holding them back.',
+    stand_together: '{P} and {C} choose each other over outside expectations.',
+    tender_gesture: 'A quiet, honest gesture between {P} and {C} breaks the lingering tension.'
+  },
+  'Horror': {
+    barricade_door: '{P} frantically reinforces the barrier as unnatural scratching starts outside.',
+    flee_corridor: '{C} pulls {P} into a shadowed alcove just before the terrifying presence turns toward them.',
+    examine_talisman: '{P} discovers the protective ward has been broken from the inside.',
+    unmask_presence: '{P} raises the lantern, exposing the true nature of the lurking threat.',
+    sever_binding: '{C} severs the cursed binding before the entity can cross the threshold.'
+  },
+  'Tragedy': {
+    accept_sacrifice: '{P} steps forward to bear the irreversible cost so {C} can survive.',
+    confront_inevitable: '{C} acknowledges that not everyone can be saved before the water rises.',
+    parting_promise: '{P} and {C} exchange a solemn promise before the final farewell.',
+    hold_the_line: '{P} stays behind to buy vital minutes for the evacuation.',
+    solemn_remembrance: '{C} preserves the emblem of the fallen, determined that their memory endures.'
+  },
+  'Comedy': {
+    absurd_disguise: '{P} hastily puts on an outrageous disguise to avoid being recognized by the mayor.',
+    frantic_swap: '{C} tries to swap the ruined prop with a dessert while no one is looking.',
+    topple_display: '{P} accidentally trips over the ribbon, sending the festive centerpiece flying.',
+    double_down: '{C} invents a wildly preposterous excuse that everyone surprisingly believes.',
+    clumsy_rescue: '{P} dives across the table to catch the falling trophy, landing face-first in icing.'
+  },
+  'Fantasy': {
+    invoke_ancient_rune: '{P} channels the glowing glyph carved into the heartwood at great personal strain.',
+    counter_curse: '{C} shatters the obsidian focal stone, releasing trapped spirit energy.',
+    commune_guardian: '{P} offers a treasured memory to the forest guardian in exchange for safe passage.',
+    shield_enchantment: '{C} weaves a barrier of woven light to repel the creeping corruption.',
+    seal_rift: '{P} binds the shimmering tear between realms using the elemental reagent.'
+  },
+  'Mystery': {
+    inspect_hidden_compartment: '{P} unlatches a false panel in the desk revealing a coded correspondence.',
+    expose_timeline_gap: '{P} points out that {C} could not have heard the chime from across the courtyard.',
+    trace_wax_seal: '{C} matches the unique crest on the torn letter to an unrecorded visitor.',
+    interrogate_contradiction: '{P} corners the key witness with their conflicting statements.',
+    reconstruct_sequence: '{P} piecing together the broken glass pattern, proves the latch was opened from inside.'
   }
 };
 
-const LATE_DIRECTIONS = ['hard_choice', 'confront', 'reveal_secret', 'honest_moment', 'raise_stakes'];
+export const LATE_DIRECTIONS = ['hard_choice', 'confront', 'reveal_secret', 'honest_moment', 'raise_stakes'];
 
 export function chooseStoryDirections(show: ShowRecord, random = Math.random): { instructions: string; criteria: Record<string, string> } {
   const names = storyPeople(show);
   const fill = (text: string) => text.replaceAll('{P}', names[0] || 'The main person').replaceAll('{C}', names[1] || 'another person');
   const used = new Set(show.turns.flatMap(turn => turn.decisionData?.valid ? [turn.decisionData.predicted_route] : []));
-  const late = show.turns.length / Math.max(1, show.turnOrder.length) > 0.55;
   const genreSet = GENRE_CUSTOM_DIRECTIONS[show.config.theme];
-  const sourceDict = genreSet && !late ? { ...STORY_DIRECTIONS, ...genreSet } : STORY_DIRECTIONS;
-  const keys = (late ? LATE_DIRECTIONS : Object.keys(sourceDict));
+  const sourceDict = genreSet ? { ...STORY_DIRECTIONS, ...genreSet } : STORY_DIRECTIONS;
+  const keys = Object.keys(sourceDict);
   const pool = keys.filter(key => !used.has(key)).length >= 3 ? keys.filter(key => !used.has(key)) : keys;
   const shuffled = [...pool].sort(() => random() - 0.5).slice(0, 3);
   const criteria = Object.fromEntries(shuffled.map(key => [key, fill(sourceDict[key] || STORY_DIRECTIONS[key] || key).slice(0, 200)]));

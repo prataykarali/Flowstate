@@ -45,7 +45,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentRoute, onNavigate
       }}
     >
       <RouteIcon id={route.id} />
-      <span>{route.label}</span>
+      <span className="nav-label-full">{route.label}</span>
+      <span className="nav-label-short">{route.shortLabel || route.label}</span>
       {lock.busy && (route.id === 'chat' || route.id === 'trivia' || route.id === 'playground') && lock.task && (
         <span className="nav-busy-dot" title="Active AI task" aria-label="AI task in progress" />
       )}
@@ -57,7 +58,8 @@ export const Navigation: React.FC<NavigationProps> = ({ currentRoute, onNavigate
       {primary.map(link)}
       <details className="nav-more" ref={menuRef}>
         <summary className={`nav-link ${secondary.some((route) => route.id === currentRoute) ? 'active' : ''}`}>
-          Explore <span aria-hidden="true">⌄</span>
+          <span className="nav-label-full">Explore <span aria-hidden="true">⌄</span></span>
+          <span className="nav-label-short">More <span aria-hidden="true">⌄</span></span>
         </summary>
         <div className="nav-more-menu">{secondary.map(link)}</div>
       </details>

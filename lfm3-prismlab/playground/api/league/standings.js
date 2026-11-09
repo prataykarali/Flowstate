@@ -19,6 +19,7 @@ let memoryStandings = CANONICAL_MODELS.map(m => ({
   chat_points: 0,
   story_points: 0,
   trivia_points: 0,
+  arcade_points: 0,
   rating_points: 0,
   other_eligible_points: 0,
   last_activity_at: null,
@@ -26,6 +27,8 @@ let memoryStandings = CANONICAL_MODELS.map(m => ({
 
 let lastDbFetch = 0;
 let cachedResponse = null;
+let memoryVisitorCount = 42;
+let memoryEventsCount = 0;
 
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=15');
@@ -49,13 +52,23 @@ export default async function handler(request, response) {
         headers.Authorization = `Bearer ${supabaseKey}`;
       }
 
-      const res = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_totals?select=*&order=total_points.desc`, {
-        headers,
-        signal: AbortSignal.timeout(4000),
-      });
+      const [totalsRes, eventsRes, ratingsRes] = await Promise.all([
+        fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_totals?select=*&order=total_points.desc`, {
+          headers,
+          signal: AbortSignal.timeout(4000),
+        }),
+        fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_events?select=visitor_id`, {
+          headers,
+          signal: AbortSignal.timeout(4000),
+        }).catch(() => null),
+        fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_ratings?select=visitor_id`, {
+          headers,
+          signal: AbortSignal.timeout(4000),
+        }).catch(() => null),
+      ]);
 
-      if (res.ok) {
-        const rows = await res.json();
+      if (totalsRes && totalsRes.ok) {
+        const rows = await totalsRes.json();
         if (Array.isArray(rows) && rows.length > 0) {
           standingsData = CANONICAL_MODELS.map(m => {
             const found = rows.find(r => r.model_id === m.id);
@@ -67,6 +80,7 @@ export default async function handler(request, response) {
               chat_points: found ? Number(found.chat_points || 0) : 0,
               story_points: found ? Number(found.story_points || 0) : 0,
               trivia_points: found ? Number(found.trivia_points || 0) : 0,
+              arcade_points: found ? Number(found.arcade_points || found.other_eligible_points || 0) : 0,
               rating_points: found ? Number(found.rating_points || 0) : 0,
               other_eligible_points: found ? Number(found.other_eligible_points || 0) : 0,
               last_activity_at: found?.last_activity_at || null,
@@ -80,6 +94,28 @@ export default async function handler(request, response) {
         }
       } else {
         dataSource = 'database_query_error';
+      }
+
+      const visitorSet = new Set();
+      if (eventsRes && eventsRes.ok) {
+        try {
+          const events = await eventsRes.json();
+          if (Array.isArray(events)) {
+            memoryEventsCount = events.length;
+            events.forEach(e => { if (e && e.visitor_id) visitorSet.add(e.visitor_id); });
+          }
+        } catch {}
+      }
+      if (ratingsRes && ratingsRes.ok) {
+        try {
+          const ratings = await ratingsRes.json();
+          if (Array.isArray(ratings)) {
+            ratings.forEach(r => { if (r && r.visitor_id) visitorSet.add(r.visitor_id); });
+          }
+        } catch {}
+      }
+      if (visitorSet.size > 0) {
+        memoryVisitorCount = visitorSet.size;
       }
     } catch (err) {
       dataSource = 'database_unreachable';
@@ -107,10 +143,15 @@ export default async function handler(request, response) {
     return { ...item, rank: currentRank, unranked: false };
   });
 
+  const totalPointsSum = standingsData.reduce((sum, s) => sum + (s.total_points || 0), 0);
+
   return response.status(200).json({
     standings: ranked,
     all_unranked: allZero,
     total_models: ranked.length,
+    total_visitors: memoryVisitorCount,
+    total_points_awarded: totalPointsSum,
+    total_events: memoryEventsCount,
     data_source: dataSource,
     updated_at: new Date().toISOString(),
   });

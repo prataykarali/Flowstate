@@ -32,7 +32,7 @@ export function saveRating(modelId: CanonicalModelId, stars: number, storage: Pi
 
 export interface ChampionshipStanding {
   modelId: CanonicalModelId; rank: number | null; points: number;
-  triviaPoints: number; chatPoints: number; storyPoints: number; ratingPoints: number;
+  triviaPoints: number; chatPoints: number; storyPoints: number; arcadePoints: number; ratingPoints: number;
   stars: number | null; matches: number; correct: number; attempts: number; incorrect: number; errors: number;
   lastResultAt: string | null;
 }
@@ -46,12 +46,13 @@ export function championshipStandings(events: LeagueEvent[], matches: LiveMatch[
     const leagueTrivia = own.filter(event => event.activity === 'trivia_correct').reduce((sum, event) => sum + event.pointsEarned, 0);
     const chatPoints = own.filter(event => event.activity === 'chat_session').reduce((sum, event) => sum + event.pointsEarned, 0);
     const storyPoints = own.filter(event => event.activity.startsWith('story_') || event.activity.startsWith('auto_story_')).reduce((sum, event) => sum + event.pointsEarned, 0);
+    const arcadePoints = own.filter(event => event.activity === 'runner_completed').reduce((sum, event) => sum + event.pointsEarned, 0);
     const triviaPoints = live.points + leagueTrivia;
     const stars = ratings[modelId]?.stars || null;
     const ratingPoints = stars ? stars * 2 : 0;
     const lastResultAt = [live.lastResultAt, ratings[modelId]?.updatedAt, ...own.map(event => event.timestamp)].filter((value): value is string => !!value).sort().at(-1) || null;
-    return { modelId, rank: null as number | null, points: triviaPoints + chatPoints + storyPoints + ratingPoints, triviaPoints, chatPoints, storyPoints, ratingPoints, stars, matches: live.matches, correct: live.correct, attempts: live.attempts, incorrect: live.incorrect, errors: live.errors, lastResultAt };
+    return { modelId, rank: null as number | null, points: triviaPoints + chatPoints + storyPoints + arcadePoints + ratingPoints, triviaPoints, chatPoints, storyPoints, arcadePoints, ratingPoints, stars, matches: live.matches, correct: live.correct, attempts: live.attempts, incorrect: live.incorrect, errors: live.errors, lastResultAt };
   });
-  rows.sort((a, b) => b.points - a.points || b.triviaPoints - a.triviaPoints || ids.indexOf(a.modelId) - ids.indexOf(b.modelId));
+  rows.sort((a, b) => b.points - a.points || b.triviaPoints - a.triviaPoints || b.arcadePoints - a.arcadePoints || ids.indexOf(a.modelId) - ids.indexOf(b.modelId));
   return rows.map(row => ({ ...row, rank: row.points ? 1 + rows.filter(other => other.points > row.points).length : null }));
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { MascotStage } from '../components/mascots/MascotStage.tsx';
+import { WorldTelemetrySection } from '../components/world/WorldTelemetrySection.tsx';
 
 interface HomeProps {
   onNavigateToPlayground: (modelId: string) => void;
@@ -20,5 +21,6 @@ export const Home: React.FC<HomeProps> = ({ onNavigateToPlayground }) => (
       </div>
     </div>
     <MascotStage onNavigateToPlayground={onNavigateToPlayground} />
+    <WorldTelemetrySection onNavigateToPlayground={onNavigateToPlayground} />
   </div>
 );

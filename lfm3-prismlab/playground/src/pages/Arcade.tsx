@@ -29,7 +29,7 @@ export const Arcade: React.FC = () => {
             <p className="eyebrow">01 / Original PrismLab game</p>
             <h2>Endless Mascot Runner</h2>
             <p>
-              Play the earlier runner with its original scenery, crystal hazards, movement and sound. Switch among six mascots without restarting your run.
+              Play the earlier runner with its original scenery, crystal hazards, movement and sound. Runs of 25+ pts award <strong>+8</strong>, 75+ pts award <strong>+15</strong>, and 150+ pts award <strong>+25</strong> Championship points to the mascot's global score!
             </p>
             <label>
               Starting mascot

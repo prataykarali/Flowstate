@@ -46,11 +46,14 @@ const ALLOWED_ACTIVITY_POINTS = {
   story_complete: 10,
   trivia_correct: 100,
   trivia_match: 0,
+  runner_completed: 25,
+  arcade: 25,
 };
 
 // In-memory event deduplication set
 const processedEvents = new Set();
 const processedReceipts = new Set();
+const visitorArcadeEvents = new Map();
 
 function verifyReceipt(receipt, secret) {
   if (!receipt || typeof receipt !== 'string') return null;
@@ -101,7 +104,9 @@ export default async function handler(request, response) {
   let verifiedActivityType = body.activity_type;
   let verifiedReceiptId = source_receipt_id;
 
-  if (sessionSecret) {
+  const isArcade = body.activity_type === 'runner_completed' || body.activity_type === 'arcade';
+
+  if (sessionSecret && !isArcade) {
     if (!activity_receipt) {
       return response.status(403).json({ error: 'Proof of inference required: missing activity_receipt' });
     }
@@ -181,6 +186,33 @@ export default async function handler(request, response) {
 
     // 4. Cryptographic receipt idempotency binding
     verifiedReceiptId = `${verified.req}:${verifiedActivityType}`;
+  } else if (isArcade) {
+    verifiedActivityType = 'runner_completed';
+    // Security audit: require authentic runner reference
+    if (!source_receipt_id || typeof source_receipt_id !== 'string') {
+      return response.status(422).json({ error: 'Missing required runner evidence reference (source_receipt_id)' });
+    }
+    const runnerMatch = source_receipt_id.match(/^runner:([a-zA-Z0-9_-]+)(?::score:(\d+))?$/);
+    if (!runnerMatch) {
+      return response.status(422).json({ error: 'Malformed runner evidence reference' });
+    }
+    const reportedScore = runnerMatch[2] ? Number(runnerMatch[2]) : null;
+    if (reportedScore !== null && reportedScore < 25) {
+      return response.status(422).json({ error: 'Score below minimum threshold (25 pts) for Championship points' });
+    }
+    // Bind session to run identifier to prevent duplicate submissions of the same game
+    verifiedReceiptId = `runner:${runnerMatch[1]}`;
+
+    // Rate-limit & daily cap enforcement per visitor (max 2 completions per 24 hours)
+    const now = Date.now();
+    const visitorRuns = (visitorArcadeEvents.get(visitor_id) || []).filter(ts => now - ts < 86400000);
+    if (visitorRuns.length >= 2) {
+      return response.status(429).json({ error: 'Daily Runner cap reached: max 2 game completions scored per 24h.' });
+    }
+    const lastRunTs = visitorRuns[visitorRuns.length - 1];
+    if (lastRunTs && now - lastRunTs < 12000) {
+      return response.status(429).json({ error: 'Runner completion cooldown active; please wait between runs.' });
+    }
   }
 
   if (!verifiedModelId || !CANONICAL_MODEL_IDS.has(verifiedModelId)) {
@@ -191,7 +223,17 @@ export default async function handler(request, response) {
   }
 
   // Server-authoritative point calculation (strictly server enforced)
-  const awardedPoints = ALLOWED_ACTIVITY_POINTS[verifiedActivityType];
+  let awardedPoints = ALLOWED_ACTIVITY_POINTS[verifiedActivityType];
+  if (isArcade) {
+    const runnerMatch = source_receipt_id.match(/^runner:([a-zA-Z0-9_-]+)(?::score:(\d+))?$/);
+    const scoreVal = runnerMatch && runnerMatch[2] ? Number(runnerMatch[2]) : null;
+    let maxAllowed = 25;
+    if (scoreVal !== null) {
+      maxAllowed = scoreVal >= 150 ? 25 : scoreVal >= 75 ? 15 : 8;
+    }
+    const reqPts = Number(body.points);
+    awardedPoints = [8, 15, 25].includes(reqPts) ? Math.min(reqPts, maxAllowed) : (scoreVal !== null ? maxAllowed : 8);
+  }
   verifiedActivityType = ACTIVITY_MAP[verifiedActivityType] || verifiedActivityType;
 
   // Idempotency check
@@ -199,11 +241,17 @@ export default async function handler(request, response) {
     return response.status(200).json({ status: 'duplicate', message: 'Event already processed' });
   }
   if (verifiedReceiptId && processedReceipts.has(verifiedReceiptId)) {
-    return response.status(200).json({ status: 'duplicate', message: 'Receipt already processed' });
+    return response.status(200).json({ status: 'duplicate', message: 'Receipt or run session already processed' });
   }
 
   processedEvents.add(event_id);
   if (verifiedReceiptId) processedReceipts.add(verifiedReceiptId);
+  if (isArcade) {
+    const now = Date.now();
+    const visitorRuns = (visitorArcadeEvents.get(visitor_id) || []).filter(ts => now - ts < 86400000);
+    visitorRuns.push(now);
+    visitorArcadeEvents.set(visitor_id, visitorRuns);
+  }
 
   // Attempt database persistence
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;

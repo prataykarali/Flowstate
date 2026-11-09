@@ -14,11 +14,12 @@ const scoreSource = readFileSync(new URL('../src/lib/championshipScore.ts', impo
   .replace("import { triviaStandings, type LiveMatch } from './triviaLive.ts';", 'const triviaStandings = globalThis.__championshipTrivia;');
 const score = await import(`data:text/javascript,${encodeURIComponent(compile(scoreSource))}`);
 
-test('Championship combines genuine completed Trivia and validated Chat, Story, and rating points', () => {
+test('Championship combines genuine completed Trivia and validated Chat, Story, Arcade, and rating points', () => {
   const requestIds = ['a'.repeat(32), 'b'.repeat(32)];
   const base = { modelId: 'text', sessionId: 'session-1', completionStatus: 'completed', validationStatus: 'validated', evidenceRef: 'completed-model-requests', timestamp: '2026-11-05T10:00:00Z' };
   const chat = league.scoreEvent([], { ...base, activity: 'chat_session', requestIds }).events;
-  const events = league.scoreEvent(chat, { ...base, activity: 'story_contribution', requestId: 'c'.repeat(32) }).events;
+  const withStory = league.scoreEvent(chat, { ...base, activity: 'story_contribution', requestId: 'c'.repeat(32) }).events;
+  const events = league.scoreEvent(withStory, { ...base, activity: 'runner_completed', score: 150, started: true }).events;
   const complete = { id: 'live-1', mode: 'live', status: 'completed', rounds: [{ index: 0, attempts: [{ modelId: 'vision', status: 'correct', points: 100, timestamp: '2026-11-05T11:00:00Z' }] }] };
   const cancelled = { ...complete, id: 'cancelled', status: 'cancelled' };
   const ratings = { text: { stars: 5, updatedAt: '2026-11-05T12:00:00Z' } };
@@ -27,8 +28,9 @@ test('Championship combines genuine completed Trivia and validated Chat, Story, 
   const vision = rows.find(row => row.modelId === 'vision');
   assert.equal(text.chatPoints, 4);
   assert.equal(text.storyPoints, 6);
+  assert.equal(text.arcadePoints, 25);
   assert.equal(text.ratingPoints, 10);
-  assert.equal(text.points, 20);
+  assert.equal(text.points, 45);
   assert.equal(vision.triviaPoints, 100);
   assert.equal(vision.points, 100);
   assert.equal(vision.rank, 1);
