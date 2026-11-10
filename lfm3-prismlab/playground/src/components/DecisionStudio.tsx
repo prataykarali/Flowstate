@@ -158,8 +158,12 @@ export const DecisionStudio: React.FC<DecisionStudioProps> = ({
     // Validate choices
     const criteria: Record<string, string> = {};
     for (const c of choices) {
-      const key = c.id.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '_') || `opt_${Math.random().toString(36).slice(2, 6)}`;
-      criteria[key] = c.description.trim() || c.label.trim();
+      let key = c.id.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+      if (!key) key = `opt_${Math.random().toString(36).slice(2, 6)}`;
+      else if (/^[0-9]/.test(key)) key = `opt_${key}`;
+      key = key.slice(0, 30);
+      const val = (c.description.trim() || c.label.trim()).slice(0, 200);
+      if (val) criteria[key] = val;
     }
 
     if (Object.keys(criteria).length < 2) {

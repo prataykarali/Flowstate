@@ -36,8 +36,10 @@ const PREFERENCE_REGEX = /(?:which (?:choice|one|option) is better (?:if|when)\s
 const FOLLOWUP_REGEX = /^(actually|what if|how about|what about|prioritiz|if we prioritiz|if i prioritiz|i prefer|preferring|with (a )?focus on|considering|weighting|give more weight to)\b/i;
 
 function cleanOptionSlug(text: string): string {
-  const slug = text.toLowerCase().trim().replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30);
-  return slug || `opt_${Math.random().toString(36).slice(2, 6)}`;
+  let slug = text.toLowerCase().trim().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '');
+  if (!slug) return `opt_${Math.random().toString(36).slice(2, 6)}`;
+  if (/^[0-9]/.test(slug)) slug = `opt_${slug}`;
+  return slug.slice(0, 30);
 }
 
 function cleanOptionLabel(text: string): string {
