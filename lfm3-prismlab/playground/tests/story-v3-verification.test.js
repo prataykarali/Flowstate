@@ -42,8 +42,13 @@ const {
   isCommittedShowTurn,
   getCommittedShowTurnCount,
   hasMeaningfulEnding,
+  detectNarrativeStagnation,
+  validateOpeningQuality,
+  validateClimaxTurn,
+  detectPromptLeakage,
   auditStoryQuality,
   chooseStoryDirections,
+  presentStoryDirection,
   formatStageDialogue,
   validateDecisionJson,
   SHOW_CAPABILITIES,
@@ -367,3 +372,117 @@ test('V3.1: Role-aware prompt leakage detection distinguishes instructions from 
   const fictionalText = 'The canyon winds began to echo through the limestone arches as dusk settled over the ridge.';
   assert.equal(story.detectPromptLeakage(fictionalText).leaked, false, 'Legitimate fictional prose with "echo" must not be flagged');
 });
+
+test('V3.1-Gate1: Opening quality validation rejects pure atmosphere and requires protagonist, objective, stakes', () => {
+  const cast = { protagonist: 'Elena', companion: 'Mateo', role: 'investigator', setting: 'docks warehouse', hook: 'find the stolen cipher' };
+
+  // Purely atmospheric opening with no character, goal or stakes
+  const atmosphereOnly = 'Rain fell steadily against the cracked windows of the empty harbor warehouse. Fog drifted in total silence along the river.';
+  const atmosphereRes = validateOpeningQuality(atmosphereOnly, cast, 'Detective investigation');
+  assert.equal(atmosphereRes.valid, false, 'Pure atmosphere must be rejected');
+  assert.ok(atmosphereRes.issues.some(i => i.includes('feature the protagonist')), 'Must flag missing protagonist');
+
+  // Protagonist mentioned but no objective or stakes
+  const noGoal = 'Elena stood near the door of the docks warehouse. She watched the dark water through the broken glass.';
+  const noGoalRes = validateOpeningQuality(noGoal, cast, 'Detective investigation');
+  assert.equal(noGoalRes.valid, false, 'Opening lacking objective or stakes must be rejected');
+
+  // Concrete opening with protagonist, objective and stakes
+  const concreteOpening = 'Elena arrived at the docks warehouse, tasked with recovering the stolen cipher before midnight. If she failed to find the ledger before the tide turned, the syndicate would destroy all evidence.';
+  const concreteRes = validateOpeningQuality(concreteOpening, cast, 'Detective investigation');
+  assert.equal(concreteRes.valid, true, 'Complete opening must pass');
+  assert.equal(concreteRes.issues.length, 0);
+});
+
+test('V3.1-Gate2: Climax turn validation requires active turning point and decisive confrontation', () => {
+  const objective = 'Confront the saboteur and secure the reactor core';
+
+  // Passive description without turning point
+  const passiveClimax = 'The reactor room was cold and quiet. Red emergency lights flickered across the metal walls as the seconds passed by.';
+  const passiveRes = validateClimaxTurn(passiveClimax, objective, 'Science fiction');
+  assert.equal(passiveRes.valid, false, 'Purely descriptive climax must be rejected');
+  assert.ok(passiveRes.issues.some(i => i.includes('decisive action') || i.includes('stalled on passive')), 'Must flag lack of turning point action');
+
+  // Decisive turning point confrontation
+  const activeClimax = 'Elena stepped forward and confronted the saboteur directly, lunging to wrench the detonation override cable free. With a decisive strike, she shattered the bypass module and sealed the core compartment.';
+  const activeRes = validateClimaxTurn(activeClimax, objective, 'Science fiction');
+  assert.equal(activeRes.valid, true, 'Active decisive turning point must pass');
+  assert.equal(activeRes.issues.length, 0);
+});
+
+test('V3.1-Gate3: Anti-stagnation engine detects consecutive passive turns without progression', () => {
+  const pastTurns = [
+    { modelId: 'text', output: 'The fog hung thick and the street remained completely still.' },
+    { modelId: 'vision', output: 'I see a lamppost and wet stone.' }
+  ];
+
+  // Second passive turn describing the scene with no new action
+  const stagnantTurn = 'Shadows lingered along the sidewalk as silence gripped the cold night air.';
+  const stagRes = detectNarrativeStagnation(stagnantTurn, 'text', pastTurns);
+  assert.equal(stagRes.hasStagnation, true, 'Consecutive passive turns must trigger stagnation flag');
+  assert.ok(stagRes.retakePromptDirective?.includes('stalling on passive description'), 'Must provide corrective directive');
+
+  // Active progression turn
+  const activeTurn = 'Elena decided to break the padlock with an iron crowbar and entered the basement.';
+  const activeRes = detectNarrativeStagnation(activeTurn, 'text', pastTurns);
+  assert.equal(activeRes.hasStagnation, false, 'Turn with character action and progression must pass');
+});
+
+test('V3.1-Gate4: Genre-specific ending validation enforces thematic resolution contracts', () => {
+  const detGoal = 'Discover who murdered Lord Blackwood and secure the family will.';
+
+  // Detective ending without culprit or evidence (even with "found")
+  const weakDet = 'They arrived at the gate and found relief as the morning sun rose over the quiet estate.';
+  assert.equal(hasMeaningfulEnding(weakDet, detGoal, 'Detective investigation'), false, 'Detective ending without culprit/evidence must fail');
+
+  // Valid Detective ending
+  const strongDet = 'Elena unmasked the butler as the culprit, presenting the forged will and matching footprints as conclusive evidence that solved the case before the inspector.';
+  assert.equal(hasMeaningfulEnding(strongDet, detGoal, 'Detective investigation'), true, 'Detective ending with unmasked culprit and evidence must pass');
+
+  // Comedy ending without comic payoff
+  const comGoal = 'Bake a three-tier wedding cake without the chef noticing.';
+  const weakCom = 'They escaped into the courtyard and reached the garden safely.';
+  assert.equal(hasMeaningfulEnding(weakCom, comGoal, 'Comedy'), false, 'Comedy ending without comic payoff must fail');
+
+  // Valid Comedy ending
+  const strongCom = 'The lopsided cake collapsed into a hilarious cascade of frosting, sending the guests into roaring laughter as the chef grinned at the ridiculous spectacle.';
+  assert.equal(hasMeaningfulEnding(strongCom, comGoal, 'Comedy'), true, 'Comedy ending with laughter and comic spectacle must pass');
+
+  // Tragedy ending with acknowledged sacrifice
+  const tragGoal = 'Defend the fortress gate until the villagers escape.';
+  const strongTrag = 'Julian made the ultimate sacrifice, holding the collapsing timber until the last villager crossed, accepting his death with solemn grief as the valley fell into mourning.';
+  assert.equal(hasMeaningfulEnding(strongTrag, tragGoal, 'Tragedy'), true, 'Tragedy ending with sacrifice and loss must pass');
+});
+
+test('V3.1-Gate5: Director-model presentation is context-grounded and free of template leakage', () => {
+  const show = createShow({
+    ...DEFAULT_SHOW_CONFIG,
+    theme: 'Detective investigation',
+    turnCount: 9,
+    cast: { protagonist: 'Elena', companion: 'Mateo', role: 'investigator', setting: 'docks warehouse', hook: 'find the stolen cipher' }
+  });
+
+  const directions = chooseStoryDirections(show);
+  assert.ok(directions.criteria.character_choice.includes('Elena and Mateo'), 'Criteria must reference actual characters');
+  assert.ok(!directions.criteria.character_choice.includes('openThread'), 'Must not leak variable placeholders');
+  assert.ok(!directions.criteria.causal_development.includes('the latest accepted contribution'), 'Must not leak fallback phrases');
+
+  const d1Voice = presentStoryDirection('d1', { predicted_route: 'character_choice', confidence: 0.9, probabilities: { character_choice: 0.9 }, valid: true, rawText: '' }, directions.criteria);
+  assert.ok(d1Voice?.startsWith('Prism Thinker directs the tactical priority:'), 'd1 must speak in Prism Thinker persona');
+  assert.ok(!d1Voice?.includes('Analyzing the active vectors, the crucial turn is:'), 'Old template wording must be replaced');
+
+  const d1OmniVoice = presentStoryDirection('d1_omni', { predicted_route: 'causal_development', confidence: 0.88, probabilities: { causal_development: 0.88 }, valid: true, rawText: '' }, directions.criteria);
+  assert.ok(d1OmniVoice?.startsWith('Sherlock Omni synthesizes the threads and directs the next turn:'), 'd1_omni must speak in Sherlock Omni persona');
+});
+
+test('V3.1-Gate6: Prose sanitization strips markdown headings, act labels, script directions, and bullet outlines', () => {
+  const dirtyOutput = `### Chapter 2: The Warehouse\n**Act II — Discovery**\nNarrator: Elena examined the iron crate.\n1. Look inside the compartment.\n(um, where... she saw the gold).`;
+  const clean = sanitizeTurnOutput(dirtyOutput);
+  assert.ok(!clean.includes('Chapter 2'), 'Must strip chapter header');
+  assert.ok(!clean.includes('Act II'), 'Must strip Act label');
+  assert.ok(!clean.includes('Narrator:'), 'Must strip Narrator prefix');
+  assert.ok(!clean.includes('1. '), 'Must strip outline numbers');
+  assert.ok(!clean.includes('(um'), 'Must clean disfluencies');
+  assert.ok(clean.includes('Elena examined the iron crate'), 'Must preserve legitimate prose');
+});
+

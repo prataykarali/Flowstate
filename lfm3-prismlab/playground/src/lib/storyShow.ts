@@ -9,6 +9,7 @@ import {
   isTruncatedOutput,
   hasMeaningfulEnding,
   detectNarrativeLoop,
+  detectNarrativeStagnation,
   auditStoryQuality,
   type CanonicalWorldState,
   type NarrativeEvent,
@@ -35,6 +36,7 @@ export {
   isTruncatedOutput,
   hasMeaningfulEnding,
   detectNarrativeLoop,
+  detectNarrativeStagnation,
   auditStoryQuality,
   createStoryDirectorPlan,
   type CanonicalWorldState,
@@ -222,6 +224,7 @@ export function isCommittedShowTurn(turn: ShowTurn): boolean {
   if (typeof turn.output !== 'string') return false;
   const trimmed = turn.output.trim();
   if (trimmed.length < 20) return false;
+  if (detectPromptLeakage(trimmed).leaked) return false;
 
   // Stricter inspection for finish_reason === 'length':
   // Never automatically accept cut-off text merely because it contains characters
@@ -814,12 +817,12 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
       intro = show.config.scenarioId
         ? `Open this ${show.config.theme} case in three concise sentences, about 400–500 characters total. Use the exact place and event in the premise; ${cast ? `the detective is named ${cast.protagonist} and the witness is ${cast.companion}` : 'invent only the detective\'s name'}. Do not move to another building or add new evidence. No title. ${show.config.opening}`
         : cast
-          ? `Start a brand-new ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict seed: ${director.primaryConflict} Main person: ${cast.protagonist}, a ${cast.role}. Other person: ${cast.companion}.${cast.setting ? ` Place: ${cast.setting}.` : ''}${cast.hook ? ` Starting situation: ${cast.hook}.` : ''} Use exactly these names. Invent a fresh plot with a clear character goal; do not follow a preset storyline. Write three concise sentences, about 400–500 characters total. No title. Do not reuse earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`
-          : `Start a fresh ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Stakes: ${director.initialStakes} Main person's name begins with ${show.config.nameInitial || 'a letter you choose'}. Creative seed ${show.config.openingSeed ?? 'new'}. Write three concise sentences, about 400–500 characters total. No title. Avoid earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`;
+          ? `Start a brand-new ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict seed: ${director.primaryConflict} Main person: ${cast.protagonist}, a ${cast.role}. Other person: ${cast.companion}.${cast.setting ? ` Place: ${cast.setting}.` : ''}${cast.hook ? ` Starting situation: ${cast.hook}.` : ''} Use exactly these names. Write three concise sentences (400–500 characters total). Sentence 1: Establish ${cast.protagonist} at ${cast.setting || 'the scene'} facing the situation. Sentence 2: Establish their specific character objective or urgent central question. Sentence 3: Reveal the immediate stakes or complication if they fail. No title, no purely atmospheric text. Do not reuse earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`
+          : `Start a fresh ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Stakes: ${director.initialStakes} Main person's name begins with ${show.config.nameInitial || 'a letter you choose'}. Creative seed ${show.config.openingSeed ?? 'new'}. Write three concise sentences (400–500 characters total). Sentence 1: Establish the character and setting. Sentence 2: Establish their concrete objective or central question. Sentence 3: Reveal immediate stakes. No title, no purely atmospheric text. Avoid earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`;
     } else if (beat === 'ending') {
       intro = `Conclude this ${genre.displayName} story. Act IV Resolution. State the definitive outcome resolving the principal conflict: "${director.primaryConflict}". Required ending: ${director.endingRequirements} Show the final consequence and aftermath for the characters and world; do not leave the choice open, do not repeat the climax, and do not introduce new threats or cliffhangers. Write three concise sentences, about 400–500 characters total.`;
     } else if (beat === 'climax') {
-      intro = `Continue this ${genre.displayName} story at its turning point. Act III Climax. Objective: "${director.climaxObjective}". Force a decisive choice or action with immediate stakes. Write three concise sentences, about 400–500 characters total. No recap.`;
+      intro = `Continue this ${genre.displayName} story at its decisive turning point. Act III Climax. Objective: "${director.climaxObjective}". Force an immediate confrontation or irreversible choice with concrete stakes. Write three concise sentences, about 400–500 characters total. No recap, no passive description.`;
     } else {
       const totalWriterTurns = show.turnOrder.filter(id => id === 'text').length;
       const developmentWriterTurns = Math.max(1, totalWriterTurns - 3);
@@ -1066,7 +1069,7 @@ export function sanitizeTurnOutput(text: string): string {
 
   // Strip code blocks and markdown headings
   trimmed = trimmed.replace(/^```[a-z]*\n/i, '').replace(/```$/i, '').trim();
-  trimmed = trimmed.replace(/^#+\s+[^\n]+\n/g, '').trim();
+  trimmed = trimmed.replace(/^#+\s+[^\n]+(?:\n+|$)/g, '').trim();
 
   // Strip unwanted planning artifacts and titles (e.g. **Title: The Coat on the Boat**, Title: ...)
   trimmed = trimmed.replace(/^\s*\*{0,2}Title:\s*[^\n*]+\*{0,2}\s*/i, '');
@@ -1075,6 +1078,10 @@ export function sanitizeTurnOutput(text: string): string {
   // Strip Act indicators (e.g. **Act IV – Resolution**, **Adventure Story – Act III: Turning Point**, Act II - Discovery)
   trimmed = trimmed.replace(/^\s*\*{0,2}(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*/i, '');
   trimmed = trimmed.replace(/^\s*(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n]+)?\n*/i, '');
+  trimmed = trimmed.replace(/\n+\s*\*{0,2}(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*\n*/gi, '\n');
+
+  // Strip markdown bold/italic section headers (e.g. **Act III**, **Chapter 1**, **Scene:**)
+  trimmed = trimmed.replace(/^\s*\*{1,3}(?:Act|Chapter|Scene|Part|Stage|Turn|Note|Direction|Director Focus|Perspective|Title|Objective)[^*]+\*{1,3}\s*\n*/i, '');
 
   // Strip scene or location headers and internal constraints headers
   trimmed = trimmed.replace(/^\s*\*{0,2}(?:Current\s+location|Location|Setting|Scene|Story\s+constraints|Main\s+objective|Active\s+people|Perspective|Director\s+Focus|Known\s+discoveries|World\s+rules):\*{0,2}\s*[^\n]+\n*/i, '');
@@ -1083,8 +1090,16 @@ export function sanitizeTurnOutput(text: string): string {
   trimmed = trimmed.replace(/^\s*\[(?:Scene|Setting|Act|Note|Chapter|Turn|Stage|Clue|Routing cue)[^\]]*\]\s*/i, '');
   trimmed = trimmed.replace(/^\s*(?:Here is the continuation|Here's the next scene|Continuing the story):?\s*/i, '');
 
+  // Strip script-style speaker/direction prefixes
+  trimmed = trimmed.replace(/(?:^|\n)\s*(?:Narrator|Director|Writer|Stage Direction):\s*/gi, '\n');
+
+  // Strip numbered outline starts (e.g. "1. The detective..." -> "The detective...")
+  trimmed = trimmed.replace(/(?:^|\n)\s*\d+\.\s+/g, '\n');
+  trimmed = trimmed.replace(/(?:^|\n)\s*[-*•]\s+/g, '\n');
+  trimmed = trimmed.replace(/\n+/g, ' ').trim();
+
   // Clean raw speech disfluencies like trailing unclosed (um...)
-  trimmed = trimmed.replace(/\s*\((?:um|uh|er|ah)[^)]*\)/gi, '').trim();
+  trimmed = trimmed.replace(/\s*\((?:um|uh|er|ah|sighs?)[^)]*\)/gi, '').trim();
 
   // Clean leading punctuation, ellipses or dangling connective starts like "...where..." or "...but..."
   trimmed = trimmed.replace(/^[.…\s]*(?:where|and|but|then|so)\s*[.…]+/i, '');
@@ -1129,16 +1144,118 @@ export function detectPromptLeakage(text: string): { leaked: boolean; reason?: s
   if (/Story constraints:\s*\n/i.test(text)) {
     return { leaked: true, reason: 'Contains internal prompt constraints block' };
   }
-  if (/\b(?:INCORPORATE RECENT EVENT|DEAD:|MISSING:|CONSUMED\/USED:|PROHIBITED:)\b/.test(text)) {
+  if (/\b(?:INCORPORATE RECENT EVENT|DEAD:|MISSING:|CONSUMED\/USED:|PROHIBITED:|Current location:|Known discoveries:|Main objective:|Active people:|LATEST SCENE EVENT:|Continue from latest event:)\b/.test(text)) {
     return { leaked: true, reason: 'Contains internal constraint headers' };
   }
-  if (/\bPerspective:\s*(?:Visual observation|Dialogue & acoustic|Physical action)\b/i.test(text)) {
-    return { leaked: true, reason: 'Contains internal perspective prompt template' };
+  if (/\b(?:Perspective:\s*(?:Visual observation|Dialogue & acoustic|Physical action)|Director Focus:\s*(?:Causal progression|Continuity & deduction))\b/i.test(text)) {
+    return { leaked: true, reason: 'Contains internal perspective/director prompt template' };
   }
-  if (/\bDirector Focus:\s*(?:Causal progression|Continuity & deduction)\b/i.test(text)) {
-    return { leaked: true, reason: 'Contains internal director focus template' };
+  if (/\b(?:Choose the most actionable|Read the [a-z\s]+ story so far|Score the better next plot|In one short sentence|Look only at the attached|Listen only to the attached|Classify the related incident|This is a suggestion|This is a routing cue|Do not force a new crisis|Write three concise sentences|Sentence 1:|Sentence 2:|Sentence 3:|No recap or title|Avoid earlier openings|Do not reuse earlier openings)\b/i.test(text)) {
+    return { leaked: true, reason: 'Contains internal instruction fragments' };
+  }
+  if (/^\s*\*{0,2}(?:Act\s+[IVXLCDM]+|Chapter\s+\d+|Scene\s+\d+|Turn\s+\d+)\b/i.test(text.trim())) {
+    return { leaked: true, reason: 'Contains standalone act or chapter heading' };
   }
   return { leaked: false };
+}
+
+export function validateOpeningQuality(
+  text: string,
+  cast?: StoryCast,
+  _theme?: string
+): { valid: boolean; issues: string[]; evidence: string[] } {
+  const issues: string[] = [];
+  const evidence: string[] = [];
+  if (!text || typeof text !== 'string') {
+    return { valid: false, issues: ['Opening text is empty.'], evidence: [] };
+  }
+  const clean = sanitizeTurnOutput(text).trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length < 14 || clean.length < 65) {
+    issues.push('Opening is too brief to establish premise, character, and stakes.');
+  }
+
+  // 1. Protagonist Presence: protagonist must be active in the opening
+  if (cast?.protagonist) {
+    const protoRegex = new RegExp(`\\b${cast.protagonist}\\b`, 'i');
+    if (!protoRegex.test(clean)) {
+      issues.push(`Opening must feature the protagonist '${cast.protagonist}'.`);
+    } else {
+      evidence.push(`Protagonist '${cast.protagonist}' present.`);
+    }
+  }
+
+  // 2. Concrete Objective / Central Question / Mystery
+  const hasGoalOrQuestion = /\?/.test(clean) ||
+    /\b(?:desperate to|determined to|trying to|attempting to|tasked with|sent to|sworn to|vowed to|resolved to|seeking to|wanted to|aimed to|set out to|ready to|hoped to|intended to|plan(?:ned)? to|had to|chose to|decided to|need(?:ed|s)? to|must)\b/i.test(clean) ||
+    /\b(?:objective|mission|goal|sought|seeking|investigat(?:e|ed|ing)|search(?:ed|ing)? for|pursu(?:e|ed|ing)|uncover(?:ed|ing)?|discover(?:ed|ing)?|find(?:ing)?|solve|reach|escape|protect|sav(?:e|ed|ing)|deliver|stop|confront|learn|unravel|explain|determine|track|verify|defend(?:ed|ing)?|locat(?:e|ed|ing)|retriev(?:e|ed|ing)|obtain|secur(?:e|ed|ing)|break|lift|heal|calibrat(?:e|ed|ing)|stabiliz(?:e|ed|ing)|repair|rescue|face|facing|cross(?:ed|ing)?|climb(?:ed|ing)?|board(?:ed|ing)?|recover(?:ed|ing)?|examine(?:d|ing)?|speak|confess)\b/i.test(clean);
+  if (!hasGoalOrQuestion) {
+    issues.push('Opening lacks a concrete character objective, investigation goal, or central narrative question.');
+  } else {
+    evidence.push('Concrete character objective or narrative question established.');
+  }
+
+  // 3. Meaningful Stakes, Complication, or Urgency
+  const hasStakesOrUrgency = /\b(?:before|danger|risk|threat|warning|looming|urgent|deadline|hour|clock|disaster|cost|loss|lost|peril|shattered|missing|stolen|trapped|stranger|mysterious|anomaly|shadow|broken|secret|ruin|failure|consequence|at stake|crisis|trouble|unease|tension|fear|sacrifice|siege|surviv\w*|withstand|plead\w*|retreat|doomed|destroy\w*|curse|strike|fail\w*)\b/i.test(clean) ||
+    (cast?.hook ? clean.toLowerCase().includes(cast.hook.toLowerCase().slice(0, 15)) : false);
+  if (!hasStakesOrUrgency) {
+    issues.push('Opening lacks meaningful stakes, urgency, or immediate complication beyond atmosphere.');
+  } else {
+    evidence.push('Immediate stakes or complication established.');
+  }
+
+  // 4. Sentences count: at least 2 distinct sentences
+  const sentenceCount = (clean.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || []).length;
+  if (sentenceCount < 2) {
+    issues.push('Opening should contain at least two complete sentences establishing scene and purpose.');
+  }
+
+  return { valid: issues.length === 0, issues, evidence };
+}
+
+export function validateClimaxTurn(
+  output: string,
+  climaxObjective?: string,
+  _theme?: string
+): { valid: boolean; issues: string[]; evidence: string[] } {
+  const issues: string[] = [];
+  const evidence: string[] = [];
+  if (!output || typeof output !== 'string') {
+    return { valid: false, issues: ['Climax text is empty.'], evidence: [] };
+  }
+  const clean = sanitizeTurnOutput(output).trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length < 12 || clean.length < 55) {
+    issues.push('Climax turn is too brief to provide an earned turning point.');
+  }
+
+  // 1. Turning point action / confrontation / decisive choice verb
+  const turningPointVerbs = /\b(?:confront(?:ed|ing)?|chose|chosen|decided|decisive|struck|shattered|revealed|unmasked|forced|broke|leaped|halted|risked|faced|stepped forward|refused|demanded|turned the tide|cut|fired|unlocked|triggered|lunged|snapped|wrenched|pushed through|collided|cornered|intercepted|surrendered|sacrificed|demanded|confessed|exposed|seized|acted|action)\b/i;
+  if (!turningPointVerbs.test(clean)) {
+    issues.push('Climax lacks a decisive action, confrontation, or turning point (purely descriptive).');
+  } else {
+    evidence.push('Decisive turning point action or confrontation present.');
+  }
+
+  // 2. Not purely passive atmospheric observation
+  const purelyPassive = /^(?:The (?:air|room|sky|night|corridor|fog|wind|shadows|street|silence) (?:was|grew|felt|hung|seemed|remained)[^.!?]*[.!?]\s*){2,}$/i.test(clean);
+  if (purelyPassive) {
+    issues.push('Climax is stalled on passive atmospheric description without forward character agency.');
+  }
+
+  // 3. Grounding in climax objective or conflict if provided
+  if (climaxObjective) {
+    const objectiveWords = climaxObjective.toLowerCase().match(/[a-z]{4,}/g)?.filter(w => !/^(about|their|there|after|before|because|story|would|could|should|create|point|central)$/.test(w)) || [];
+    const matched = objectiveWords.filter(w => clean.toLowerCase().includes(w));
+    if (objectiveWords.length > 0 && matched.length === 0) {
+      const genericConflict = /\b(?:truth|culprit|evidence|choice|door|bridge|station|core|signal|danger|threat|beast|spell|power|secret|escape|rescue|time|way)\b/i.test(clean);
+      if (!genericConflict) {
+        issues.push('Climax does not connect to the established central objective or turning point.');
+      }
+    }
+  }
+
+  return { valid: issues.length === 0, issues, evidence };
 }
 
 /**
@@ -1497,14 +1614,21 @@ export function generateFreshPremise(_theme: string, cast: StoryCast): string {
 export function chooseStoryDirections(show: ShowRecord, random = Math.random): { instructions: string; criteria: Record<string, string> } {
   const canonical = show.canonicalWorldState;
   const contract = getGenreContract(show.config.theme);
-  const recentFact = canonical?.establishedFacts.slice(-1)[0]?.text || show.turns.slice(-1)[0]?.stageText || 'the latest accepted contribution';
-  const openThread = canonical?.unresolvedConflicts.find(conflict => !conflict.resolved)?.description || canonical?.narrativeGoal || 'the central question established by the story';
-  const people = storyPeople(show).join(' and ') || 'the established characters';
+  const cast = show.config.cast;
+  const people = storyPeople(show).join(' and ') || (cast ? `${cast.protagonist} and ${cast.companion}` : 'the characters');
+  const location = canonical?.currentLocation || cast?.setting || 'the active scene';
+
+  const lastAccepted = show.turns.slice().reverse().find(t => t.status === 'completed' && t.output);
+  const rawClue = canonical?.discoveredClues?.slice(-1)[0]?.replace(/_/g, ' ') ||
+    (lastAccepted?.output ? truncateWords(stripEchoedPrefix(lastAccepted.output, []), 8) : cast?.hook || 'the active situation');
+  const clue = rawClue.replace(/^(?:the latest accepted contribution|established action|openThread)\b/i, cast?.hook || 'the recent discovery');
+  const rawGoal = canonical?.narrativeGoal || cast?.hook || show.config.opening || contract.centralConflict;
+  const goal = truncateWords(rawGoal.replace(/^(?:the central question established by the story|the latest accepted contribution)\b/i, 'resolving the central conflict'), 10);
 
   const candidates: Array<[string, string]> = [
-    ['character_choice', `Build on ${people}'s established motivations by making a decisive choice regarding ${openThread}.`],
-    ['causal_development', `Let an established action or discovery (${recentFact}) produce a new consequence that reshapes the active scene.`],
-    ['genre_payoff', `Develop ${openThread} in a manner faithful to ${contract.centralConflict}, paying off an earlier detail.`]
+    ['character_choice', `${people} must make a decisive choice: confront the immediate risk at ${location} regarding ${goal}.`],
+    ['causal_development', `The development concerning ${clue} triggers an immediate consequence that reshapes the situation at ${location}.`],
+    ['genre_payoff', `Advance the central tension by forcing ${people} to commit to an irreversible action toward ${goal}.`]
   ];
   const rotate = Math.floor(Math.max(0, Math.min(0.999999, random())) * candidates.length);
   const criteria = Object.fromEntries([...candidates.slice(rotate), ...candidates.slice(0, rotate)].map(([key, value]) => [key, value.slice(0, 200)]));
@@ -1513,12 +1637,18 @@ export function chooseStoryDirections(show: ShowRecord, random = Math.random): {
 
 /** Story-voice line for a valid plot-direction vote. */
 export function presentStoryDirection(modelId: CanonicalModelId, decision: ValidatedDecision, options?: Record<string, string>): string | null {
-  const description = options?.[decision.predicted_route];
-  if (!decision.valid || !description) return null;
+  const rawDescription = options?.[decision.predicted_route];
+  if (!decision.valid || !rawDescription) return null;
+  const description = rawDescription
+    .replace(/^(?:Build on [^.]+ motivations by making a decisive choice regarding |Let an established action or discovery \([^)]+\) produce a new consequence that reshapes the active scene\.|Develop [^.]+ in a manner faithful to [^.]+, paying off an earlier detail\.)/i, '')
+    .trim() || rawDescription;
+
+  // Clean trailing period for uniform voice assembly
+  const cleanDesc = description.replace(/[.]+$/, '');
   if (modelId === 'd1') {
-    return `Analyzing the active vectors, the crucial turn is: ${description}`;
+    return `Prism Thinker directs the tactical priority: ${cleanDesc}.`;
   }
-  return `Evaluating every thread of evidence, the decisive development here is: ${description}`;
+  return `Sherlock Omni synthesizes the threads and directs the next turn: ${cleanDesc}.`;
 }
 
 /** Main people for the story: chosen cast first, then names the writer established. */

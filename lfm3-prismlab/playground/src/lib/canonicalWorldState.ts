@@ -1232,7 +1232,7 @@ export function isTruncatedOutput(text: string): { truncated: boolean; reason?: 
   return { truncated: false };
 }
 
-export function hasMeaningfulEnding(text: string, goal: string, _theme?: string): boolean {
+export function hasMeaningfulEnding(text: string, goal: string, theme?: string): boolean {
   if (!text || isTruncatedOutput(text).truncated) return false;
   const wordCount = text.trim().split(/\s+/).length;
   if (wordCount < 8) return false;
@@ -1240,12 +1240,93 @@ export function hasMeaningfulEnding(text: string, goal: string, _theme?: string)
   if (/\b(?:to be continued|who could it be\??|sudden(?:ly)?(?:,\s*|\s+)(?:an?|the|something|someone|a shadow|another|a cold|icy)\b|grip tighten(?:ed)?|hand passed through|tighten(?:ed)? around (?:his|her|their) wrist|fingers were slick|lurking in the fog|whispered behind (?:him|her|them)|eyes glint(?:ing|ed)? with malice\b)/i.test(text.slice(-180))) {
     return false;
   }
-  const outcome = /\b(?:reached|arrived|appeared|appears|showed up|found|secured|saved|rescued|recovered|delivered|escaped|returned|won|lost|failed|succeeded|crossed|cross|made it|could not|never reached|abandoned|destroyed|resolved|confess|confessed|love|together|parted|promise|promised|forgave|forgiven|embraced|held|reconciled|separated|laughed|laugh|laughter|smiled|smile|joke|cheered|applauded|celebration|ridiculous|spectacle|absurd|amused|fun|funniest|delight|mourned|mourn|wept|grief|sorrow|accepted|acceptance|farewell|cost|lingering|memory|sacrifice|perished|died|loss|buried|survived|survivor|dread|nightmare|silence|banished|trapped|darkness|revealed|reveal|solved|solve|deduced|deduction|truth|culprit|proven|proved|explanation|unmasked|healed|restore|restored|spell|broken|shattered|peaceful|balance|stabilized|nominal|telemetry|repaired|anomaly|signal|calibrated|rebooted|orbit|self[- ]?destruct\w*|jettisoned|ejected|purged|overrode|overridden|sacrificed|concluded|sealed|contained|aftermath|consequence|choice|chosen|clarity|understanding|alibi|testimony|motive|oath|escaped|safe|relief|dawn|horizon|finally|at last|never again|once more|rested|endured|decided|stood)\b/i.test(text);
-  const goalWords = goal.toLowerCase().match(/[a-z]{4,}/g)?.filter(word => !/^(their|there|after|before|because|story|about|would|could|should|through|where|which|these|those)$/.test(word)) || [];
-  const grounded = goalWords.some(word => text.toLowerCase().includes(word)) || /\b(?:goal|mission|quest|objective|destination|shelter|treasure|village|town|home|cure|journey|summit|temple|artifact|heart|love|truth|mystery|case|incident|secret|threat|danger|life|loss|festival|rehearsal|station|ship|magic|spell|curse|pastry|cake|bridge|canyon|memory|future|dawn|night|path|choice|bond|entity|nightmare|horror|shadow|creature|monster|dread|survivor|spectacle|joke|laughter|prank|misunderstanding|rumor|prop|chip|reactor|core|airlock|pod|clue|evidence|alibi|silence|ruin|room|study|garden|trail|gate|world|people|we|they|he|she)\b/i.test(text);
+  const outcome = /\b(?:reached|arrived|found|secured|saved|rescued|recovered|delivered|escaped|returned|won|lost|failed|succeeded|crossed|cross|made it|could not|never reached|abandoned|destroyed|resolved|confess|confessed|love|together|parted|promise|promised|forgave|forgiven|embraced|held|reconciled|separated|laughed|laugh|laughter|smiled|smile|joke|cheered|applauded|celebration|ridiculous|spectacle|absurd|amused|fun|funniest|delight|mourned|mourn|wept|grief|sorrow|accepted|acceptance|farewell|cost|lingering|memory|sacrifice|perished|died|loss|buried|survived|survivor|dread|nightmare|silence|banished|trapped|darkness|revealed|reveal|solved|solve|deduced|deduction|truth|culprit|proven|proved|explanation|unmasked|healed|restore|restored|spell|broken|shattered|peaceful|balance|stabilized|nominal|telemetry|repaired|anomaly|signal|calibrated|rebooted|jettisoned|ejected|purged|overrode|overridden|sacrificed|concluded|sealed|contained|aftermath|consequence|choice|chosen|clarity|understanding|alibi|testimony|motive|oath|escaped|safe|relief|dawn|horizon|finally|at last|never again|once more|rested|endured|decided)\b/i.test(text);
+  const goalWords = goal ? goal.toLowerCase().match(/[a-z]{4,}/g)?.filter(word => !/^(their|there|after|before|because|story|about|would|could|should|through|where|which|these|those|start|brand|fresh|involving|original|situation|involve)$/.test(word)) || [] : [];
+  const groundedInGoal = goalWords.length > 0 && goalWords.some(word => text.toLowerCase().includes(word));
+  const groundedInStoryConcepts = /\b(?:destination|shelter|treasure|village|town|home|cure|journey|summit|temple|artifact|heart|love|truth|mystery|case|incident|secret|threat|danger|life|loss|festival|rehearsal|station|ship|magic|spell|curse|pastry|cake|bridge|canyon|memory|future|dawn|night|path|choice|bond|entity|nightmare|horror|shadow|creature|monster|dread|survivor|spectacle|joke|laughter|prank|misunderstanding|rumor|prop|chip|reactor|core|airlock|pod|clue|evidence|alibi|silence|ruin|room|study|garden|trail|gate)\b/i.test(text);
+  const grounded = groundedInGoal || groundedInStoryConcepts;
   const routeResolved = !/\b(?:two ways|fork|split route|two paths)\b/i.test(goal) || /\b(?:chose|choose|selected|followed|took)\b[^.!?]{0,55}\b(?:route|path|way|map|trail)\b/i.test(text);
   const choiceResolved = !/\b(?:self[- ]?destruct\w*|choice between|destructing the station)\b/i.test(goal) || /\b(?:self[- ]?destruct|countdown|detonat\w*|overload\w*|eject\w*|jettison\w*|secur\w*|retriev\w*|escap\w*|chip|destroy\w*|surviv\w*|saved?|cho[os]\w*)\b/i.test(text);
-  return outcome && grounded && routeResolved && choiceResolved;
+
+  let genreContractSatisfied = true;
+  if (theme) {
+    const t = theme.toLowerCase();
+    if (t.includes('detective')) {
+      genreContractSatisfied = /\b(?:culprit|motive|evidence|solved|solve|confessed|confession|alibi|arrested|arrest|unmasked|truth|explanation|suspect|guilty|innocent|case closed)\b/i.test(text);
+    } else if (t.includes('comedy')) {
+      genreContractSatisfied = /\b(?:laughed|laugh|laughter|joke|ridiculous|absurd|amused|funniest|delight|cheered|smile|smiled|spectacle|embarrass|mistake|mix-up|awkward)\b/i.test(text);
+    } else if (t.includes('tragedy')) {
+      genreContractSatisfied = /\b(?:cost|loss|lost|sacrifice|sacrificed|grief|sorrow|mourned|wept|farewell|regret|consequence|perished|died|death|aftermath)\b/i.test(text);
+    } else if (t.includes('horror')) {
+      genreContractSatisfied = /\b(?:survived|survivor|escaped|safe|dawn|banished|contained|trapped|perished|darkness|silence|threat|monster|nightmare|dread)\b/i.test(text);
+    } else if (t.includes('romance')) {
+      genreContractSatisfied = /\b(?:together|parted|confessed|forgave|forgiven|embraced|held|reconciled|love|promise|promised|bond|trust|heart|separated)\b/i.test(text);
+    } else if (t.includes('mystery')) {
+      genreContractSatisfied = /\b(?:truth|revealed|reveal|uncovered|solved|solve|answer|secret|discovered|explanation|deduced|clarity|understood)\b/i.test(text);
+    } else if (t.includes('fantasy')) {
+      genreContractSatisfied = /\b(?:spell|magic|broken|lifted|curse|enchanted|restored|healed|peaceful|power|bound|sealed|cost|balance)\b/i.test(text);
+    } else if (t.includes('science')) {
+      genreContractSatisfied = /\b(?:stabilized|nominal|repaired|calibrated|rebooted|signal|telemetry|core|reactor|airlock|station|system|anomaly|containment|safe)\b/i.test(text);
+    } else if (t.includes('adventure')) {
+      genreContractSatisfied = /\b(?:reached|arrived|crossed|shelter|summit|safe|delivered|secured|journey|treasure|made it|destination|return|dawn)\b/i.test(text);
+    }
+  }
+
+  return Boolean(outcome && grounded && routeResolved && choiceResolved && genreContractSatisfied);
+}
+
+export function detectNarrativeStagnation(
+  rawOutput: string,
+  modelId: string,
+  pastTurns: Array<{ output?: string; modelId?: string; isRelevant?: boolean }>,
+  _worldState?: CanonicalWorldState
+): { hasStagnation: boolean; issues: string[]; retakePromptDirective?: string } {
+  const issues: string[] = [];
+  const clean = rawOutput.trim();
+  if (!clean || pastTurns.length < 2) return { hasStagnation: false, issues: [] };
+
+  if (modelId !== 'text') return { hasStagnation: false, issues: [] };
+
+  const hasActionOrDiscovery = /\b(?:decided|chose|found|discovered|spoke|said|asked|shouted|whispered|stepped|ran|walked|opened|closed|took|grabbed|confronted|revealed|struck|pushed|pulled|climbed|crossed|entered|left|fled|unlocked|examined|read|tested|confront|strike|break|turn|action|moved|acted)\b/i.test(clean);
+  const purelyObservational = !hasActionOrDiscovery && /\b(?:looked|seemed|appeared|hung|felt|was|were|remained|lingered|cast|shadows|fog|air|silence|glow|quiet|dust|gloom|chill)\b/i.test(clean);
+
+  if (purelyObservational) {
+    const previousWriterTurns = pastTurns.filter(t => t.modelId === 'text' && t.output && t.isRelevant !== false);
+    const lastWriterTurn = previousWriterTurns[previousWriterTurns.length - 1];
+    if (lastWriterTurn?.output) {
+      const lastHadAction = /\b(?:decided|chose|found|discovered|spoke|said|asked|shouted|whispered|stepped|ran|walked|opened|closed|took|grabbed|confronted|revealed|struck|pushed|pulled|climbed|crossed|entered|left|fled|unlocked|examined|read|tested|confront|strike|break|turn|action|moved|acted)\b/i.test(lastWriterTurn.output);
+      if (!lastHadAction) {
+        issues.push('Narrative stagnation: scene has stalled on consecutive passive observations without character action or event progression.');
+        return {
+          hasStagnation: true,
+          issues,
+          retakePromptDirective: 'The scene is stalling on passive description. Advance the plot now: have characters take a concrete action, make a discovery, or speak.'
+        };
+      }
+    }
+  }
+
+  const recentTurns = pastTurns.slice(-2).filter(t => t.output && t.isRelevant !== false);
+  for (const prev of recentTurns) {
+    if (!prev.output) continue;
+    const extractNouns = (s: string) => (s.toLowerCase().match(/\b[a-z]{4,}\b/g) || []).filter(w => !NARRATIVE_STOPWORDS.has(w));
+    const currNouns = new Set(extractNouns(clean));
+    const prevNouns = extractNouns(prev.output);
+    if (currNouns.size >= 6 && prevNouns.length >= 6) {
+      const shared = prevNouns.filter(w => currNouns.has(w)).length;
+      const ratio = shared / Math.min(currNouns.size, prevNouns.length);
+      if (ratio > 0.70 && !hasActionOrDiscovery) {
+        issues.push('Narrative stagnation: turn redescribes the previous scene without adding new development.');
+        return {
+          hasStagnation: true,
+          issues,
+          retakePromptDirective: 'Do not re-describe the same scene elements. Move the narrative forward to the next concrete action or consequence.'
+        };
+      }
+    }
+  }
+
+  return { hasStagnation: false, issues: [] };
 }
 
 // ─── Narrative Loop Detection Engine ─────────────────────────────────────
@@ -1457,7 +1538,7 @@ export function auditStoryQuality(
   // 5. Genre Contract & Ending Fulfillment
   const finalTurn = completedTurns[completedTurns.length - 1];
   const finalProse = finalTurn?.output || '';
-  const addressedCentralConflict = hasMeaningfulEnding(finalProse, worldState.narrativeGoal);
+  const addressedCentralConflict = hasMeaningfulEnding(finalProse, worldState.narrativeGoal, worldState.theme);
   if (!addressedCentralConflict) issues.push('Final turn does not resolve the original narrative goal.');
   const genreRequirementsMet = canonConsistent && addressedCentralConflict;
   const genreContractPassed = genreRequirementsMet;

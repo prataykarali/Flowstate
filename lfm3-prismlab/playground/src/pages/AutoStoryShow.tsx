@@ -53,6 +53,9 @@ import {
   isTruncatedOutput,
   hasMeaningfulEnding,
   detectNarrativeLoop,
+  detectNarrativeStagnation,
+  validateOpeningQuality,
+  validateClimaxTurn,
   auditStoryQuality,
   detectPromptLeakage,
   buildSupportRetryPrompt,
@@ -598,6 +601,56 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       const originalReuse = openingReuse(rawOutput);
       if (originalReuse) genreEvaluation = { ...genreEvaluation, status: 'review', issues: [...genreEvaluation.issues, originalReuse] };
 
+      // Bounded Opening Quality Gate (Protagonist, concrete objective, and stakes)
+      if (index === 0 && modelId === 'text') {
+        const openingCheck = validateOpeningQuality(rawOutput, current.config.cast, current.config.theme);
+        if (!openingCheck.valid && retryCountRef.current === 0) {
+          retryCountRef.current = 1;
+          const cast = current.config.cast;
+          const genre = getGenreContract(current.config.theme);
+          const openingCorrectionPrompt = `Start a fresh ${genre.displayName} story. Rewrite the opening in three concise sentences (400–500 characters total). Sentence 1: Establish ${cast?.protagonist || 'the protagonist'} in ${cast?.setting || 'the scene'} facing the concrete situation. Sentence 2: Establish their specific character objective or urgent central question. Sentence 3: Reveal the immediate stakes or complication if they fail. No title, no purely atmospheric text.`;
+          try {
+            const correctiveResult = await generateTextStream(openingCorrectionPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+            const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
+            if (correctiveRaw) {
+              rawOutput = sanitizeTurnOutput(correctiveRaw);
+              result = correctiveResult;
+            }
+          } catch {
+            // Retake failed; evaluation proceeds on rawOutput
+          }
+        }
+        const postOpeningCheck = validateOpeningQuality(rawOutput, current.config.cast, current.config.theme);
+        if (!postOpeningCheck.valid) {
+          genreEvaluation = { status: 'review', issues: [...(genreEvaluation?.issues || []), ...postOpeningCheck.issues], evidence: postOpeningCheck.evidence };
+        }
+      }
+
+      // Bounded Climax Turning-Point Gate (Act III Climax)
+      if (showBeat(current, index) === 'climax' && modelId === 'text') {
+        const director = current.canonicalWorldState?.directorPlan || current.directorPlan;
+        const climaxCheck = validateClimaxTurn(rawOutput, director?.climaxObjective, current.config.theme);
+        if (!climaxCheck.valid && retryCountRef.current === 0) {
+          retryCountRef.current = 1;
+          const genre = getGenreContract(current.config.theme);
+          const climaxCorrectionPrompt = `Continue this ${genre.displayName} story at its decisive turning point. Act III Climax. Objective: "${director?.climaxObjective || 'Confront the central obstacle'}". Characters must directly confront the obstacle and make an irreversible choice or take decisive action now. Three concise sentences. No recap, no passive description.`;
+          try {
+            const correctiveResult = await generateTextStream(climaxCorrectionPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+            const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
+            if (correctiveRaw) {
+              rawOutput = sanitizeTurnOutput(correctiveRaw);
+              result = correctiveResult;
+            }
+          } catch {
+            // Retake failed; evaluation proceeds on rawOutput
+          }
+        }
+        const postClimaxCheck = validateClimaxTurn(rawOutput, director?.climaxObjective, current.config.theme);
+        if (!postClimaxCheck.valid) {
+          genreEvaluation = { status: 'review', issues: [...(genreEvaluation?.issues || []), ...postClimaxCheck.issues], evidence: postClimaxCheck.evidence };
+        }
+      }
+
       // Bounded Ending Resolution Gate (Issue 3: At most one bounded corrective generation)
       if (showBeat(current, index) === 'ending' && modelId === 'text') {
         const goal = current.canonicalWorldState?.narrativeGoal || current.config.cast?.hook || current.config.opening;
@@ -717,6 +770,32 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           const loopCheck = detectNarrativeLoop(rawOutput, proposedEvents, pastAcceptedTurns, cws);
           if (loopCheck.hasLoop) {
             loopIssue = loopCheck.issues[0];
+          } else {
+            const stagnationCheck = detectNarrativeStagnation(rawOutput, modelId, pastAcceptedTurns, cws);
+            if (stagnationCheck.hasStagnation) {
+              if (retryCountRef.current === 0) {
+                retryCountRef.current = 1;
+                const stagPrompt = `${stagnationCheck.retakePromptDirective || 'Advance the plot with immediate action.'} Write three concise sentences. No recap.`;
+                try {
+                  const stagResult = await generateTextStream(stagPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+                  const stagRaw = stagResult.output == null ? '' : outputText(stagResult.output).trim();
+                  if (stagRaw) {
+                    rawOutput = sanitizeTurnOutput(stagRaw);
+                    result = stagResult;
+                    const reCheck = detectNarrativeStagnation(rawOutput, modelId, pastAcceptedTurns, cws);
+                    if (reCheck.hasStagnation) {
+                      loopIssue = reCheck.issues[0];
+                    }
+                  } else {
+                    loopIssue = stagnationCheck.issues[0];
+                  }
+                } catch {
+                  loopIssue = stagnationCheck.issues[0];
+                }
+              } else {
+                loopIssue = stagnationCheck.issues[0];
+              }
+            }
           }
         }
 
