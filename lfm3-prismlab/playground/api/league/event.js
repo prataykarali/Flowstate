@@ -287,15 +287,79 @@ export default async function handler(request, response) {
       } else {
         const errBody = await rpcRes.text();
         if (isArcade) {
-          return response.status(200).json({
-            status: 'recorded_transient',
-            event_id,
-            model_id: verifiedModelId,
-            activity_type: verifiedActivityType,
-            points: awardedPoints,
-            persisted: false,
-            warning: 'Database runner migration pending; recorded transiently',
-          });
+          try {
+            const base = supabaseUrl.replace(/\/$/, '');
+            const curRes = await fetch(`${base}/rest/v1/championship_totals?model_id=eq.${verifiedModelId}&select=*`, {
+              headers,
+              signal: AbortSignal.timeout(3000),
+            });
+            let curRow = null;
+            if (curRes.ok) {
+              const rows = await curRes.json();
+              if (Array.isArray(rows) && rows.length > 0) curRow = rows[0];
+            }
+            if (curRow) {
+              const prevOther = Number(curRow.other_eligible_points || curRow.arcade_points || 0);
+              const prevTotal = Number(curRow.total_points || 0);
+              const newOther = prevOther + awardedPoints;
+              const newTotal = prevTotal + awardedPoints;
+              const nowIso = new Date().toISOString();
+
+              let patchRes = await fetch(`${base}/rest/v1/championship_totals?model_id=eq.${verifiedModelId}`, {
+                method: 'PATCH',
+                headers,
+                body: JSON.stringify({
+                  total_points: newTotal,
+                  arcade_points: newOther,
+                  other_eligible_points: newOther,
+                  last_activity_at: nowIso,
+                  updated_at: nowIso,
+                }),
+                signal: AbortSignal.timeout(3000),
+              });
+              if (!patchRes.ok) {
+                patchRes = await fetch(`${base}/rest/v1/championship_totals?model_id=eq.${verifiedModelId}`, {
+                  method: 'PATCH',
+                  headers,
+                  body: JSON.stringify({
+                    total_points: newTotal,
+                    other_eligible_points: newOther,
+                    last_activity_at: nowIso,
+                    updated_at: nowIso,
+                  }),
+                  signal: AbortSignal.timeout(3000),
+                });
+              }
+
+              await fetch(`${base}/rest/v1/championship_events`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({
+                  event_id,
+                  visitor_id,
+                  model_id: verifiedModelId,
+                  activity_type: 'chat',
+                  points: awardedPoints,
+                  source_receipt_id: verifiedReceiptId || null,
+                  completed_at: nowIso,
+                }),
+                signal: AbortSignal.timeout(3000),
+              }).catch(() => null);
+
+              if (patchRes.ok) {
+                return response.status(200).json({
+                  status: 'success',
+                  event_id,
+                  model_id: verifiedModelId,
+                  activity_type: verifiedActivityType,
+                  points: awardedPoints,
+                  persisted: true,
+                });
+              }
+            }
+          } catch (arcadeErr) {
+            console.error('Arcade persistence fallback failed:', arcadeErr);
+          }
         }
         return response.status(502).json({
           error: 'Database transaction rejected by Supabase',

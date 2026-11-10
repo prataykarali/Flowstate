@@ -81,28 +81,62 @@ export default async function handler(request, response) {
       if (totalsRes && totalsRes.ok) {
         const rows = await totalsRes.json();
         if (Array.isArray(rows) && rows.length > 0) {
-          const normalizedTriviaPoints = new Map();
+          const POINTS_PER_EVENT = 100;
+          const triviaCounts = new Map();
+          const chatCounts = new Map();
+          const storyCounts = new Map();
+          const arcadeCounts = new Map();
+
           for (const event of eventRows) {
-            if (event?.activity_type !== 'trivia_correct' || !CANONICAL_MODEL_IDS.has(event.model_id)) continue;
-            const points = Number(event.points || 0);
-            normalizedTriviaPoints.set(event.model_id, (normalizedTriviaPoints.get(event.model_id) || 0) + points);
+            if (!event || !CANONICAL_MODEL_IDS.has(event.model_id)) continue;
+            const mId = event.model_id;
+            const act = event.activity_type;
+            const isRunner = act === 'runner_completed' || act === 'arcade' || (typeof event.source_receipt_id === 'string' && event.source_receipt_id.startsWith('runner:'));
+
+            if (isRunner) {
+              arcadeCounts.set(mId, (arcadeCounts.get(mId) || 0) + 1);
+            } else if (act === 'trivia_correct') {
+              triviaCounts.set(mId, (triviaCounts.get(mId) || 0) + 1);
+            } else if (act === 'chat') {
+              chatCounts.set(mId, (chatCounts.get(mId) || 0) + 1);
+            } else if (act === 'story_turn' || act === 'story_complete' || act === 'story_support_turn' || act === 'auto_story_complete') {
+              storyCounts.set(mId, (storyCounts.get(mId) || 0) + 1);
+            }
           }
+
           standingsData = CANONICAL_MODELS.map(m => {
             const found = rows.find(r => r.model_id === m.id);
-            const rawTrivia = found ? Number(found.trivia_points || 0) : 0;
-            const trivia = normalizedTriviaPoints.has(m.id) ? normalizedTriviaPoints.get(m.id) : rawTrivia;
-            const rawTotal = found ? Number(found.total_points || 0) : 0;
+            const trivia = Math.max(
+              (triviaCounts.get(m.id) || 0) * POINTS_PER_EVENT,
+              found && found.trivia_points ? Math.round(Number(found.trivia_points) / 8) * POINTS_PER_EVENT : 0
+            );
+            const chat = Math.max(
+              (chatCounts.get(m.id) || 0) * POINTS_PER_EVENT,
+              found && found.chat_points ? Math.round(Number(found.chat_points) / 10) * POINTS_PER_EVENT : 0
+            );
+            const story = Math.max(
+              (storyCounts.get(m.id) || 0) * POINTS_PER_EVENT,
+              found && found.story_points ? Math.round(Number(found.story_points) / 10) * POINTS_PER_EVENT : 0
+            );
+            const rawArcade = found ? Number(found.arcade_points || found.other_eligible_points || 0) : 0;
+            const arcade = Math.max(
+              (arcadeCounts.get(m.id) || 0) * POINTS_PER_EVENT,
+              rawArcade >= 100 ? rawArcade : Math.round(rawArcade / 8) * POINTS_PER_EVENT
+            );
+            const rating = found ? Number(found.rating_points || 0) : 0;
+            const total = trivia + chat + story + arcade + rating;
+
             return {
               model_id: m.id,
               display_name: m.name,
               model_family: m.family,
-              total_points: rawTotal - rawTrivia + trivia,
-              chat_points: found ? Number(found.chat_points || 0) : 0,
-              story_points: found ? Number(found.story_points || 0) : 0,
+              total_points: total,
+              chat_points: chat,
+              story_points: story,
               trivia_points: trivia,
-              arcade_points: found ? Number(found.arcade_points || found.other_eligible_points || 0) : 0,
-              rating_points: found ? Number(found.rating_points || 0) : 0,
-              other_eligible_points: found ? Number(found.other_eligible_points || 0) : 0,
+              arcade_points: arcade,
+              rating_points: rating,
+              other_eligible_points: arcade,
               last_activity_at: found?.last_activity_at || null,
             };
           });
