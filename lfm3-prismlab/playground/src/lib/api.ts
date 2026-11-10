@@ -370,7 +370,7 @@ export async function executeLocalStream(request: ExecuteRequest, onUpdate: (upd
       headers,
       body: JSON.stringify(request),
       cache: 'no-store',
-      signal: combinedSignal || AbortSignal.timeout(25_000)
+      signal: combinedSignal || AbortSignal.timeout(150_000)
     });
     if (response.status === 404) {
       fallback = true;
@@ -511,7 +511,7 @@ export async function generateTextStream(
         checkpoint
       }),
       cache: 'no-store',
-      signal: signal || AbortSignal.timeout(25_000)
+      signal: signal || AbortSignal.timeout(150_000)
     });
     if (response.status === 404) {
       if (cappedTokens !== 128) throw new ApiError('Restart the local backend to use bounded streaming output.', 503);

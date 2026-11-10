@@ -478,10 +478,17 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         } catch (execErr) {
           const is503 = (execErr instanceof ApiError && execErr.status === 503) || /queue is full|timed out|busy/i.test(String(execErr));
           const is429 = (execErr instanceof ApiError && execErr.status === 429) || /rate limit|compute budget/i.test(String(execErr));
-          if ((is503 || is429) && retries < 10) {
+          const isStreamAbort = /BodyStreamBuffer|aborted|TimeoutError|network|fetch failed|ECONNREFUSED|ECONNRESET/i.test(String(execErr))
+            || (execErr instanceof DOMException && execErr.name === 'AbortError')
+            || (execErr instanceof TypeError && /fetch|network/i.test(execErr.message));
+
+          if ((is503 || is429 || isStreamAbort) && retries < 10) {
             retries += 1;
-            const delayMs = Math.min(5000, 1500 * retries);
-            setMessage(`Models busy with another visitor's turn; waiting in queue (${retries}/10, retrying in ${(delayMs / 1000).toFixed(1)}s)…`);
+            const delayMs = isStreamAbort ? Math.min(12000, 3000 * retries) : Math.min(5000, 1500 * retries);
+            const reason = isStreamAbort
+              ? `Model is loading (swap in progress); retrying in ${(delayMs / 1000).toFixed(0)}s (${retries}/10)…`
+              : `Models busy with another visitor's turn; waiting in queue (${retries}/10, retrying in ${(delayMs / 1000).toFixed(1)}s)…`;
+            setMessage(reason);
             await new Promise(r => setTimeout(r, delayMs));
             if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
             continue;
