@@ -379,7 +379,19 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         commit({ ...next, status: isCompleted ? 'completed' : 'active' });
         setPhase(isCompleted ? 'completed' : 'presenting_turn');
         setMessage(`${MODELS[modelId].characterName} could not contribute to turn ${index + 1} (${why}); skipping to next stage.`);
-        if (!isCompleted) schedule(1200);
+        if (isCompleted) {
+          // Last turn was skipped — show winner modal automatically after a beat
+          window.setTimeout(() => {
+            if (mountedRef.current) setShowWinnerModal(true);
+          }, 1000);
+          try {
+            const cooldownUntil = Date.now() + 180 * 1000;
+            localStorage.setItem('prismlab_story_cooldown_until', String(cooldownUntil));
+            setStoryCooldownRemaining(180);
+          } catch {}
+        } else {
+          schedule(1200);
+        }
       }
     };
 
@@ -431,6 +443,13 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         ? { prompt: pack.incidentReport, truncated: false }
         : buildShowPrompt(current, modelId);
 
+      // Clamp base prompt to 960 chars BEFORE retry suffix so total stays <= 1000.
+      // This prevents 422 "Text prompt must be 1–1,000 characters" on attempt 2.
+      if (built.prompt.length > 960) {
+        built.prompt = built.prompt.slice(0, 960);
+        built.truncated = true;
+      }
+
       // On retry attempt: inject targeted anti-repetition / concise resolution guidance
       if (attemptNumber > 1) {
         const prevFailed = current.turns.filter(t => t.index === index).slice(-1)[0];
@@ -442,6 +461,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           }
         }
       }
+      // Final safety clamp — no prompt should ever exceed 998 chars
+      if (built.prompt.length > 998) built.prompt = built.prompt.slice(0, 998);
 
       const decisionQuestion = capability.role === 'decision_assistant' && !pack ? chooseStoryDirections(current) : undefined;
       promptLength = built.prompt.length;
@@ -481,8 +502,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         try {
           if (modelId === 'text') {
             const isClimaxOrEnding = showBeat(current, index) === 'climax' || showBeat(current, index) === 'ending';
-            const defaultTokens = isClimaxOrEnding ? 96 : 84;
-            const tokensToGen = Math.min(108, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 108) : defaultTokens));
+            const defaultTokens = isClimaxOrEnding ? 120 : 84;
+            const tokensToGen = Math.min(128, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 128) : defaultTokens));
             result = await generateTextStream(
               built.prompt,
               onTextUpdate,

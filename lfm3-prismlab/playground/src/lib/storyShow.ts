@@ -334,12 +334,15 @@ export function planShow(config: ShowConfig, random = Math.random): CanonicalMod
       })()
     : random;
 
-  // Build the development pool: all specialists + any extra writer turns
-  const extraWriterCount = developmentSlots - support.length;
-  const devPool: CanonicalModelId[] = [
-    ...support,
-    ...Array.from({ length: extraWriterCount }, () => 'text' as CanonicalModelId)
-  ];
+  // Build the development pool: all specialists first, then fill extra slots by
+  // cycling through the specialist list again (not 'text') so Prism Pure only
+  // appears at Turn 0 (opening), Turn N-2 (climax), and Turn N-1 (resolution).
+  const extraSlots = developmentSlots - support.length;
+  const extraSpecialists: CanonicalModelId[] = Array.from(
+    { length: extraSlots },
+    (_, i) => support[i % support.length]
+  );
+  const devPool: CanonicalModelId[] = [...support, ...extraSpecialists];
 
   // Dynamic Fisher-Yates shuffle of the development phase
   for (let i = devPool.length - 1; i > 0; i--) {
@@ -893,7 +896,7 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
     }
   }
 
-  // Tier 2: Cast & Setting
+  // Tier 2: Cast & Setting — structured summary (never raw opening prose)
   const tier2Foundation: string[] = [];
   const storyCast = show.config.cast;
   if (storyCast && beat !== 'opening') {
@@ -901,11 +904,30 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   } else if (show.config.opening && beat === 'opening') {
     tier2Foundation.push(`Premise: ${show.config.opening}`);
   }
-  const firstNarrative = show.turns.find(turn => turn.modelId === 'text' && turn.status === 'completed' && turn.output);
-  if (firstNarrative && beat !== 'opening') {
-    tier2Foundation.push(`Opening: ${truncateWords(firstNarrative.output!, 24)}`);
-  } else if (show.config.opening && beat !== 'opening') {
-    tier2Foundation.push(`Opening: ${truncateWords(show.config.opening, 24)}`);
+  // For all non-opening turns: inject a compact structured context summary
+  // instead of the raw opening prose. Feeding the raw opening paragraph caused
+  // models to repeat it verbatim ("The salty air whistled…").
+  if (beat !== 'opening') {
+    const firstNarrative = show.turns.find(turn => turn.modelId === 'text' && turn.status === 'completed' && turn.output);
+    const openingSnippet = firstNarrative
+      ? truncateWords(firstNarrative.output!, 10)
+      : (show.config.opening ? truncateWords(show.config.opening, 10) : '');
+    if (openingSnippet) {
+      // Build a compact summary from canonical state so we do NOT repeat prose
+      const whoList = canonical.characters.filter(c => c.status === 'alive').map(c => c.name).slice(0, 3).join(', ') ||
+        (storyCast ? `${storyCast.protagonist}, ${storyCast.companion}` : '');
+      const whereStr = canonical.currentLocation || storyCast?.setting || '';
+      const goalStr = canonical.narrativeGoal
+        ? truncateWords(canonical.narrativeGoal, 10)
+        : (storyCast?.hook ? truncateWords(storyCast.hook, 10) : '');
+      const summaryParts: string[] = [];
+      if (whoList) summaryParts.push(`Who: ${whoList}`);
+      if (whereStr) summaryParts.push(`Where: ${whereStr}`);
+      if (goalStr) summaryParts.push(`Goal: ${goalStr}`);
+      if (summaryParts.length) {
+        tier2Foundation.push(`Story context: ${summaryParts.join(' | ')}`);
+      }
+    }
   }
 
   // Tier 3: Forensic Clues & Decision routing

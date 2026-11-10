@@ -318,7 +318,7 @@ test('every genre accepts full cast and specialist text prompts keep prior scene
   assert.match(prompt, /grounded in the story state/);
   assert.doesNotMatch(prompt, /attached image/);
   for (let i = 1; i < 7; i++) show = appendShowTurn(show, { ...base, turnId: `c:${i + 1}`, index: i, modelId: i % 2 ? 'vision' : 'audio', role: 'visual_interpreter', output: `A new event happens at beat ${i}.`, storyPerspective: true });
-  assert.match(buildShowPrompt(show, 'text').prompt, /Opening: Mina dropped the cake/);
+  assert.match(buildShowPrompt(show, 'text').prompt, /Story context:/);
 });
 
 test('structured decision output must be complete and probabilistically valid', () => {
