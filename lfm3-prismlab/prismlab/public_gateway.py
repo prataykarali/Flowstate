@@ -507,12 +507,14 @@ async def _run_stream(request: Request, job: Callable, payload: dict | None = No
                         )
                     loop.call_soon_threadsafe(updates.put_nowait, ("result", result))
                 except Exception as e:
+                    import traceback
+                    traceback.print_exc()
                     if handle.cancelled:
                         job_rec.status = "cancelled"
                     else:
                         job_rec.status = "failed"
-                        job_rec.error = "Inference unavailable"
-                        loop.call_soon_threadsafe(updates.put_nowait, ("error", {"message": "Inference unavailable"}))
+                        job_rec.error = f"Inference unavailable: {e}"
+                        loop.call_soon_threadsafe(updates.put_nowait, ("error", {"message": f"Inference unavailable: {e}"}))
                 finally:
                     unregister_upstream(handle.thread_ident)
                     handle.worker_finished_event.set()

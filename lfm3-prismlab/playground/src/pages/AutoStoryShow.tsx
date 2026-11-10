@@ -116,7 +116,15 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     if (show.status === 'paused_rate_limit') return `Your Story is saved at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}.`;
     return `Story paused at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}. Click "Resume" to continue.`;
   });
-  const [preview, setPreview] = React.useState('');
+  const [preview, setPreviewState] = React.useState('');
+  const previewRef = React.useRef('');
+  const setPreview = React.useCallback((val: string | ((prev: string) => string)) => {
+    setPreviewState(prev => {
+      const next = typeof val === 'function' ? val(prev) : val;
+      previewRef.current = next;
+      return next;
+    });
+  }, []);
   const [modeLabel, setModeLabel] = React.useState<string>(() => show ? 'Paused' : '');
   const [, setReaction] = React.useState(0);
   const [, setReactionState] = React.useState<'idle' | 'thinking' | 'happy' | 'sad'>('idle');
@@ -394,21 +402,33 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       let genreEvaluation: ShowTurn['genreEvaluation'];
       let result: LiveResult;
 
+      const onTextUpdate: Parameters<typeof generateTextStream>[1] = update => {
+        if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
+        if (update.kind === 'token') {
+          setPhase('awaiting_result');
+          setPreview(text => text + update.text);
+        } else {
+          setPhase('loading_model');
+          setMessage(update.message);
+        }
+      };
+
+      const onStreamUpdate: Parameters<typeof generateTextStream>[1] = update => {
+        if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
+        if (update.kind === 'token') {
+          setPhase('awaiting_result');
+          setPreview(text => text + update.text);
+        } else {
+          setPhase('loading_model');
+          setMessage(update.message);
+        }
+      };
+
       let retries = 0;
       while (true) {
         try {
           if (modelId === 'text') {
-            const tokensToGen = Math.min(128, Math.max(16, current.config.maxTokens || 128));
-            const onTextUpdate: Parameters<typeof generateTextStream>[1] = update => {
-              if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
-              if (update.kind === 'token') {
-                setPhase('awaiting_result');
-                setPreview(text => text + update.text);
-              } else {
-                setPhase('loading_model');
-                setMessage(update.message);
-              }
-            };
+            const tokensToGen = Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72));
             result = await generateTextStream(
               built.prompt,
               onTextUpdate,
@@ -419,16 +439,6 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } }
             );
           } else {
-            const onStreamUpdate: Parameters<typeof generateTextStream>[1] = update => {
-              if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
-              if (update.kind === 'token') {
-                setPhase('awaiting_result');
-                setPreview(text => text + update.text);
-              } else {
-                setPhase('loading_model');
-                setMessage(update.message);
-              }
-            };
             result = await executeLocalStream({
               model: modelId,
               task: modelId === 'audio' && !pack ? 'chat' : capability.task,
@@ -437,7 +447,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               audio,
               required_media: image && audio ? capability.media : undefined,
               decision_question: decisionQuestion,
-              max_tokens: capability.role === 'decision_assistant' ? 40 : 52,
+              max_tokens: capability.role === 'decision_assistant' ? 36 : 32,
               job_id: turnId,
               activity_session_id: current.showId,
               checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
@@ -548,11 +558,12 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         if ((rawOutput.length < 25 || hasLeak) && retryCountRef.current === 0) {
           retryCountRef.current = 1;
           try {
+            setPreview('');
             const retryPrompt = modelId === 'text'
               ? `Continue the story with what happens next. Advance the plot. Do not repeat previous sentences or opening lines. Write 2–3 new sentences.`
               : buildSupportRetryPrompt(current, modelId);
             const retakeResult = await (modelId === 'text'
-              ? generateTextStream(retryPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)))
+              ? generateTextStream(retryPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)))
               : executeLocalStream({
                   model: modelId,
                   task: modelId === 'audio' && !pack ? 'chat' : capability.task,
@@ -561,11 +572,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                   audio,
                   required_media: image && audio ? capability.media : undefined,
                   decision_question: decisionQuestion,
-                  max_tokens: 52,
+                  max_tokens: 32,
                   job_id: turnId,
                   activity_session_id: current.showId,
                   checkpoint: { turn_index: index + 1, activity_type: 'STORY', state: { showId: current.showId, turnIndex: index + 1 } },
-                }, () => {})
+                }, onStreamUpdate)
             );
             const retakeRaw = retakeResult.output == null ? '' : outputText(retakeResult.output).trim();
             if (retakeRaw) {
@@ -610,7 +621,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           const genre = getGenreContract(current.config.theme);
           const openingCorrectionPrompt = `Start a fresh ${genre.displayName} story. Rewrite the opening in three concise sentences (400–500 characters total). Sentence 1: Establish ${cast?.protagonist || 'the protagonist'} in ${cast?.setting || 'the scene'} facing the concrete situation. Sentence 2: Establish their specific character objective or urgent central question. Sentence 3: Reveal the immediate stakes or complication if they fail. No title, no purely atmospheric text.`;
           try {
-            const correctiveResult = await generateTextStream(openingCorrectionPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+            setPreview('');
+            const correctiveResult = await generateTextStream(openingCorrectionPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
             const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
             if (correctiveRaw) {
               rawOutput = sanitizeTurnOutput(correctiveRaw);
@@ -635,7 +647,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           const genre = getGenreContract(current.config.theme);
           const climaxCorrectionPrompt = `Continue this ${genre.displayName} story at its decisive turning point. Act III Climax. Objective: "${director?.climaxObjective || 'Confront the central obstacle'}". Characters must directly confront the obstacle and make an irreversible choice or take decisive action now. Three concise sentences. No recap, no passive description.`;
           try {
-            const correctiveResult = await generateTextStream(climaxCorrectionPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+            setPreview('');
+            const correctiveResult = await generateTextStream(climaxCorrectionPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
             const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
             if (correctiveRaw) {
               rawOutput = sanitizeTurnOutput(correctiveRaw);
@@ -661,7 +674,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             const climaxOutcome = climaxTurn?.output ? ` The climax just forced a decisive choice: "${truncateWords(climaxTurn.output, 24)}".` : '';
             const endingCorrectionPrompt = `Conclude this ${getGenreContract(current.config.theme).displayName} story. Act IV Resolution.${climaxOutcome} State the definitive outcome of the climax choice and the original goal. Address and conclude the principal conflict: "${goal}". Show the final consequence and aftermath for the characters and world. Write three concise sentences, about 400–500 characters total. No recap.`;
             try {
-              const correctiveResult = await generateTextStream(endingCorrectionPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+              setPreview('');
+              const correctiveResult = await generateTextStream(endingCorrectionPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
               const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
               if (correctiveRaw) {
                 rawOutput = correctiveRaw;
@@ -777,7 +791,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                 retryCountRef.current = 1;
                 const stagPrompt = `${stagnationCheck.retakePromptDirective || 'Advance the plot with immediate action.'} Write three concise sentences. No recap.`;
                 try {
-                  const stagResult = await generateTextStream(stagPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)));
+                  setPreview('');
+                  const stagResult = await generateTextStream(stagPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
                   const stagRaw = stagResult.output == null ? '' : outputText(stagResult.output).trim();
                   if (stagRaw) {
                     rawOutput = sanitizeTurnOutput(stagRaw);
@@ -817,12 +832,13 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       stageText = storyDirection || formatStageDialogue(modelId, rawOutput, current.config.theme, storyPerspective, decisionQuestion ? Object.keys(decisionQuestion.criteria) : undefined).stageText;
 
       const finalDisplay = (stageText || rawOutput).slice(0, 500);
-      if (modelId !== 'text') {
-        const step = Math.max(2, Math.floor(finalDisplay.length / 15));
+      const streamedLen = previewRef.current.trim().length;
+      if (streamedLen <= 10) {
+        const step = Math.max(2, Math.floor(finalDisplay.length / 25));
         for (let i = step; i < finalDisplay.length; i += step) {
           if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
           setPreview(finalDisplay.slice(0, i));
-          await new Promise(r => setTimeout(r, 16));
+          await new Promise(r => setTimeout(r, 12));
         }
       }
       setPreview(finalDisplay);
@@ -919,7 +935,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         setPhase('paused');
         setMessage('Show paused. Completed turns are preserved.');
       } else if (current.config.playback === 'automatic') {
-        const readDelay = Math.min(1200, Math.max(800, Math.round(finalDisplay.length * 4)));
+        const readDelay = Math.min(600, Math.max(300, Math.round(finalDisplay.length * 1.5)));
         schedule(readDelay);
       } else {
         setPhase('paused');

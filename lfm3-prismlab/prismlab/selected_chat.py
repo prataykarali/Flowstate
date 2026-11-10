@@ -8,6 +8,7 @@ from __future__ import annotations
 import base64
 import json
 import math
+import re
 import threading
 import time
 from urllib.request import Request, urlopen
@@ -155,7 +156,6 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
                     unregister_upstream(ident)
             if isinstance(raw.get("timings"), dict):
                 server_timings = raw["timings"]
-    inference_s = time.perf_counter() - inference_started
     if model in {"d1", "d1_omni"}:
         if request.decision_question:
             answer = raw["answers"]["route"]
@@ -174,6 +174,29 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
             "human_review_required": True, "external_action_executed": False,
         }
         warnings = ("Decision confidence is not production-calibrated; human review required.",)
+        if on_token:
+            if request.decision_question:
+                criteria_map = request.decision_question.get("criteria", {})
+                criteria_desc = criteria_map.get(predicted, "")
+                clean_desc = re.sub(
+                    r"^(?:Build on [^.]+ motivations by making a decisive choice regarding |Let an established action or discovery \([^)]+\) produce a new consequence that reshapes the active scene\.|Develop [^.]+ in a manner faithful to [^.]+, paying off an earlier detail\.)",
+                    "",
+                    criteria_desc,
+                    flags=re.I
+                ).strip() or criteria_desc
+                clean_desc = clean_desc.rstrip(".") + "."
+                director_prefix = "Prism Thinker directs the tactical priority: " if model == "d1" else "Sherlock Omni synthesizes the threads and directs the next turn: "
+                stream_text = f"{director_prefix}{clean_desc}"
+            else:
+                stream_text = f"Evaluated route: {predicted} (confidence {confidence:.1%})."
+
+            words = stream_text.split(" ")
+            for i, w in enumerate(words):
+                tok = w if i == len(words) - 1 else w + " "
+                if first_token_at is None:
+                    first_token_at = time.perf_counter()
+                on_token(tok)
+                time.sleep(0.018)
     else:
         output = raw["choices"][0]["message"]["content"]
         if not isinstance(output, str):
@@ -183,11 +206,12 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
             raise RuntimeError("Model returned no final answer")
         warnings = ()
 
+    inference_s = time.perf_counter() - inference_started
     speed = server_timings.get("predicted_per_second")
     speed = float(speed) if isinstance(speed, (int, float)) and not isinstance(speed, bool) and math.isfinite(speed) and speed >= 0 else None
-    ttft = first_token_at - started if first_token_at is not None else None
-    trace.append(TraceStep("inference", "ok", model=model, latency_s=inference_s,
-                           ttft_s=first_token_at - inference_started if first_token_at is not None else None))
+    ttft_s = min(inference_s, max(0.0, first_token_at - inference_started)) if first_token_at is not None else None
+    ttft = min(time.perf_counter() - started, max(0.0, first_token_at - started)) if first_token_at is not None else None
+    trace.append(TraceStep("inference", "ok", model=model, latency_s=inference_s, ttft_s=ttft_s))
     return PrismResult(
         request.request_id, "completed", output=output, route=(model,), trace=tuple(trace),
         total_latency_s=time.perf_counter() - started, ttft_s=ttft,
