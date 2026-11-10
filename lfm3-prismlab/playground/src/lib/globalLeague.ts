@@ -144,7 +144,7 @@ export async function fetchGlobalStandings(force = false): Promise<GlobalStandin
 
 export async function recordGlobalEvent(
   modelId: CanonicalModelId,
-  activityType: 'chat' | 'story_turn' | 'story_complete' | 'trivia_correct' | 'trivia_match' | 'runner_completed' | 'arcade',
+  activityType: 'chat' | 'story_turn' | 'story_support_turn' | 'story_complete' | 'auto_story_complete' | 'trivia_correct' | 'trivia_match' | 'runner_completed' | 'arcade',
   points: number,
   sourceReceiptId?: string,
   activityReceipt?: string
@@ -190,7 +190,7 @@ export async function recordGlobalEvent(
             ...row,
             total_points: row.total_points + awarded,
             chat_points: activityType === 'chat' ? row.chat_points + awarded : row.chat_points,
-            story_points: activityType.startsWith('story') ? row.story_points + awarded : row.story_points,
+            story_points: (activityType.startsWith('story') || activityType.startsWith('auto_story')) ? row.story_points + awarded : row.story_points,
             trivia_points: activityType.startsWith('trivia') ? row.trivia_points + awarded : row.trivia_points,
             arcade_points: (activityType === 'runner_completed' || activityType === 'arcade')
               ? (row.arcade_points || 0) + awarded

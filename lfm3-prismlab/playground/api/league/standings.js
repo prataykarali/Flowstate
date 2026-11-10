@@ -9,6 +9,7 @@ const CANONICAL_MODELS = [
   { id: 'd1', name: 'Prism Thinker', family: 'd1-2B' },
   { id: 'd1_omni', name: 'Sherlock Omni', family: 'd1-Omni-2B' },
 ];
+const CANONICAL_MODEL_IDS = new Set(CANONICAL_MODELS.map(model => model.id));
 
 // Fallback in-memory state if database is pending or unreachable
 let memoryStandings = CANONICAL_MODELS.map(m => ({
@@ -57,7 +58,7 @@ export default async function handler(request, response) {
           headers,
           signal: AbortSignal.timeout(4000),
         }),
-        fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_events?select=visitor_id`, {
+        fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/championship_events?select=visitor_id,model_id,activity_type,points`, {
           headers,
           signal: AbortSignal.timeout(4000),
         }).catch(() => null),
@@ -66,20 +67,39 @@ export default async function handler(request, response) {
           signal: AbortSignal.timeout(4000),
         }).catch(() => null),
       ]);
+      let eventRows = [];
+      if (eventsRes && eventsRes.ok) {
+        try {
+          const events = await eventsRes.json();
+          if (Array.isArray(events)) {
+            eventRows = events;
+            memoryEventsCount = events.length;
+          }
+        } catch {}
+      }
 
       if (totalsRes && totalsRes.ok) {
         const rows = await totalsRes.json();
         if (Array.isArray(rows) && rows.length > 0) {
+          const normalizedTriviaPoints = new Map();
+          for (const event of eventRows) {
+            if (event?.activity_type !== 'trivia_correct' || !CANONICAL_MODEL_IDS.has(event.model_id)) continue;
+            const points = Number(event.points || 0);
+            normalizedTriviaPoints.set(event.model_id, (normalizedTriviaPoints.get(event.model_id) || 0) + points);
+          }
           standingsData = CANONICAL_MODELS.map(m => {
             const found = rows.find(r => r.model_id === m.id);
+            const rawTrivia = found ? Number(found.trivia_points || 0) : 0;
+            const trivia = normalizedTriviaPoints.has(m.id) ? normalizedTriviaPoints.get(m.id) : rawTrivia;
+            const rawTotal = found ? Number(found.total_points || 0) : 0;
             return {
               model_id: m.id,
               display_name: m.name,
               model_family: m.family,
-              total_points: found ? Number(found.total_points || 0) : 0,
+              total_points: rawTotal - rawTrivia + trivia,
               chat_points: found ? Number(found.chat_points || 0) : 0,
               story_points: found ? Number(found.story_points || 0) : 0,
-              trivia_points: found ? Number(found.trivia_points || 0) : 0,
+              trivia_points: trivia,
               arcade_points: found ? Number(found.arcade_points || found.other_eligible_points || 0) : 0,
               rating_points: found ? Number(found.rating_points || 0) : 0,
               other_eligible_points: found ? Number(found.other_eligible_points || 0) : 0,
@@ -97,15 +117,7 @@ export default async function handler(request, response) {
       }
 
       const visitorSet = new Set();
-      if (eventsRes && eventsRes.ok) {
-        try {
-          const events = await eventsRes.json();
-          if (Array.isArray(events)) {
-            memoryEventsCount = events.length;
-            events.forEach(e => { if (e && e.visitor_id) visitorSet.add(e.visitor_id); });
-          }
-        } catch {}
-      }
+      eventRows.forEach(e => { if (e && e.visitor_id) visitorSet.add(e.visitor_id); });
       if (ratingsRes && ratingsRes.ok) {
         try {
           const ratings = await ratingsRes.json();

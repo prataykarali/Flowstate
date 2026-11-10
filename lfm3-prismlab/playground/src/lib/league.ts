@@ -48,7 +48,18 @@ export interface LeagueEvent {
 }
 export interface AwardResult { events: LeagueEvent[]; event: LeagueEvent | null; reason: string | null }
 
-const requestIdValid = (value: string) => typeof value === 'string' && /^[a-f0-9]{32}$/i.test(value);
+export const POINTS_PER_EVENT = 100;
+export const ACTIVITY_POINTS: Record<ScoredActivity, number> = {
+  trivia_correct: POINTS_PER_EVENT,
+  runner_completed: POINTS_PER_EVENT,
+  chat_session: POINTS_PER_EVENT,
+  story_contribution: POINTS_PER_EVENT,
+  story_session_complete: POINTS_PER_EVENT,
+  auto_story_turn: POINTS_PER_EVENT,
+  auto_story_session: POINTS_PER_EVENT,
+};
+
+const requestIdValid = (value: string) => typeof value === 'string' && /^[a-f0-9]{32}$/i.test(value.replace(/-/g, ''));
 const dayOf = (timestamp: string) => {
   const date = new Date(timestamp);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -69,39 +80,39 @@ export function scoreEvent(events: LeagueEvent[], candidate: LeagueCandidate, ma
 
   switch (candidate.activity) {
     case 'trivia_correct':
-      if (!Number.isInteger(candidate.questionId) || candidate.questionId < 1 || candidate.answerIndex !== candidate.correctIndex || !candidate.sourceUrl.startsWith('https://')) return reject('Unverified trivia answer.');
-      points = 8;
+      if (!Number.isInteger(candidate.questionId) || candidate.questionId < 0 || candidate.answerIndex !== candidate.correctIndex || !candidate.sourceUrl.startsWith('https://')) return reject('Unverified trivia answer.');
+      points = POINTS_PER_EVENT;
       key = `trivia:${day}:${candidate.questionId}`;
       if (sameDay(events, 'trivia_correct', day) >= 4) return reject('Daily trivia cap reached.');
       break;
     case 'runner_completed':
       if (!candidate.started || !Number.isFinite(candidate.score) || candidate.score < 25) return reject('Run did not reach a completed achievement.');
-      points = candidate.score >= 150 ? 25 : candidate.score >= 75 ? 15 : 8;
+      points = POINTS_PER_EVENT;
       ruleId = candidate.score >= 150 ? 'runner_150' : candidate.score >= 75 ? 'runner_75' : 'runner_25';
       key = `runner:${candidate.sessionId}`;
       if (sameDay(events, 'runner_completed', day) >= 2) return reject('Daily Runner cap reached.');
       break;
     case 'chat_session':
       if (candidate.requestIds.length < 1 || !candidate.requestIds.every(requestIdValid) || new Set(candidate.requestIds).size !== candidate.requestIds.length) return reject('Valid completed model request IDs are required.');
-      points = 4;
+      points = POINTS_PER_EVENT;
       key = `chat:${candidate.sessionId}:${candidate.requestIds.join(':')}`;
       break;
     case 'story_contribution':
       if (!requestIdValid(candidate.requestId)) return reject('A completed model request ID is required.');
-      points = 6;
+      points = POINTS_PER_EVENT;
       key = `story_turn:${candidate.requestId}`;
       if (sameDay(events, 'story_contribution', day, candidate.modelId) >= 3) return reject('Daily Story contribution cap reached.');
       break;
     case 'story_session_complete':
       if (candidate.requestIds.length < 2 || new Set(candidate.requestIds).size < 2 || !candidate.requestIds.every(requestIdValid)) return reject('Two distinct completed model turns are required.');
-      points = 10;
+      points = POINTS_PER_EVENT;
       key = `story_session:${candidate.sessionId}`;
       if (sameDay(events, 'story_session_complete', day, candidate.modelId) >= 1) return reject('Daily Story session cap reached.');
       break;
     case 'auto_story_turn':
       if (!candidate.liveExecution || candidate.showId !== candidate.sessionId || !candidate.turnId.trim() || !requestIdValid(candidate.requestId) || (candidate.role === 'writer') !== (candidate.modelId === 'text')) return reject('A live completed show turn with correct model role is required.');
       if (events.some(event => event.activity === 'auto_story_turn' && event.requestId === candidate.requestId)) return reject('This model request was already awarded.');
-      points = candidate.role === 'writer' ? 6 : 3;
+      points = POINTS_PER_EVENT;
       key = `auto-story:${AUTO_STORY_VERSION}:${candidate.showId}:${candidate.turnId}:${candidate.modelId}`;
       if (sameDay(events, 'auto_story_turn', day, candidate.modelId) >= 4) return reject('Daily Auto Story turn cap reached.');
       break;
@@ -109,7 +120,7 @@ export function scoreEvent(events: LeagueEvent[], candidate: LeagueCandidate, ma
       if (!candidate.liveExecution || candidate.showId !== candidate.sessionId || candidate.modelId !== 'text' || candidate.requestIds.length < 3 || new Set(candidate.requestIds).size < 3 || !candidate.requestIds.every(requestIdValid)) return reject('Completed live show evidence is required.');
       const qualifying = events.filter(event => event.activity === 'auto_story_turn' && event.sessionId === candidate.showId && event.requestId && candidate.requestIds.includes(event.requestId));
       if (qualifying.length < 3 || qualifying.filter(event => event.modelId === 'text').length < 2) return reject('Three scored turns, including two writer turns, are required.');
-      points = 8;
+      points = POINTS_PER_EVENT;
       key = `auto-story-session:${AUTO_STORY_VERSION}:${candidate.showId}`;
       if (sameDay(events, 'auto_story_session', day, 'text') >= 1) return reject('Daily Auto Story session cap reached.');
       break;

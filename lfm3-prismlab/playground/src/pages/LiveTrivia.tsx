@@ -4,7 +4,7 @@ import { MascotAvatar } from '../components/mascots/MascotAvatar.tsx';
 import { TriviaWinnerModal } from '../components/mascots/TriviaWinnerModal.tsx';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
 import { getGatewayStatus, startActivity, stopActivity, parkActivity, resumeParkedActivity, ApiError, type GatewayStatus } from '../lib/api.ts';
-import { answerQuestion, generateQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
+import { answerQuestion, generateQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, TRIVIA_POINTS_PER_CORRECT, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
 import { awardTriviaCorrect } from '../lib/leagueAdapters.ts';
 import { setTriviaRunning } from '../lib/triviaLock.ts';
 import { cancelActiveInference } from '../lib/inferenceLock.ts';
@@ -375,7 +375,7 @@ export const LiveTrivia: React.FC = () => {
   const contestantMatchStats = LIVE_MODELS.map(id => {
     const modelAttempts = allAttempts.filter(a => a.modelId === id);
     const correct = modelAttempts.filter(a => a.status === 'correct').length;
-    const modelPoints = correct * 100;
+    const modelPoints = correct * TRIVIA_POINTS_PER_CORRECT;
     const attemptsCount = modelAttempts.length;
     const accuracy = attemptsCount > 0 ? Math.round((correct / attemptsCount) * 100) : 0;
     return { id, points: modelPoints, correct, attempts: attemptsCount, accuracy };

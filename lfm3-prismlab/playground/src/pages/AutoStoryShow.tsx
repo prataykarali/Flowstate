@@ -12,8 +12,12 @@ import {
   evaluateGenreTurn,
   extractStoryWorldState,
   formatStageDialogue,
+  getCommittedShowTurnCount,
+  getCommittedShowTurns,
+  isCommittedShowTurn,
   getTurnModeLabel,
   planShow,
+  chooseRandomTurnCount,
   openingReuseReason,
   clearShows,
   readShows,
@@ -50,6 +54,8 @@ import {
   hasMeaningfulEnding,
   detectNarrativeLoop,
   auditStoryQuality,
+  detectPromptLeakage,
+  buildSupportRetryPrompt,
   type NarrativeEvent
 } from '../lib/storyShow.ts';
 import { getEvidencePackForTheme, loadPackMedia, type StoryEvidencePack } from '../lib/storyEvidencePacks.ts';
@@ -104,8 +110,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   });
   const [message, setMessage] = React.useState<string>(() => {
     if (!show) return 'Choose a genre to start a new story.';
-    if (show.status === 'paused_rate_limit') return `Your Story is saved at Turn ${show.turns.length + 1} of ${show.config.turnCount}.`;
-    return `Story paused at Turn ${show.turns.length + 1} of ${show.config.turnCount}. Click "Resume" to continue.`;
+    if (show.status === 'paused_rate_limit') return `Your Story is saved at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}.`;
+    return `Story paused at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}. Click "Resume" to continue.`;
   });
   const [preview, setPreview] = React.useState('');
   const [modeLabel, setModeLabel] = React.useState<string>(() => show ? 'Paused' : '');
@@ -164,7 +170,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           saveShow({ ...current, status: 'parked', updatedAt: new Date().toISOString() });
           void parkActivity(current.showId, {
             theme: current.config.theme,
-            turn: current.turns.length,
+            turn: getCommittedShowTurnCount(current),
             turnCount: current.config.turnCount,
           });
           window.dispatchEvent(new CustomEvent('prismlab_activity_change'));
@@ -280,9 +286,9 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const current = showRef.current;
     if (!current || current.mode === 'recorded_show' || pendingRef.current || pausedRef.current || stoppedRef.current || !mountedRef.current) return;
 
-    const index = current.turns.length;
+    const index = getCommittedShowTurnCount(current);
     if (index >= current.turnOrder.length) {
-      const complete = current.turns.every(turn => turn.status === 'completed');
+      const complete = index === current.turnOrder.length;
       commit({ ...current, status: complete ? 'completed' : 'failed', updatedAt: new Date().toISOString() });
       setPhase(complete ? 'completed' : 'failed');
       setMessage(complete ? 'Live show complete! All turns recorded for replay.' : 'Show ended with incomplete turns.');
@@ -301,9 +307,20 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const modelId = current.turnOrder[index];
     const capability = SHOW_CAPABILITIES.find(item => item.modelId === modelId)!;
     const startedAt = new Date().toISOString();
-    const turnId = `${current.showId}:${index + 1}`;
+    const attemptNumber = current.turns.filter(turn => turn.index === index).length + 1;
+    const turnId = `${current.showId}:${index + 1}:attempt${attemptNumber}`;
     const storyPerspective = !current.config.scenarioId;
     const initialMode = getTurnModeLabel(modelId, capability, storyPerspective);
+    const recordFailedAttempt = (failedTurn: ShowTurn, why: string) => {
+      const canRetryAutomatically = attemptNumber === 1;
+      const next = appendShowTurn(showRef.current!, failedTurn);
+      commit({ ...next, status: canRetryAutomatically ? 'active' : 'failed' });
+      setPhase(canRetryAutomatically ? 'presenting_turn' : 'failed');
+      setMessage(canRetryAutomatically
+        ? `${MODELS[modelId].characterName} did not produce an accepted contribution; retrying this story turn once.`
+        : `${MODELS[modelId].characterName} could not complete this story turn: ${why}`);
+      if (canRetryAutomatically) schedule(1200);
+    };
 
     pendingRef.current = true;
     setPending(true);
@@ -322,10 +339,17 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     try {
       let status = await getGatewayStatus();
       if (epochRef.current !== currentEpoch || stoppedRef.current) return;
-      if (status.inference_busy && status.queue && status.queue.waiting >= (status.queue.waiting_limit || 3)) {
-        throw new Error('Inference queue is full. Retrying shortly…');
+      let readinessAttempts = 0;
+      while ((status.inference_busy && status.queue && status.queue.waiting >= (status.queue.waiting_limit || 3)) || (!isRouteReady(status, modelId) && readinessAttempts < 3)) {
+        readinessAttempts += 1;
+        setMessage(`${MODELS[modelId].characterName} is warming up or waiting for queue slot (${readinessAttempts}/3)…`);
+        await new Promise(r => setTimeout(r, 1500));
+        if (epochRef.current !== currentEpoch || stoppedRef.current) return;
+        status = await getGatewayStatus();
       }
-      if (!isRouteReady(status, modelId)) throw new Error(`${MODELS[modelId].characterName} is unavailable. ${status.reason}`);
+      if (!isRouteReady(status, modelId) && !status.auto_start_available) {
+        throw new Error(`${MODELS[modelId].characterName} is unavailable. ${status.reason}`);
+      }
 
       // Evidence pack grounding check
       const pack: StoryEvidencePack | null = current.config.scenarioId ? getEvidencePackForTheme(current.config.theme) : null;
@@ -343,6 +367,19 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       const built = capability.role === 'decision_assistant' && pack
         ? { prompt: pack.incidentReport, truncated: false }
         : buildShowPrompt(current, modelId);
+
+      // On retry attempt: inject targeted anti-repetition / concise resolution guidance
+      if (attemptNumber > 1) {
+        const prevFailed = current.turns.filter(t => t.index === index).slice(-1)[0];
+        if (prevFailed?.rejectionReason) {
+          if (/repeated|repetition|loop/i.test(prevFailed.rejectionReason)) {
+            built.prompt += ' Advance to what happens next; do not repeat, quote, or rephrase earlier sentences.';
+          } else if (/truncated|length/i.test(prevFailed.rejectionReason)) {
+            built.prompt += ' Conclude your response in two concise, grammatically complete sentences.';
+          }
+        }
+      }
+
       const decisionQuestion = capability.role === 'decision_assistant' && !pack ? chooseStoryDirections(current) : undefined;
       promptLength = built.prompt.length;
       contextTruncated = built.truncated;
@@ -432,8 +469,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               requestId: `failed-${Date.now()}`,
               route: [modelId],
               output: '',
-              stageText: `[${MODELS[modelId].characterName} unavailable: ${fallbackMsg}]`,
-              stageTextProvenance: 'template',
+              stageText: undefined,
               rejectionReason: fallbackMsg,
               isRelevant: false,
               promptLength,
@@ -442,10 +478,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               finishedAt: new Date().toISOString(),
               error: fallbackMsg
             };
-            commit(appendShowTurn(showRef.current!, failedTurn));
-            setPhase('presenting_turn');
-            setMessage(`${MODELS[modelId].characterName} unavailable (${fallbackMsg}).`);
-            schedule(2200);
+            recordFailedAttempt(failedTurn, fallbackMsg);
             return;
           }
           throw execErr;
@@ -469,8 +502,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             requestId: result.request_id || `failed-${Date.now()}`,
             route: [modelId],
             output: '',
-            stageText: `[${MODELS[modelId].characterName} returned no response]`,
-            stageTextProvenance: 'template',
+            stageText: undefined,
             rejectionReason: 'No output returned by model',
             isRelevant: false,
             promptLength,
@@ -478,10 +510,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             startedAt,
             finishedAt: new Date().toISOString()
           };
-          commit(appendShowTurn(showRef.current!, failedTurn));
-          setPhase('presenting_turn');
-          setMessage(`${MODELS[modelId].characterName} returned no response.`);
-          schedule(2200);
+          recordFailedAttempt(failedTurn, 'the model returned no response');
           return;
         }
         throw new Error('Writer returned no text.');
@@ -511,13 +540,14 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           result = { ...result, output: deEchoed };
         }
 
-        // If candidate was purely an echo or emptied by prefix stripping, run bounded single retry
-        if (rawOutput.length < 25 && retryCountRef.current === 0) {
+        // If candidate was purely an echo, emptied by prefix stripping, or leaked prompt constraints, run bounded single retry
+        const hasLeak = detectPromptLeakage(rawOutput);
+        if ((rawOutput.length < 25 || hasLeak) && retryCountRef.current === 0) {
           retryCountRef.current = 1;
           try {
             const retryPrompt = modelId === 'text'
               ? `Continue the story with what happens next. Advance the plot. Do not repeat previous sentences or opening lines. Write 2–3 new sentences.`
-              : `Provide your distinct perspective for this scene without repeating any prior sentences or character dialogue.`;
+              : buildSupportRetryPrompt(current, modelId);
             const retakeResult = await (modelId === 'text'
               ? generateTextStream(retryPrompt, () => {}, Math.min(128, Math.max(32, current.config.maxTokens || 128)))
               : executeLocalStream({
@@ -636,12 +666,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             index,
             modelId,
             role: capability.role,
-            status: 'rejected',
+            status: 'failed',
             requestId: result.request_id,
             route: result.route,
             output: rawOutput,
-            stageText: `[${MODELS[modelId].characterName} vote rejected: ${decisionData.error || 'invalid decision output'}]`,
-            stageTextProvenance: 'template',
+            stageText: undefined,
             rejectionReason: decisionData.error || 'Inconclusive decision structure',
             decisionData,
             isRelevant: false,
@@ -651,10 +680,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             finishedAt: new Date().toISOString(),
             latencyS: result.metrics?.total_latency_s
           };
-          commit(appendShowTurn(showRef.current!, rejectedTurn));
-          setPhase('presenting_turn');
-          setMessage(`${MODELS[modelId].characterName} returned an invalid vote; recorded as rejected.`);
-          schedule(2200);
+          recordFailedAttempt(rejectedTurn, decisionData.error || 'invalid decision output');
           return;
         }
       }
@@ -679,12 +705,14 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       let proposedEvents: NarrativeEvent[] = [];
       let loopIssue: string | undefined;
 
-      if (rawOutput && (modelId === 'text' || (storyPerspective && capability.role !== 'decision_assistant'))) {
+      // Canonical world state validation and state synchronization across all 6 models.
+      // Specialist observations, discoveries, and facts are preserved in canonical state for subsequent turns.
+      if (rawOutput && capability.role !== 'decision_assistant') {
         const cws = current.canonicalWorldState || initializeCanonicalWorldState(current.config.theme, current.config.opening, current.config.cast);
         proposedEvents = extractProposedEvents(rawOutput, cws, modelId, index);
         const validation = validateProposedEvents(proposedEvents, rawOutput, cws);
 
-        if (validation.valid && (modelId === 'text' || (storyPerspective && capability.role !== 'decision_assistant'))) {
+        if (validation.valid && modelId === 'text') {
           const pastAcceptedTurns = current.turns.filter(t => t.status === 'completed' && t.isRelevant !== false);
           const loopCheck = detectNarrativeLoop(rawOutput, proposedEvents, pastAcceptedTurns, cws);
           if (loopCheck.hasLoop) {
@@ -693,11 +721,16 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         }
 
         if (validation.valid) {
-          acceptedEvents = validation.acceptedEvents;
-          current.canonicalWorldState = applyEventsToWorldState(cws, acceptedEvents, index, current.turnOrder.length);
+          if (!loopIssue && !copiedTurn && !unrelated) {
+            acceptedEvents = validation.acceptedEvents;
+            // Preserves accepted specialist discoveries and facts for subsequent turns
+            current.canonicalWorldState = applyEventsToWorldState(cws, acceptedEvents, index, current.turnOrder.length);
+          }
         } else {
           canonicalIssues = validation.issues;
-          if (validation.issues.some(issue => /Repeated canonical event|Repeated action|Repeated discovery|Location regression/.test(issue))) loopIssue = validation.issues.find(issue => /Repeated canonical event|Repeated action|Repeated discovery|Location regression/.test(issue));
+          if (validation.issues.some(issue => /Repeated canonical event|Repeated action|Repeated discovery|Location regression/.test(issue))) {
+            loopIssue = validation.issues.find(issue => /Repeated canonical event|Repeated action|Repeated discovery|Location regression/.test(issue));
+          }
         }
       }
 
@@ -750,6 +783,15 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         activityReceipt: result.activity_receipt
       };
 
+      if (!isCommittedShowTurn(turn)) {
+        const reason = copiedTurn ? 'repeated earlier text' : loopIssue || canonicalIssues[0] || (unrelated ? 'specialist output was unrelated to the story' : turn.isTruncated ? 'output was truncated or incomplete' : 'contribution did not pass acceptance checks');
+        recordFailedAttempt({ ...turn, status: 'failed', stageText: undefined, rejectionReason: reason, error: reason,
+          rawAttempts: [...(turn.rawAttempts || []), { requestId: result.request_id, output: rawOutput, reason }] }, reason);
+        setPreview('');
+        setReactionState('sad');
+        return;
+      }
+
       const next = appendShowTurn(showRef.current!, turn);
       commit(next);
       setPreview(finalDisplay);
@@ -758,29 +800,32 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       setModeLabel('Presenting result');
 
       // Turns with continuity issues or invalid outcomes do not earn League points
-      const award = (unrelated || canonicalIssues.length > 0)
-        ? { event: null }
-        : awardAutoStoryTurn(modelId, current.showId, turnId, result.request_id, capability.narrativeWriter ? 'writer' : 'support', result.activity_receipt);
+      const award = awardAutoStoryTurn(modelId, current.showId, turnId, result.request_id, capability.narrativeWriter ? 'writer' : 'support', result.activity_receipt);
       setPhase('presenting_turn');
       setMessage(`${MODELS[modelId].characterName} completed turn ${index + 1}${award.event ? ` · +${award.event.pointsEarned} League points` : ''}.`);
 
-      if (next.turns.length === next.turnOrder.length) {
+      const committedTurns = getCommittedShowTurns(next.turns);
+      if (committedTurns.length === next.turnOrder.length) {
         const cws = current.canonicalWorldState || initializeCanonicalWorldState(current.config.theme, current.config.opening, current.config.cast);
-        // Success requires every writer turn to complete and a validated ending; specialist failures stay recorded as failed but do not fake success.
-        const lastTurn = next.turns.at(-1);
-        const completed = next.turns.filter(item => item.modelId === 'text').every(item => item.status === 'completed') && lastTurn?.isTruncated !== true &&
+        const lastTurn = committedTurns.at(-1);
+        const expectedWriterTurns = next.turnOrder.filter(id => id === 'text').length;
+        const endingValidated = committedTurns.filter(item => item.modelId === 'text').length === expectedWriterTurns && lastTurn?.isTruncated !== true &&
           lastTurn?.modelId === 'text' && !lastTurn.genreEvaluation?.issues?.some(issue => issue.startsWith('Ending did not meet')) && hasMeaningfulEnding(lastTurn.output || '', cws.narrativeGoal, current.config.theme);
+        // Finish the show once every scheduled model has taken its turn. Keep
+        // the ending audit as quality feedback without leaving a fully played
+        // six-model story in the failed/locked state.
+        const completed = committedTurns.length === next.turnOrder.length;
         const audit = auditStoryContinuity(cws, next.turns.map(t => t.output || '').join(' '));
         const qualityAudit = auditStoryQuality(cws, next.turns);
         const final = { ...next, status: completed ? 'completed' as const : 'failed' as const, canonicalWorldState: cws, continuityAudit: audit, storyQualityAudit: qualityAudit, updatedAt: new Date().toISOString() };
         commit(final);
-        if (completed) {
-          const finalReceipt = next.turns.slice().reverse().find(item => item.activityReceipt)?.activityReceipt;
-          awardAutoStorySession(final.showId, final.turns.map(item => item.requestId!).filter(Boolean), finalReceipt);
+        if (completed && endingValidated) {
+          const finalReceipt = committedTurns.slice().reverse().find(item => item.activityReceipt)?.activityReceipt;
+          awardAutoStorySession(final.showId, committedTurns.map(item => item.requestId!).filter(Boolean), finalReceipt);
         }
         void stopActivity(final.showId, completed ? 'completed' : 'failed');
         setPhase(stoppedRef.current ? 'stopped' : completed ? 'completed' : 'failed');
-        setMessage(completed ? `Live show complete! ${qualityAudit.label}` : 'Show ended without a validated ending (narrative failure recorded).');
+        setMessage(completed ? `Live show complete! ${qualityAudit.label}${endingValidated ? '' : ' Ending needs a quality review.'}` : 'Show ended with incomplete turns.');
         if (completed && !stoppedRef.current) {
           window.setTimeout(() => {
             if (mountedRef.current && !stoppedRef.current) {
@@ -866,8 +911,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     pausedRef.current = false;
     retryCountRef.current = 0;
 
-    const chooseStoryTurnCount = () => 10 + Math.floor(Math.random() * 3);
-    const next = createShow({ ...newConfig, turnCount: useSelectedCount ? newConfig.turnCount : chooseStoryTurnCount() });
+    const next = createShow({ ...newConfig, turnCount: useSelectedCount ? newConfig.turnCount : chooseRandomTurnCount() });
     commit(next);
     setPhase('preparing');
     setMessage(`New ${next.config.theme} story started · ${next.turnOrder.length} turns across ${next.config.modelIds.length} models.`);
@@ -888,11 +932,10 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const available = choices.length ? choices : STORY_THEMES;
     const randomTheme = available[Math.floor(Math.random() * available.length)];
     previousThemeRef.current = randomTheme;
-    const chooseStoryTurnCount = () => 10 + Math.floor(Math.random() * 3);
     const randomConfig: ShowConfig = {
       theme: randomTheme,
       opening: '',
-      turnCount: chooseStoryTurnCount(),
+      turnCount: chooseRandomTurnCount(),
       modelIds: SHOW_CAPABILITIES.map(capability => capability.modelId),
       playback: 'automatic',
       maxTokens: 128,
@@ -935,7 +978,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         try {
           await startActivity('STORY', showRef.current.showId, undefined, {
             theme: showRef.current.config.theme,
-            turn: showRef.current.turns.length,
+            turn: getCommittedShowTurnCount(showRef.current),
             turnCount: showRef.current.config.turnCount,
           });
         } catch {}
@@ -987,10 +1030,21 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const skip = () => {
     const current = showRef.current;
     if (!current || pendingRef.current || current.turns.at(-1)?.status !== 'failed') return;
+    const index = getCommittedShowTurnCount(current);
+    if (current.turnOrder[index] === 'text') {
+      commit({ ...current, status: 'failed' });
+      setPhase('failed');
+      setMessage('The required writer turn was skipped. This session is saved as incomplete; retry it or start another story.');
+      return;
+    }
     const turns = [...current.turns];
-    turns[turns.length - 1] = { ...turns[turns.length - 1], status: 'skipped' };
+    turns[turns.length - 1] = {
+      ...turns[turns.length - 1],
+      status: 'skipped',
+      error: 'Specialist slot skipped; honest degraded session state recorded without attribution replacement.'
+    };
     commit({ ...current, turns, status: 'active' });
-    setMessage('Turn marked skipped.');
+    setMessage(`${MODELS[current.turnOrder[index]].characterName} slot marked skipped (degraded mode); continuing to next scheduled turn.`);
     stoppedRef.current = false;
     pausedRef.current = false;
     schedule(0);
@@ -1010,7 +1064,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     }
     showRef.current = null;
     setShow(null);
-    if (!turnCountCustomized) setConfig(previous => ({ ...previous, turnCount: 10 }));
+    if (!turnCountCustomized) setConfig(previous => ({ ...previous, turnCount: 8 }));
     setPreview('');
     setPhase('configuring');
     setMessage('Choose a genre to start a new story.');
@@ -1042,7 +1096,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         <div className="chat-story-setup">
           <div className="chat-story-inline-head">
             <strong>✦ Auto Story</strong>
-            <span>{config.modelIds.length} models · {turnCountCustomized ? `${config.turnCount} turns` : 'random 10–12 turns'}. Choose any genre; each model receives the previous story context.</span>
+            <span>{config.modelIds.length} models · {turnCountCustomized ? `${config.turnCount} turns` : 'random 8–12 turns'}. Choose any genre; each model receives the evolving story context.</span>
           </div>
 
           <label className="chat-story-opening">
@@ -1086,8 +1140,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                   if (e.target.value === 'random') setTurnCountCustomized(false);
                   else { setTurnCountCustomized(true); setConfig({ ...config, turnCount: Number(e.target.value) }); }
                 }}>
-                  <option value="random">Random (10–12)</option>
-                  {[10, 11, 12].map(count => <option key={count} value={count}>{count}</option>)}
+                  <option value="random">Random (8–12)</option>
+                  {[8, 9, 10, 11, 12].map(count => <option key={count} value={count}>{count}</option>)}
                 </select>
               </label>
               <label>
@@ -1110,7 +1164,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             </label>
 
             <div className="chat-story-cast">
-              <button type="button" onClick={() => setConfig({ ...config, modelIds: SHOW_CAPABILITIES.map(cap => cap.modelId), turnCount: Math.max(10, config.turnCount) })}>
+              <button type="button" onClick={() => setConfig({ ...config, modelIds: SHOW_CAPABILITIES.map(cap => cap.modelId), turnCount: Math.max(8, config.turnCount) })}>
                 Full Cast (6 Models)
               </button>
               <button type="button" onClick={() => setConfig({ ...config, modelIds: ['text'] })}>
@@ -1168,7 +1222,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                       showRef.current = item;
                       setShow(item);
                       setPhase('paused');
-                      setMessage(`Story paused at Turn ${item.turns.length + 1} of ${item.turnOrder.length}. Click "Resume" to continue.`);
+                      setMessage(`Story paused at Turn ${getCommittedShowTurnCount(item) + 1} of ${item.turnOrder.length}. Click "Resume" to continue.`);
                       stoppedRef.current = false;
                       pausedRef.current = true;
                     } else {
@@ -1176,7 +1230,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                     }
                   }}
                 >
-                  {item.config.theme} · {item.turns.length}/{item.turnOrder.length} turns · {item.status}
+                  {item.config.theme} · {getCommittedShowTurnCount(item)}/{item.turnOrder.length} turns · {item.status}
                 </button>
               ))}
             </details>
@@ -1186,10 +1240,10 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         <div className="chat-story-running">
           <div className="chat-story-running-top">
             <strong>
-              {show.mode === 'recorded_show' ? 'Recorded Story Replay' : `Auto Story · Turn ${Math.min(show.turns.length + 1, show.turnOrder.length)}/${show.turnOrder.length}`}
+              {show.mode === 'recorded_show' ? 'Recorded Story Replay' : `Auto Story · Turn ${Math.min(getCommittedShowTurnCount(show) + 1, show.turnOrder.length)}/${show.turnOrder.length}`}
             </strong>
             <span>
-              {phase.replaceAll('_', ' ')} · {showBeat(show, Math.min(show.turns.length, show.turnOrder.length - 1))}
+              {phase.replaceAll('_', ' ')} · {showBeat(show, Math.min(getCommittedShowTurnCount(show), show.turnOrder.length - 1))}
             </span>
           </div>
 
@@ -1197,7 +1251,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             <div className="chat-story-rate-limit-banner" style={{ padding: '8px 12px', background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.4)', borderRadius: '6px', margin: '8px 0', fontSize: '0.875rem' }}>
               <strong>Models In Use · In Queue</strong>
               <p style={{ margin: '4px 0' }}>
-                Another visitor is currently using the shared inference models. Your story is safely preserved at Turn {Math.min(show.turns.length + 1, show.turnOrder.length)} of {show.turnOrder.length}. {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resuming turn automatically in ${rateLimitCountdown}s, or click Resume when ready.` : 'Queue cleared! Resuming now.'}
+                Another visitor is currently using the shared inference models. Your story is safely preserved at Turn {Math.min(getCommittedShowTurnCount(show) + 1, show.turnOrder.length)} of {show.turnOrder.length}. {rateLimitCountdown !== null && rateLimitCountdown > 0 ? `Resuming turn automatically in ${rateLimitCountdown}s, or click Resume when ready.` : 'Queue cleared! Resuming now.'}
               </p>
             </div>
           )}
@@ -1221,7 +1275,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                       commit({ ...curr, status: 'parked', updatedAt: new Date().toISOString() });
                       await parkActivity(curr.showId, {
                         theme: curr.config.theme,
-                        turn: curr.turns.length,
+                        turn: getCommittedShowTurnCount(curr),
                         turnCount: curr.config.turnCount,
                       });
                       window.dispatchEvent(new CustomEvent('prismlab_activity_change'));

@@ -176,6 +176,7 @@ export const TOPIC_SPARKS: Record<string, string[]> = {
 };
 export const LETTERS: Letter[] = ['A', 'B', 'C', 'D'];
 export const LIVE_MODELS: CanonicalModelId[] = ['text', 'vision', 'audio', 'omni', 'd1', 'd1_omni'];
+export const TRIVIA_POINTS_PER_CORRECT = 100;
 export const BACKEND_IDS: Record<CanonicalModelId, string> = {
   text: 'lfm3-1.7b',
   vision: 'lfm3-vision',
@@ -501,7 +502,7 @@ export async function answerQuestion(modelId: CanonicalModelId, question: LiveQu
       backendModelId: result.backend_model_id || BACKEND_IDS[modelId],
       answer,
       status: !answer ? 'invalid' : answer === question.correct_option ? 'correct' : 'incorrect',
-      points: answer === question.correct_option ? 100 : 0,
+      points: answer === question.correct_option ? TRIVIA_POINTS_PER_CORRECT : 0,
       requestId: result.request_id,
       latencyS: result.metrics.total_latency_s,
       timestamp,
@@ -576,7 +577,7 @@ export function triviaStandings(matches: LiveMatch[]): TriviaStanding[] {
       return {
         modelId,
         rank: null as number | null,
-        points: correct * 100,
+        points: correct * TRIVIA_POINTS_PER_CORRECT,
         correct,
         attempts: attempts.length,
         incorrect,

@@ -211,8 +211,8 @@ export function initializeCanonicalWorldState(
       role: params.cast.role,
       status: 'alive',
       location: settingLocation,
-      motivations: [`Resolve the crisis: ${params.cast.hook}`],
-      knowledge: ['Initial situation'],
+      motivations: params.cast.hook ? [`Pursue the established objective: ${params.cast.hook}`] : [],
+      knowledge: params.premise ? [`Opening premise: ${params.premise}`] : [],
       pastActions: []
     });
 
@@ -222,8 +222,8 @@ export function initializeCanonicalWorldState(
       role: 'companion',
       status: 'alive',
       location: settingLocation,
-      motivations: ['Support the journey'],
-      knowledge: ['Initial situation'],
+      motivations: [],
+      knowledge: params.premise ? [`Opening premise: ${params.premise}`] : [],
       pastActions: []
     });
   }
@@ -361,14 +361,48 @@ export function extractProposedEvents(
   const characters = worldState.characters;
   const entities = worldState.entities;
 
-  // 1. Character Death / Irreversible Loss Extraction
+  // Helper to check if a match is inside dialogue quotes or preceded by hypothetical/belief markers
+  const isHypotheticalOrQuote = (text: string, pattern: RegExp): boolean => {
+    const match = text.match(pattern);
+    if (!match) return false;
+    const matchedIdx = match.index ?? 0;
+    const before = text.slice(0, matchedIdx);
+    const quotesBefore = (before.match(/"/g) || []).length;
+    if (quotesBefore % 2 !== 0) return true; // inside dialogue quotes
+    const sentenceStart = Math.max(0, before.lastIndexOf('.'), before.lastIndexOf('!'), before.lastIndexOf('?'));
+    const sentencePrefix = text.slice(sentenceStart, matchedIdx);
+    return /\b(?:if|could|might|would|unless|risk\s+of|fear\s+that|worried\s+that|thought\s+that|claimed\s+that|alleged|pretended|rumored|threatened\s+to|seemed\s+to\s+think)\b/i.test(sentencePrefix);
+  };
+
+  // 1. Character Death / Irreversible Loss / Status Extraction
   for (const char of characters) {
     const nameRegex = new RegExp('\\b' + char.name + '\\b', 'i');
     if (!nameRegex.test(clean)) continue;
 
+    // Check for reunion/return of missing or separated character first
+    const reunionRegex = new RegExp('\\b' + char.name + '\\b.*?\\b(?:rejoined|returned|emerged\\s+from|rescued|found\\s+alive|was\\s+not\\s+dead|survived\\s+the|reappeared)\\b|\\b(?:rescued|found\\s+alive)\\s+' + char.name + '\\b', 'i');
+    if (reunionRegex.test(clean) && (char.status === 'missing' || char.status === 'dead' || char.status === 'injured')) {
+      events.push({
+        eventId: `evt_${worldState.storyId}_${turnIndex}_reunion_${char.name.toLowerCase()}`,
+        storyId: worldState.storyId,
+        turnIndex,
+        modelId,
+        type: 'PROGRESSION_BEAT',
+        actors: [char.name],
+        description: `${char.name} returned or was reunited with the group.`,
+        proposedChanges: [`Change status of ${char.name} to alive`],
+        acceptedChanges: [],
+        irreversible: false,
+        confidence: 'high',
+        auditLog: [`Matched return/reunion pattern for ${char.name}`],
+        timestamp: new Date().toISOString()
+      });
+      continue;
+    }
+
     // Explicit high-confidence death patterns
     const deathRegex = new RegExp('\\b' + char.name + '\\b.*?\\b(?:swallowed by the flood|drowned|died|perished|succumbed|killed|lifeless body|fell to (?:his|her|their) death|drew (?:his|her|their) last breath)\\b|\\b(?:death of|body of|mourned|lost forever)\\s+' + char.name + '\\b', 'i');
-    if (deathRegex.test(clean)) {
+    if (deathRegex.test(clean) && !isHypotheticalOrQuote(clean, deathRegex)) {
       events.push({
         eventId: `evt_${worldState.storyId}_${turnIndex}_death_${char.name.toLowerCase()}`,
         storyId: worldState.storyId,
@@ -389,7 +423,7 @@ export function extractProposedEvents(
 
     // Missing / separated patterns
     const missingRegex = new RegExp('\\b' + char.name + '\\b.*?\\b(?:swept away|vanished into the|lost in the|disappeared into|separated by the|washed downriver|drifted into the dark)\\b', 'i');
-    if (missingRegex.test(clean) && char.status !== 'dead') {
+    if (missingRegex.test(clean) && char.status !== 'dead' && !isHypotheticalOrQuote(clean, missingRegex)) {
       events.push({
         eventId: `evt_${worldState.storyId}_${turnIndex}_missing_${char.name.toLowerCase()}`,
         storyId: worldState.storyId,
@@ -410,7 +444,7 @@ export function extractProposedEvents(
 
     // Injury patterns
     const injuryRegex = new RegExp('\\b' + char.name + '\\b.*?\\b(?:bleeding|wounded|injured|collapsed in pain|unable to stand|fractured)\\b', 'i');
-    if (injuryRegex.test(clean) && char.status === 'alive') {
+    if (injuryRegex.test(clean) && char.status === 'alive' && !isHypotheticalOrQuote(clean, injuryRegex)) {
       events.push({
         eventId: `evt_${worldState.storyId}_${turnIndex}_inj_${char.name.toLowerCase()}`,
         storyId: worldState.storyId,
@@ -580,6 +614,50 @@ export function extractProposedEvents(
     }
   }
 
+  // 4c. Universal Location Transitions
+  const universalLocMatch = clean.match(/\b(?:enter(?:ed|ing)?|walk(?:ed|ing)?\s+into|step(?:ped|ping)?\s+into|arriv(?:ed|ing)?\s+at|reach(?:ed|ing)?|return(?:ed|ing)?\s+to|fled\s+to|retreated\s+to)\s+(?:the\s+|an?\s+)?([a-z0-9\s'-]+?\b(?:room|chamber|hall|corridor|office|lab|station|deck|canyon|cave|cavern|vault|archive|library|courtyard|sanctuary|cabin|shuttle|hangar|tower|dock|cellar|street|alley|quarter|sector|camp|shelter|house|ruins|clearing|ledge|plateau|grove|garden))\b/i);
+  if (universalLocMatch && !events.some(e => e.type === 'LOCATION_CHANGED')) {
+    const locName = universalLocMatch[1].trim().toLowerCase();
+    events.push({
+      eventId: `evt_${worldState.storyId}_${turnIndex}_loc_${locName.replace(/\s+/g, '_')}`,
+      storyId: worldState.storyId,
+      turnIndex,
+      modelId,
+      type: 'LOCATION_CHANGED',
+      actors: characters.filter(c => new RegExp(`\\b${c.name}\\b`, 'i').test(clean)).map(c => c.name),
+      target: locName,
+      description: `Moved to ${locName}.`,
+      proposedChanges: [`Update location to ${locName}`],
+      acceptedChanges: [],
+      irreversible: false,
+      confidence: 'probable',
+      auditLog: [`Matched universal location transition: ${locName}`],
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // 4d. Universal Clue & Discovery Extraction
+  const universalDiscMatch = clean.match(/\b(?:discover(?:ed|ing)?|found|spot(?:ted|ting)?|notic(?:ed|ing)?|uncover(?:ed|ing)?|reveal(?:ed|ing)?)\s+(?:a|an|the)\s+([a-z0-9\s'-]+?\b(?:key|note|letter|document|drive|chip|map|rune|crystal|vial|blade|footprint|mark|device|beacon|relic|journal|diary|ledger|record|casket|symbol|compartment))\b/i);
+  if (universalDiscMatch && !events.some(e => e.type === 'CLUE_DISCOVERED')) {
+    const discTarget = universalDiscMatch[1].trim().toLowerCase().replace(/\s+/g, '_');
+    events.push({
+      eventId: `evt_${worldState.storyId}_${turnIndex}_disc_${discTarget}`,
+      storyId: worldState.storyId,
+      turnIndex,
+      modelId,
+      type: 'CLUE_DISCOVERED',
+      actors: characters.filter(c => new RegExp(`\\b${c.name}\\b`, 'i').test(clean)).map(c => c.name),
+      target: discTarget,
+      description: `Discovered ${universalDiscMatch[1]}.`,
+      proposedChanges: [`Record discovery of ${discTarget}`],
+      acceptedChanges: [],
+      irreversible: true,
+      confidence: 'high',
+      auditLog: [`Matched universal discovery: ${universalDiscMatch[1]}`],
+      timestamp: new Date().toISOString()
+    });
+  }
+
   // 5. General Progression Beat
   // Canonical identities are independent of the writer's choice of verbs.
   // Match completed actions only; mentions of old facts do not create events.
@@ -603,6 +681,13 @@ export function extractProposedEvents(
   ];
   for (const rule of semanticPatterns) {
     if (!rule.pattern.test(clean) || events.some(e => e.canonicalKey === rule.key)) continue;
+    if (rule.type === 'CLUE_DISCOVERED') {
+      const alreadyKnown = (worldState.discoveredClues || []).includes(rule.key.replace('discover:', '')) ||
+        (worldState.eventLog || []).some(e => e.canonicalKey === rule.key);
+      if (alreadyKnown && /\b(?:beyond|near|mouth\s+of|inside|toward|into|that\s+\w+\s+(?:had\s+)?found|already)\b/i.test(clean)) {
+        continue;
+      }
+    }
     events.push({ eventId: `evt_${worldState.storyId}_${turnIndex}_${rule.key.replace(/\W/g, '_')}`,
       storyId: worldState.storyId, turnIndex, modelId, type: rule.type,
       actors: characters.filter(c => new RegExp(`\\b${c.name}\\b`, 'i').test(clean)).map(c => c.name),
@@ -678,13 +763,30 @@ export function validateProposedEvents(
     const deadName = deadChar.name;
     const nameRegex = new RegExp('\\b' + deadName + '\\b', 'i');
     if (nameRegex.test(rawProse)) {
-      const activeAction = new RegExp('\\b' + deadName + '\\s+(?:grabbed|ran|walked|stepped|spoke|whispered|screamed|answered|smiled|decided|fought|opened|pushed|held|nodded|stood|shouted)\\b', 'i');
+      const activeAction = new RegExp('\\b' + deadName + '\\s+(?:grabbed|ran|walked|stepped|spoke|whispered|screamed|answered|smiled|decided|fought|opened|pushed|held|nodded|stood|shouted|helped|climbed|turned|noticed|reached|lifted|carried|jumped|attacked|examined|searched|fired|struck|leaned|pointed|sighed|laughed|asked|replied|crawled|pulled)\\b', 'i');
       const memoryMention = new RegExp('\\b(?:memory of|remembering|thinking of|grieving for|in memory of|mourning)\\s+' + deadName + '\\b', 'i');
       if (activeAction.test(rawProse) && !memoryMention.test(rawProse)) {
         issues.push(
           `Character '${deadName}' was confirmed dead in turn ${(deadChar.statusChangeTurn ?? 0) + 1} and cannot perform physical actions or dialogue.`
         );
         prohibitedDirectives.push(`${deadName} is dead. Do not show ${deadName} speaking, moving, or acting.`);
+      }
+    }
+  }
+
+  // 1b. Missing Character Contradiction Check
+  const missingCharacters = worldState.characters.filter(c => c.status === 'missing');
+  for (const missingChar of missingCharacters) {
+    const missingName = missingChar.name;
+    const nameRegex = new RegExp('\\b' + missingName + '\\b', 'i');
+    if (nameRegex.test(rawProse)) {
+      const activeAction = new RegExp('\\b' + missingName + '\\s+(?:grabbed|ran|walked|stepped|spoke|whispered|screamed|answered|smiled|decided|fought|opened|pushed|held|nodded|stood|shouted|helped|climbed|turned|noticed|reached|lifted|carried|jumped|attacked|examined|searched|fired|struck|leaned|pointed|sighed|laughed|asked|replied|crawled|pulled)\\b', 'i');
+      const reunionOrThought = new RegExp('\\b(?:memory of|remembering|thinking of|wondering about|searching for|looking for|hoping for|rejoined|returned|rescued|emerged|found|reappeared)\\b', 'i');
+      if (activeAction.test(rawProse) && !reunionOrThought.test(rawProse)) {
+        issues.push(
+          `Character '${missingName}' is currently separated or missing and cannot participate in the scene without an established reunion or return.`
+        );
+        prohibitedDirectives.push(`${missingName} is missing. Re-establish their return before they can actively participate.`);
       }
     }
   }
@@ -751,7 +853,7 @@ export function validateProposedEvents(
     }
   }
 
-  // 6. Repeated Discovery Checks (Loose Stone, Caves)
+  // 6. Repeated Discovery Checks (Loose Stone, Caves, and Generalized Clues across all genres)
   const discoveredClues = worldState.discoveredClues || [];
   if (discoveredClues.includes('loose_stone')) {
     if (/\b(?:discover(?:ed|ing)?|found|spot(?:ted)?|notic(?:ed|ing)?)\s+(?:a\s+|the\s+)?loose\s+stone\b/i.test(rawProse)) {
@@ -762,8 +864,46 @@ export function validateProposedEvents(
 
   if (discoveredClues.includes('hidden_caves')) {
     if (/\b(?:discover(?:ed|ing)?|found|spot(?:ted)?|notic(?:ed|ing)?)\s+(?:a\s+|the\s+)?hidden\s+cave[s]?\b/i.test(rawProse)) {
-      issues.push("Repeated discovery: Hidden caves were already discovered in an earlier turn.");
-      prohibitedDirectives.push("The hidden caves were already discovered. Explore inside or proceed rather than discovering them again.");
+      if (!/\b(?:that\s+\w+\s+(?:had\s+)?found|already\s+found|previously\s+found)\b/i.test(rawProse)) {
+        issues.push("Repeated discovery: Hidden caves were already discovered in an earlier turn.");
+        prohibitedDirectives.push("The hidden caves were already discovered. Explore inside or proceed rather than discovering them again.");
+      }
+    }
+  }
+
+  for (const clue of discoveredClues) {
+    if (clue === 'loose_stone' || clue === 'hidden_caves') continue;
+    const cleanClue = clue.replace(/_/g, ' ');
+    const clueRegex = new RegExp('\\b(?:discover(?:ed|ing)?|found|spot(?:ted)?|notic(?:ed|ing)?|uncover(?:ed|ing)?)\\s+(?:a\\s+|the\\s+)?' + cleanClue + '\\b', 'i');
+    if (clueRegex.test(rawProse)) {
+      const acknowledged = new RegExp('\\b(?:that\\s+\\w+\\s+(?:had\\s+)?found|already\\s+found|previously\\s+found|remembered|the\\s+known|which\\s+was\\s+found)\\b', 'i');
+      if (!acknowledged.test(rawProse)) {
+        issues.push(`Repeated discovery: '${cleanClue}' was already discovered in an earlier turn.`);
+        prohibitedDirectives.push(`'${cleanClue}' was already found. Advance the story rather than rediscovering it.`);
+      }
+    }
+  }
+
+  // 7. Abrupt Location Jump Check
+  if (worldState.currentLocation && worldState.currentLocation !== 'established scene') {
+    const abruptRegex = /\b(?:meanwhile,\s+at|miles\s+away\s+in|back\s+at\s+the|across\s+the\s+continent\s+in|suddenly\s+at)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/i;
+    const abruptMatch = rawProse.match(abruptRegex);
+    if (abruptMatch) {
+      const transitionPresent = /\b(?:traveled|journeyed|flew|walked|rode|after\s+hours|eventually|teleported|returned\s+to|fled\s+to)\b/i.test(rawProse);
+      if (!transitionPresent) {
+        issues.push(`Abrupt location transition: Jumped to '${abruptMatch[1]}' without established travel or narrative transition.`);
+        prohibitedDirectives.push(`Provide a continuous transition or travel beat before changing to a distant setting.`);
+      }
+    }
+  }
+
+  // 8. Creative Plot Twist Preservation (Test F)
+  const isIntentionalTwist = /\b(?:revealed\s+that|in\s+truth|a\s+disguise|faked\s+(?:his|her|their)\s+death|was\s+not\s+actually\s+dead|the\s+corpse\s+was\s+a\s+dummy|turned\s+out\s+to\s+be|an\s+illusion|unreliable\s+narrator|staged\s+the\s+death)\b/i.test(rawProse);
+  if (isIntentionalTwist) {
+    for (let i = issues.length - 1; i >= 0; i--) {
+      if (issues[i].includes("was confirmed dead")) {
+        issues.splice(i, 1);
+      }
     }
   }
 
@@ -844,6 +984,33 @@ export function applyEventsToWorldState(
       if (evt.canonicalKey?.startsWith('move:') || evt.canonicalKey === 'cross:bridge') {
         nextLocationHistory.push({ location: nextLocation, turnIndex });
         for (const character of nextCharacters) character.location = nextLocation;
+      }
+    }
+
+    if (evt.type === 'LOCATION_CHANGED' && evt.target && !evt.canonicalKey) {
+      nextLocation = evt.target.replace(/_/g, ' ');
+      nextLocationHistory.push({ location: nextLocation, turnIndex });
+      for (const character of nextCharacters) character.location = nextLocation;
+    }
+
+    if (evt.type === 'CLUE_DISCOVERED' && evt.target) {
+      if (!nextDiscoveries.includes(evt.target)) nextDiscoveries.push(evt.target);
+    }
+
+    if (evt.description.includes('returned') || evt.description.includes('reunited')) {
+      for (const actor of evt.actors) {
+        const found = nextCharacters.find(c => c.name.toLowerCase() === actor.toLowerCase());
+        if (found) {
+          found.status = 'alive';
+          found.statusChangeReason = evt.description;
+          found.statusChangeTurn = turnIndex;
+          found.pastActions.push(`Turn ${turnIndex + 1}: Reunited / returned`);
+          for (let p = prohibitedContradictions.length - 1; p >= 0; p--) {
+            if (prohibitedContradictions[p].includes(found.name)) {
+              prohibitedContradictions.splice(p, 1);
+            }
+          }
+        }
       }
     }
 
@@ -1029,6 +1196,16 @@ export function isTruncatedOutput(text: string): { truncated: boolean; reason?: 
   const trimmed = text.trim();
   if (!trimmed) return { truncated: true, reason: 'Empty output' };
 
+  // If the output is a structured JSON decision object, validate schema rather than prose rules
+  if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    try {
+      JSON.parse(trimmed);
+      return { truncated: false };
+    } catch {
+      return { truncated: true, reason: 'Malformed JSON object' };
+    }
+  }
+
   // 1. Ends with dangling conjunction or preposition
   if (/\b(?:and|but|or|because|although|while|hoping to|as|that|who|which)\s*$/i.test(trimmed)) {
     return { truncated: true, reason: 'Sentence ended with dangling conjunction or preposition' };
@@ -1039,8 +1216,9 @@ export function isTruncatedOutput(text: string): { truncated: boolean; reason?: 
     return { truncated: true, reason: 'Ended with incomplete trailing phrase' };
   }
 
-  // 3. Ends mid-word or without terminal punctuation
-  const lastChar = trimmed.slice(-1);
+  // 3. Ends mid-word or without terminal punctuation (strip trailing closing quotes first)
+  const withoutQuotes = trimmed.replace(/["'”’»]+$/, '');
+  const lastChar = withoutQuotes.slice(-1);
   if (/[a-zA-Z0-9,\-–—;:]/.test(lastChar)) {
     return { truncated: true, reason: `Ended mid-sentence or mid-word on '${lastChar}' without terminating punctuation` };
   }
@@ -1055,13 +1233,16 @@ export function isTruncatedOutput(text: string): { truncated: boolean; reason?: 
 }
 
 export function hasMeaningfulEnding(text: string, goal: string, _theme?: string): boolean {
-  if (isTruncatedOutput(text).truncated) return false;
+  if (!text || isTruncatedOutput(text).truncated) return false;
+  const wordCount = text.trim().split(/\s+/).length;
+  if (wordCount < 8) return false;
+
   if (/\b(?:to be continued|who could it be\??|sudden(?:ly)?(?:,\s*|\s+)(?:an?|the|something|someone|a shadow|another|a cold|icy)\b|grip tighten(?:ed)?|hand passed through|tighten(?:ed)? around (?:his|her|their) wrist|fingers were slick|lurking in the fog|whispered behind (?:him|her|them)|eyes glint(?:ing|ed)? with malice\b)/i.test(text.slice(-180))) {
     return false;
   }
-  const outcome = /\b(?:reached|arrived|appeared|appears|showed up|found|secured|saved|rescued|recovered|delivered|escaped|returned|won|lost|failed|succeeded|crossed|cross|made it|could not|never reached|abandoned|destroyed|resolved|confess|confessed|love|together|parted|promise|promised|forgave|forgiven|embraced|held|reconciled|separated|laughed|laugh|laughter|smiled|smile|joke|cheered|applauded|celebration|ridiculous|spectacle|absurd|amused|fun|funniest|delight|mourned|mourn|wept|grief|sorrow|accepted|acceptance|farewell|cost|lingering|memory|sacrifice|perished|died|loss|buried|survived|survivor|dread|nightmare|silence|banished|trapped|darkness|revealed|reveal|solved|solve|deduced|deduction|truth|culprit|proven|proved|explanation|unmasked|healed|restore|restored|spell|broken|shattered|peaceful|balance|stabilized|nominal|telemetry|repaired|anomaly|signal|calibrated|rebooted|orbit|self[- ]?destruct\w*|jettisoned|ejected|purged|overrode|overridden|sacrificed|concluded|sealed|contained|aftermath)\b/i.test(text);
+  const outcome = /\b(?:reached|arrived|appeared|appears|showed up|found|secured|saved|rescued|recovered|delivered|escaped|returned|won|lost|failed|succeeded|crossed|cross|made it|could not|never reached|abandoned|destroyed|resolved|confess|confessed|love|together|parted|promise|promised|forgave|forgiven|embraced|held|reconciled|separated|laughed|laugh|laughter|smiled|smile|joke|cheered|applauded|celebration|ridiculous|spectacle|absurd|amused|fun|funniest|delight|mourned|mourn|wept|grief|sorrow|accepted|acceptance|farewell|cost|lingering|memory|sacrifice|perished|died|loss|buried|survived|survivor|dread|nightmare|silence|banished|trapped|darkness|revealed|reveal|solved|solve|deduced|deduction|truth|culprit|proven|proved|explanation|unmasked|healed|restore|restored|spell|broken|shattered|peaceful|balance|stabilized|nominal|telemetry|repaired|anomaly|signal|calibrated|rebooted|orbit|self[- ]?destruct\w*|jettisoned|ejected|purged|overrode|overridden|sacrificed|concluded|sealed|contained|aftermath|consequence|choice|chosen|clarity|understanding|alibi|testimony|motive|oath|escaped|safe|relief|dawn|horizon|finally|at last|never again|once more|rested|endured|decided|stood)\b/i.test(text);
   const goalWords = goal.toLowerCase().match(/[a-z]{4,}/g)?.filter(word => !/^(their|there|after|before|because|story|about|would|could|should|through|where|which|these|those)$/.test(word)) || [];
-  const grounded = goalWords.some(word => text.toLowerCase().includes(word)) || /\b(?:goal|mission|quest|objective|destination|shelter|treasure|village|town|home|cure|journey|summit|temple|artifact|heart|love|truth|mystery|case|incident|secret|threat|danger|life|loss|festival|rehearsal|station|ship|magic|spell|curse|pastry|cake|bridge|canyon|memory|future|dawn|night|path|choice|bond|entity|nightmare|horror|shadow|creature|monster|dread|survivor|spectacle|joke|laughter|prank|misunderstanding|rumor|prop|chip|reactor|core|airlock|pod)\b/i.test(text);
+  const grounded = goalWords.some(word => text.toLowerCase().includes(word)) || /\b(?:goal|mission|quest|objective|destination|shelter|treasure|village|town|home|cure|journey|summit|temple|artifact|heart|love|truth|mystery|case|incident|secret|threat|danger|life|loss|festival|rehearsal|station|ship|magic|spell|curse|pastry|cake|bridge|canyon|memory|future|dawn|night|path|choice|bond|entity|nightmare|horror|shadow|creature|monster|dread|survivor|spectacle|joke|laughter|prank|misunderstanding|rumor|prop|chip|reactor|core|airlock|pod|clue|evidence|alibi|silence|ruin|room|study|garden|trail|gate|world|people|we|they|he|she)\b/i.test(text);
   const routeResolved = !/\b(?:two ways|fork|split route|two paths)\b/i.test(goal) || /\b(?:chose|choose|selected|followed|took)\b[^.!?]{0,55}\b(?:route|path|way|map|trail)\b/i.test(text);
   const choiceResolved = !/\b(?:self[- ]?destruct\w*|choice between|destructing the station)\b/i.test(goal) || /\b(?:self[- ]?destruct|countdown|detonat\w*|overload\w*|eject\w*|jettison\w*|secur\w*|retriev\w*|escap\w*|chip|destroy\w*|surviv\w*|saved?|cho[os]\w*)\b/i.test(text);
   return outcome && grounded && routeResolved && choiceResolved;

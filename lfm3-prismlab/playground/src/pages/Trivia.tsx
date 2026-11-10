@@ -5,6 +5,7 @@ import { TriviaWinnerModal } from '../components/mascots/TriviaWinnerModal.tsx';
 import { MODEL_LIST, MODELS, type CanonicalModelId } from '../data/models.ts';
 import { isTriviaRunning, setTriviaRunning, subscribeTriviaRunning } from '../lib/triviaLock.ts';
 import { LiveTrivia } from './LiveTrivia.tsx';
+import { TRIVIA_POINTS_PER_CORRECT } from '../lib/triviaLive.ts';
 
 type Phase = 'idle' | 'presenting' | 'answering' | 'revealing' | 'completed';
 type Question = { topic: string; text: string; options: [string, string, string, string]; key: number; explanation: string; demoAnswers: [number, number, number] };
@@ -73,7 +74,7 @@ const DemoTrivia: React.FC = () => {
       setCurrentContestant(-1); setPhase('revealing');
       setScores(previous => {
         const next = { ...previous };
-        for (let i = 0; i < 3; i += 1) if (QUESTIONS[n % QUESTIONS.length].demoAnswers[i] === QUESTIONS[n % QUESTIONS.length].key) next[IDS[(n + i + 1) % IDS.length]] += 100;
+        for (let i = 0; i < 3; i += 1) if (QUESTIONS[n % QUESTIONS.length].demoAnswers[i] === QUESTIONS[n % QUESTIONS.length].key) next[IDS[(n + i + 1) % IDS.length]] += TRIVIA_POINTS_PER_CORRECT;
         return next;
       });
       await delay(2300);
@@ -87,7 +88,7 @@ const DemoTrivia: React.FC = () => {
 
   const contestantMatchStats = IDS.map(id => {
     const points = scores[id] || 0;
-    const correct = points / 100;
+    const correct = points / TRIVIA_POINTS_PER_CORRECT;
     const attempts = demoAttempts[id] || correct;
     const accuracy = attempts > 0 ? Math.round((correct / attempts) * 100) : 0;
     return { id, points, correct, attempts, accuracy };

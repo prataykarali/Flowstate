@@ -35,6 +35,7 @@ const {
   presentDecisionOutput,
   buildShowPrompt,
   appendShowTurn,
+  getCommittedShowTurnCount,
   initializeCanonicalWorldState,
   extractProposedEvents,
   validateProposedEvents,
@@ -55,18 +56,29 @@ const {
   STORY_THEMES
 } = story;
 
+test('rejected Story attempts do not advance the committed turn cursor', () => {
+  const show = createShow({ ...DEFAULT_SHOW_CONFIG, turnCount: 8 });
+  show.turns = [
+    { turnId: 'accepted', index: 0, modelId: 'text', role: 'writer', status: 'completed', output: 'The signal appeared.' },
+    { turnId: 'loop', index: 1, modelId: 'vision', role: 'specialist', status: 'completed', output: 'The signal appeared.', loopIssue: 'Repeated output' },
+    { turnId: 'retry', index: 1, modelId: 'vision', role: 'specialist', status: 'failed', output: '' },
+    { turnId: 'truncated', index: 1, modelId: 'vision', role: 'specialist', status: 'completed', output: 'The signal', isTruncated: true },
+  ];
+  assert.equal(getCommittedShowTurnCount(show), 1);
+});
+
 const sd = await import(pathToFileURL(path.join(cacheDir, 'storyDirector.js')).href);
 const { RANDOM_CAST_NAMES } = sd;
 
 const config = (extra = {}) => ({ ...DEFAULT_SHOW_CONFIG, ...extra });
 const validDecision = JSON.stringify({ predicted_route: 'technical', confidence: 0.7, probabilities: { billing: 0.1, technical: 0.7, shipping: 0.1, other: 0.1 } });
 
-test('10–20 turn contract and six supported model roles', () => {
+test('8–12 turn contract and six supported model roles', () => {
   assert.equal(SHOW_CAPABILITIES.length, 6);
-  assert.equal(validateShowConfig(config({ turnCount: 9 })), 'Choose 10–20 turns for a complete story.');
+  assert.equal(validateShowConfig(config({ turnCount: 7 })), 'Choose 8–12 turns for a complete story.');
   assert.equal(validateShowConfig(config({ turnCount: 10 })), null);
-  assert.equal(validateShowConfig(config({ turnCount: 20 })), null);
-  assert.equal(validateShowConfig(config({ turnCount: 21 })), 'Choose 10–20 turns for a complete story.');
+  assert.equal(validateShowConfig(config({ turnCount: 12 })), null);
+  assert.equal(validateShowConfig(config({ turnCount: 13 })), 'Choose 8–12 turns for a complete story.');
   
   // 10 turns schedule (default full cast)
   const order10 = planShow(config({ turnCount: 10 }));
@@ -75,12 +87,14 @@ test('10–20 turn contract and six supported model roles', () => {
   assert.equal(order10.at(-1), 'text');
   for (const id of config().modelIds) assert.ok(order10.includes(id));
 
-  for (const count of [11, 12, 20]) {
+  for (const count of [8, 9, 11, 12]) {
     const order = planShow(config({ turnCount: count }));
     assert.equal(order.length, count);
     assert.equal(order[0], 'text');
     assert.equal(order.at(-1), 'text');
     for (const id of config().modelIds) assert.ok(order.includes(id));
+    assert.equal(story.showBeat({ config: config({ turnCount: count }), turnOrder: order }, count - 2), 'climax');
+    assert.equal(story.showBeat({ config: config({ turnCount: count }), turnOrder: order }, count - 1), 'ending');
   }
 });
 
@@ -218,7 +232,7 @@ test('Test E: Specialist observation contradicting canon is isolated', () => {
 
   // The text model prompt must retain Dalia as DEAD
   const writerPrompt = buildShowPrompt(show, 'text').prompt;
-  assert.match(writerPrompt, /DEAD \(cannot act or speak\): Dalia/);
+  assert.match(writerPrompt, /DEAD: Dalia/);
   assert.ok(writerPrompt.length <= 1000);
 });
 
@@ -301,7 +315,7 @@ test('every genre accepts full cast and specialist text prompts keep prior scene
   show = appendShowTurn(show, base);
   const prompt = buildShowPrompt(show, 'vision').prompt;
   assert.match(prompt, /Mina dropped the cake/);
-  assert.match(prompt, /same people, place and facts/);
+  assert.match(prompt, /grounded in the story state/);
   assert.doesNotMatch(prompt, /attached image/);
   for (let i = 1; i < 7; i++) show = appendShowTurn(show, { ...base, turnId: `c:${i + 1}`, index: i, modelId: i % 2 ? 'vision' : 'audio', role: 'visual_interpreter', output: `A new event happens at beat ${i}.`, storyPerspective: true });
   assert.match(buildShowPrompt(show, 'text').prompt, /Opening: Mina dropped the cake/);
@@ -342,12 +356,15 @@ test('decision model JSON is robust against markdown fences, unclosed braces, an
   assert.equal(recoveredMid.predicted_route, 'confront');
 });
 
-test('random turn count spans inclusive 10 through 20 with strict clamping', () => {
-  assert.equal(story.chooseRandomTurnCount(() => 0), 10);
-  assert.equal(story.chooseRandomTurnCount(() => 0.5), 15);
-  assert.equal(story.chooseRandomTurnCount(() => 0.999999), 20);
-  assert.equal(story.chooseRandomTurnCount(() => -0.5), 10);
-  assert.equal(story.chooseRandomTurnCount(() => 1.5), 20);
+test('random turn count spans inclusive 8 through 12 with strict clamping', () => {
+  assert.equal(story.chooseRandomTurnCount(() => 0), 8);
+  assert.equal(story.chooseRandomTurnCount(() => 0.5), 10);
+  assert.equal(story.chooseRandomTurnCount(() => 0.999999), 12);
+  assert.equal(story.chooseRandomTurnCount(() => -0.5), 8);
+  assert.equal(story.chooseRandomTurnCount(() => 1.5), 12);
+  const bins = new Map([8, 9, 10, 11, 12].map(turns => [turns, 0]));
+  for (let n = 0; n < 100; n++) bins.set(story.chooseRandomTurnCount(() => n / 100), bins.get(story.chooseRandomTurnCount(() => n / 100)) + 1);
+  assert.deepEqual([...bins.values()], [20, 20, 20, 20, 20]);
 });
 
 test('S3-B.5-1: Story Director creates bounded plans across all 9 genres with 4-5 development beats and ending requirements', () => {
@@ -640,7 +657,7 @@ test('Universal Genre Fidelity: deterministic verification across ALL 9 genres i
   for (const theme of story.STORY_THEMES) {
     // 1. Fresh cast and premise generation
     const cast = chooseStoryCast(theme, [], []);
-    assert.ok(cast.protagonist && cast.companion && cast.role && cast.setting && cast.hook, `${theme}: cast setup incomplete`);
+    assert.ok(cast.protagonist && cast.companion && cast.role, `${theme}: cast setup incomplete`);
     const premise = generateFreshPremise(theme, cast);
     assert.ok(premise.length > 20, `${theme}: premise generation failed`);
     assert.ok(premise.includes(cast.protagonist), `${theme}: premise missing protagonist`);
@@ -659,7 +676,7 @@ test('Universal Genre Fidelity: deterministic verification across ALL 9 genres i
     assert.ok(acts.has(1) && acts.has(2) && acts.has(3) && acts.has(4), `${theme}: beats do not cover acts 1-4`);
 
     // 4. Random 10-20 turn planning
-    for (const turnCount of [10, 14, 18, 20]) {
+    for (const turnCount of [8, 9, 10, 11, 12]) {
       const order = planShow(config({ theme, turnCount }));
       assert.equal(order.length, turnCount, `${theme}: planShow length mismatch for ${turnCount} turns`);
       assert.equal(order[0], 'text', `${theme}: Turn 0 must be text`);
@@ -718,9 +735,9 @@ test('Universal Genre Fidelity: full multi-turn show progression across diverse 
   const testScenarios = [
     { theme: 'Romance', turnCount: 10 },
     { theme: 'Comedy', turnCount: 12 },
-    { theme: 'Horror', turnCount: 14 },
-    { theme: 'Science fiction', turnCount: 16 },
-    { theme: 'Adventure', turnCount: 20 } // Near 20-turn long show
+    { theme: 'Horror', turnCount: 9 },
+    { theme: 'Science fiction', turnCount: 11 },
+    { theme: 'Adventure', turnCount: 12 } // Longest supported show
   ];
 
   for (const { theme, turnCount } of testScenarios) {
@@ -894,5 +911,3 @@ test('chooseStoryDirections produces valid, specific directives for all 9 genres
     }
   }
 });
-
-

@@ -131,4 +131,3 @@ test('P2 response normalization: accepts harmlessly wrapped letters and rejects 
     assert.equal(live.validateAnswer(raw, 'vision'), null, `Expected ${raw} to be rejected`);
   }
 });
-

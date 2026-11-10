@@ -35,19 +35,21 @@ const ACTIVITY_MAP = {
 };
 
 const ALLOWED_ACTIVITY_POINTS = {
-  chat: 4,
-  ocr: 4,
-  audio_qa: 4,
-  video_qa: 4,
-  transcribe: 4,
-  summarize: 4,
-  decision: 4,
-  story_turn: 1,
-  story_complete: 10,
+  chat: 100,
+  ocr: 100,
+  audio_qa: 100,
+  video_qa: 100,
+  transcribe: 100,
+  summarize: 100,
+  decision: 100,
+  story_turn: 100,
+  story_support_turn: 100,
+  story_complete: 100,
+  auto_story_complete: 100,
   trivia_correct: 100,
   trivia_match: 0,
-  runner_completed: 25,
-  arcade: 25,
+  runner_completed: 100,
+  arcade: 100,
 };
 
 // In-memory event deduplication set
@@ -152,13 +154,13 @@ export default async function handler(request, response) {
         });
       }
       verifiedActivityType = reqAct;
-    } else if (reqAct === 'story_turn') {
+    } else if (reqAct === 'story_turn' || reqAct === 'story_support_turn' || reqAct === 'auto_story_complete') {
       if (verified.act !== 'story') {
         return response.status(403).json({
-          error: `Forbidden: Receipt for activity '${verified.act}' is not eligible for story turns`
+          error: `Forbidden: Receipt for activity '${verified.act}' is not eligible for story scoring`
         });
       }
-      verifiedActivityType = 'story_turn';
+      verifiedActivityType = reqAct;
     } else if (reqAct === 'story_complete') {
       if (verified.act !== 'story' && verified.act !== 'story_complete') {
         return response.status(403).json({
@@ -223,16 +225,9 @@ export default async function handler(request, response) {
   }
 
   // Server-authoritative point calculation (strictly server enforced)
-  let awardedPoints = ALLOWED_ACTIVITY_POINTS[verifiedActivityType];
+  let awardedPoints = ALLOWED_ACTIVITY_POINTS[verifiedActivityType] || 100;
   if (isArcade) {
-    const runnerMatch = source_receipt_id.match(/^runner:([a-zA-Z0-9_-]+)(?::score:(\d+))?$/);
-    const scoreVal = runnerMatch && runnerMatch[2] ? Number(runnerMatch[2]) : null;
-    let maxAllowed = 25;
-    if (scoreVal !== null) {
-      maxAllowed = scoreVal >= 150 ? 25 : scoreVal >= 75 ? 15 : 8;
-    }
-    const reqPts = Number(body.points);
-    awardedPoints = [8, 15, 25].includes(reqPts) ? Math.min(reqPts, maxAllowed) : (scoreVal !== null ? maxAllowed : 8);
+    awardedPoints = 100;
   }
   verifiedActivityType = ACTIVITY_MAP[verifiedActivityType] || verifiedActivityType;
 
@@ -267,6 +262,11 @@ export default async function handler(request, response) {
         headers.Authorization = `Bearer ${supabaseKey}`;
       }
 
+      // Keep the database activity labels compatible with existing schemas;
+      // the point amount remains server-calculated above.
+      const persistenceActivityType = verifiedActivityType === 'story_support_turn'
+        ? 'story_turn'
+        : verifiedActivityType === 'auto_story_complete' ? 'story_complete' : verifiedActivityType;
       const rpcRes = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/record_championship_event`, {
         method: 'POST',
         headers,
@@ -274,7 +274,7 @@ export default async function handler(request, response) {
           p_event_id: event_id,
           p_visitor_id: visitor_id,
           p_model_id: verifiedModelId,
-          p_activity_type: verifiedActivityType,
+          p_activity_type: persistenceActivityType,
           p_points: awardedPoints,
           p_source_receipt_id: verifiedReceiptId || null,
         }),
@@ -283,9 +283,20 @@ export default async function handler(request, response) {
 
       if (rpcRes.ok) {
         const result = await rpcRes.json();
-        return response.status(200).json({ status: 'success', data: result, persisted: true });
+        return response.status(200).json({ status: 'success', data: result, persisted: true, points: awardedPoints });
       } else {
         const errBody = await rpcRes.text();
+        if (isArcade) {
+          return response.status(200).json({
+            status: 'recorded_transient',
+            event_id,
+            model_id: verifiedModelId,
+            activity_type: verifiedActivityType,
+            points: awardedPoints,
+            persisted: false,
+            warning: 'Database runner migration pending; recorded transiently',
+          });
+        }
         return response.status(502).json({
           error: 'Database transaction rejected by Supabase',
           detail: errBody,

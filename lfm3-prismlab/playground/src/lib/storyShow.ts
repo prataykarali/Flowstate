@@ -109,7 +109,7 @@ export const GENRE_CONTRACTS: Record<string, GenreContract> = {
 };
 
 export function getGenreContract(theme: string): GenreContract {
-  const contract = GENRE_CONTRACTS[theme];
+  const contract = GENRE_CONTRACTS[theme] || Object.values(GENRE_CONTRACTS).find(c => c.displayName.toLowerCase() === theme.toLowerCase() || c.id.toLowerCase() === theme.toLowerCase());
   if (!contract) throw new Error(`No narrative contract for ${theme}.`);
   return contract;
 }
@@ -180,7 +180,7 @@ export interface GenreEvaluation {
 }
 
 export function chooseRandomTurnCount(random = Math.random): number {
-  return 10 + Math.floor(Math.min(0.999999999, Math.max(0, random())) * 11);
+  return 8 + Math.floor(Math.min(0.999999999, Math.max(0, random())) * 5);
 }
 
 export interface HumanInterjection {
@@ -205,6 +205,50 @@ export interface ShowRecord {
   continuityAudit?: ContinuityAuditResult;
   directorPlan?: StoryDirectorPlan;
   storyQualityAudit?: StoryQualityAuditResult;
+}
+
+/** Only verified, complete, accepted narrative contributions advance the selected session length. */
+export function isCommittedShowTurn(turn: ShowTurn): boolean {
+  if (turn.status === 'skipped') return true; // Honest degraded mode: allows cursor to advance past an explicitly skipped turn
+  if (turn.status !== 'completed') return false;
+  if (turn.rejectionReason || turn.loopIssue) return false;
+  if (turn.isTruncated) return false;
+
+  // Decision assistants are validated via their structured route and probabilities schema
+  if (turn.role === 'decision_assistant') {
+    return turn.decisionData?.valid === true;
+  }
+
+  if (typeof turn.output !== 'string') return false;
+  const trimmed = turn.output.trim();
+  if (trimmed.length < 20) return false;
+
+  // Stricter inspection for finish_reason === 'length':
+  // Never automatically accept cut-off text merely because it contains characters
+  if (turn.finishReason === 'length') {
+    if (isTruncatedOutput(trimmed).truncated) return false;
+
+    // Climax and ending turns must complete their narrative function without token cutoff
+    if (turn.storyFitPoints !== undefined && turn.storyFitPoints < 0) return false;
+
+    // Must be structurally complete with terminal punctuation
+    const sentences = trimmed.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [];
+    if (sentences.length < 1) return false;
+
+    // Minimum substantive prose for writer vs specialist
+    if (turn.role === 'writer' && (sentences.length < 2 && trimmed.length < 75)) return false;
+    if (turn.role !== 'writer' && trimmed.length < 35) return false;
+  }
+
+  return true;
+}
+
+export function getCommittedShowTurns(turns: ShowTurn[]): ShowTurn[] {
+  return turns.filter(isCommittedShowTurn);
+}
+
+export function getCommittedShowTurnCount(show: Pick<ShowRecord, 'turns'>): number {
+  return getCommittedShowTurns(show.turns).length;
 }
 
 export const DEFAULT_SHOW_CONFIG: ShowConfig = {
@@ -244,23 +288,23 @@ export const BEAT_CUES: Record<string, string> = {
 export function validateShowConfig(config: ShowConfig): string | null {
   if (!STORY_THEMES.includes(config.theme as typeof STORY_THEMES[number])) return 'Choose a supported story theme.';
   if (config.opening.length > 240) return 'Opening sentence must be at most 240 characters.';
-  if (!Number.isInteger(config.turnCount) || config.turnCount < 10 || config.turnCount > 20) return 'Choose 10–20 turns for a complete story.';
+  if (!Number.isInteger(config.turnCount) || config.turnCount < 8 || config.turnCount > 12) return 'Choose 8–12 turns for a complete story.';
   if (!config.modelIds.includes('text') || new Set(config.modelIds).size !== config.modelIds.length || config.modelIds.some(id => !SHOW_CAPABILITIES.some(cap => cap.modelId === id))) return 'Prism Pure must write; choose registered participants once each.';
-  if (config.modelIds.length - 1 > config.turnCount - 2) return `Choose at least ${config.modelIds.length + 1} turns so all selected characters can participate.`;
+  if (config.modelIds.length - 1 > config.turnCount - 3) return `Choose at least ${config.modelIds.length + 2} turns so all selected characters can participate and the story can resolve.`;
   if (!['automatic','manual'].includes(config.playback) || ![64,96,128,180,256].includes(config.maxTokens)) return 'Invalid playback or output limit.';
   return null;
 }
 
-export function planShow(config: ShowConfig): CanonicalModelId[] {
+export const NARRATIVE_SPECIALIST_ORDERS: readonly CanonicalModelId[][] = [
+  ['vision', 'audio', 'omni', 'd1', 'd1_omni'],
+  ['audio', 'vision', 'd1', 'omni', 'd1_omni'],
+  ['vision', 'd1', 'audio', 'omni', 'd1_omni'],
+  ['audio', 'omni', 'vision', 'd1', 'd1_omni'],
+  ['vision', 'audio', 'd1', 'd1_omni', 'omni']
+];
+
+export function planShow(config: ShowConfig, random = Math.random): CanonicalModelId[] {
   const invalid = validateShowConfig(config); if (invalid) throw new Error(invalid);
-  if (['text', 'vision', 'audio', 'omni', 'd1', 'd1_omni'].every(id => config.modelIds.includes(id as CanonicalModelId))) {
-    const order: CanonicalModelId[] = ['text', 'vision', 'text', 'audio', 'omni', 'd1', 'text', 'd1_omni', 'text', 'text'];
-    const rotating: CanonicalModelId[] = ['vision', 'audio', 'omni', 'd1', 'd1_omni'];
-    for (let extra = 0; extra < config.turnCount - 10; extra++) {
-      order.splice(order.length - 2, 0, extra % 2 === 0 ? 'text' : rotating[Math.floor(extra / 2) % rotating.length]);
-    }
-    return order;
-  }
   const support = config.modelIds.filter(id => id !== 'text');
   const count = config.turnCount;
 
@@ -268,25 +312,40 @@ export function planShow(config: ShowConfig): CanonicalModelId[] {
     return Array.from({ length: count }, () => 'text' as CanonicalModelId);
   }
 
-  const order: CanonicalModelId[] = ['text'];
-  const climaxIdx = Math.max(2, Math.floor(count * 0.75));
-  let supportIdx = 0;
-
-  for (let i = 1; i < count - 1; i++) {
-    if (i === climaxIdx) {
-      order.push('text');
-    } else if (supportIdx < support.length) {
-      order.push(support[supportIdx++]);
-    } else if (order[order.length - 1] !== 'text' && Math.random() < 0.6) {
-      order.push('text');
-    } else {
-      const nextCandidate = support[(supportIdx++) % support.length];
-      order.push(order[order.length - 1] === nextCandidate ? 'text' : nextCandidate);
-    }
+  // Opening, climax and resolution always remain primary narrator turns.
+  const developmentSlots = count - 3;
+  if (developmentSlots < support.length) {
+    throw new Error(`Need at least ${support.length + 3} turns to schedule all selected models with opening, climax, and resolution.`);
   }
 
-  order.push('text');
-  return order;
+  // PRISMLAB V3: Fully un-fixed, dynamically randomized model scheduling
+  // Guarantee all specialists are included without fixing any rigid order.
+  const rng = typeof config.openingSeed === 'number'
+    ? (() => {
+        let s = (Math.abs(config.openingSeed) + 1) * 2654435761;
+        return () => {
+          s = (s ^ (s >> 13)) * 0x5bd1e995;
+          s = (s ^ (s >> 15)) >>> 0;
+          return (s & 0xfffffff) / 0xfffffff;
+        };
+      })()
+    : random;
+
+  // Build the development pool: all specialists + any extra writer turns
+  const extraWriterCount = developmentSlots - support.length;
+  const devPool: CanonicalModelId[] = [
+    ...support,
+    ...Array.from({ length: extraWriterCount }, () => 'text' as CanonicalModelId)
+  ];
+
+  // Dynamic Fisher-Yates shuffle of the development phase
+  for (let i = devPool.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [devPool[i], devPool[j]] = [devPool[j], devPool[i]];
+  }
+
+  // Final schedule: Turn 0 (opening) -> Dynamic Dev Pool -> Climax -> Ending
+  return ['text', ...devPool, 'text', 'text'];
 }
 
 export function showBeat(show: Pick<ShowRecord, 'config' | 'turnOrder'>, index: number): string {
@@ -611,9 +670,8 @@ export function extractStoryWorldState(show: ShowRecord, upToTurn: number): Stor
 
   let mostRecentChange = show.config.opening;
 
-  for (let i = 0; i < upToTurn && i < show.turns.length; i++) {
-    const t = show.turns[i];
-    if (t.status !== 'completed' || !t.output) continue;
+  for (const t of getCommittedShowTurns(show.turns).slice(0, upToTurn)) {
+    if (!t.output) continue;
 
     if (t.modelId === 'text') {
       completedActions.push(t.output);
@@ -697,7 +755,7 @@ export function extractStoryWorldState(show: ShowRecord, upToTurn: number): Stor
     unresolvedQuestions: unresolvedMysteries,
     previousSignificantActions: completedActions,
     latestNarrativeSegment: mostRecentChange,
-    completedTurns: Math.min(upToTurn, show.turns.length),
+    completedTurns: Math.min(upToTurn, getCommittedShowTurns(show.turns).length),
     upcomingTurnPlan: show.turnOrder.slice(upToTurn),
     theme,
     location,
@@ -736,7 +794,7 @@ export function truncateWords(text: string, maxWords: number): string {
 export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { prompt: string; truncated: boolean } {
   const cap = SHOW_CAPABILITIES.find(item => item.modelId === modelId);
   if (!cap) throw new Error('Unsupported show model.');
-  const index = show.turns.length;
+  const index = getCommittedShowTurnCount(show);
   const beat = showBeat(show, index);
   const world = extractStoryWorldState(show, index);
   const canonical = show.canonicalWorldState || initializeCanonicalWorldState(show.config.theme, show.config.opening, show.config.cast);
@@ -745,7 +803,8 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   const actIndex = beat === 'opening' ? 0 : beat === 'ending' ? 3 : beat === 'climax' ? 2 : 1;
 
   const director = canonical.directorPlan || show.directorPlan || createStoryDirectorPlan(show.config.theme, show.config.cast, show.config.opening);
-  const writerTurnsCount = show.turns.slice(0, index).filter(t => t.modelId === 'text' && t.status === 'completed').length;
+  const committedTurns = getCommittedShowTurns(show.turns);
+  const writerTurnsCount = committedTurns.filter(t => t.modelId === 'text').length;
 
   let intro = '';
   if (modelId === 'text') {
@@ -755,20 +814,23 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
       intro = show.config.scenarioId
         ? `Open this ${show.config.theme} case in three concise sentences, about 400–500 characters total. Use the exact place and event in the premise; ${cast ? `the detective is named ${cast.protagonist} and the witness is ${cast.companion}` : 'invent only the detective\'s name'}. Do not move to another building or add new evidence. No title. ${show.config.opening}`
         : cast
-          ? `Start a brand-new ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Main person: ${cast.protagonist}, a ${cast.role}. Other person: ${cast.companion}. Place: ${cast.setting}. Starting problem: ${cast.hook}. Use exactly these names. Write three concise sentences, about 400–500 characters total. No title. Do not reuse earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`
+          ? `Start a brand-new ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict seed: ${director.primaryConflict} Main person: ${cast.protagonist}, a ${cast.role}. Other person: ${cast.companion}.${cast.setting ? ` Place: ${cast.setting}.` : ''}${cast.hook ? ` Starting situation: ${cast.hook}.` : ''} Use exactly these names. Invent a fresh plot with a clear character goal; do not follow a preset storyline. Write three concise sentences, about 400–500 characters total. No title. Do not reuse earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`
           : `Start a fresh ${genre.displayName} story. ${genre.premiseRequirements} ${genre.acts[0]} Central conflict: ${director.primaryConflict} Stakes: ${director.initialStakes} Main person's name begins with ${show.config.nameInitial || 'a letter you choose'}. Creative seed ${show.config.openingSeed ?? 'new'}. Write three concise sentences, about 400–500 characters total. No title. Avoid earlier openings${avoided ? `: ${avoided}` : ''}. ${show.config.opening ? `Premise: ${show.config.opening}` : ''}`;
     } else if (beat === 'ending') {
       intro = `Conclude this ${genre.displayName} story. Act IV Resolution. State the definitive outcome resolving the principal conflict: "${director.primaryConflict}". Required ending: ${director.endingRequirements} Show the final consequence and aftermath for the characters and world; do not leave the choice open, do not repeat the climax, and do not introduce new threats or cliffhangers. Write three concise sentences, about 400–500 characters total.`;
     } else if (beat === 'climax') {
       intro = `Continue this ${genre.displayName} story at its turning point. Act III Climax. Objective: "${director.climaxObjective}". Force a decisive choice or action with immediate stakes. Write three concise sentences, about 400–500 characters total. No recap.`;
     } else {
-      const beatIdx = Math.min(director.developmentBeats.length - 1, Math.max(1, writerTurnsCount));
+      const totalWriterTurns = show.turnOrder.filter(id => id === 'text').length;
+      const developmentWriterTurns = Math.max(1, totalWriterTurns - 3);
+      const developmentProgress = Math.max(0, Math.min(1, (writerTurnsCount - 1) / Math.max(1, developmentWriterTurns - 1)));
+      const beatIdx = Math.min(Math.max(1, director.developmentBeats.length - 2), 1 + Math.round(developmentProgress));
       const dirBeat = director.developmentBeats[beatIdx] || director.developmentBeats[1];
       const recentClues = world.mediaObservations.filter(m => m.relevant).slice(-2).map(m => m.observation).join('; ');
       intro = `Continue this ${genre.displayName} story. ${dirBeat.targetAct}. Objective: ${dirBeat.narrativeGoal}. Required progression: ${dirBeat.requiredProgression}. Do not repeat: ${dirBeat.avoidRepeating}. ${pendingDirection(show)}${recentClues ? `Clue: ${truncateWords(recentClues, 16)}.` : ''} Write three concise sentences, about 400–500 characters total. No recap.`;
     }
   } else if (creativeMode && cap.role !== 'decision_assistant') {
-    intro = `${supportVoice(modelId)} Genre: ${genre.displayName}. Act: ${genre.acts[actIndex]}. Add one fresh observation or action from your perspective advancing the scene. DO NOT repeat or echo prior sentences or the story opening. Keep the same people, place and facts; preserve the conflict. Write three concise sentences, about 400–500 characters total. No recap or title.`;
+    intro = `${supportVoice(modelId)} Genre: ${genre.displayName}. ${genre.centralConflict} Phase: ${genre.acts[actIndex]}. Add one fresh, useful contribution from your perspective, grounded in the story state; it may be quiet, emotional, comic, investigative, speculative, or physical as the scene calls for. Do not force a new crisis. Do not repeat prior sentences or the opening. Keep established people and facts consistent; let the contribution change knowledge, choice, relationship, or consequence. Write three concise sentences, about 400–500 characters total. No recap or title.`;
   } else if (cap.role === 'decision_assistant') {
     intro = creativeMode
       ? `Read the ${show.config.theme} story so far and score the better next plot direction. Use only established people and actions. This is a suggestion, not a new story fact.`
@@ -797,7 +859,7 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   if (canonical.completedMilestones?.length) tier1Constraints.push(`Completed (do not repeat): ${canonical.completedMilestones.slice(-6).join(', ')}`);
   if (canonical.discoveredClues?.length) tier1Constraints.push(`Known discoveries: ${canonical.discoveredClues.slice(-5).join(', ')}`);
   if (canonical.bridgeDamaged) tier1Constraints.push('Bridge damaged: crossing requires repair or another route.');
-  if (deadChars.length) tier1Constraints.push(`DEAD (cannot act or speak): ${deadChars.join(', ')}`);
+  if (deadChars.length) tier1Constraints.push(`DEAD: ${deadChars.join(', ')}`);
   if (missingChars.length) tier1Constraints.push(`MISSING: ${missingChars.join(', ')}`);
   if (injuredChars.length) tier1Constraints.push(`INJURED: ${injuredChars.join(', ')}`);
   if (consumedEntities.length) tier1Constraints.push(`CONSUMED/USED: ${consumedEntities.join(', ')}`);
@@ -808,26 +870,18 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   
   const lastAcceptedTurn = show.turns.slice().reverse().find(t => t.status === 'completed' && t.isRelevant !== false && t.output);
   if (lastAcceptedTurn && beat !== 'opening') {
-    tier1Constraints.push(`LATEST SCENE EVENT: ${truncateWords(stripEchoedPrefix(lastAcceptedTurn.stageText || lastAcceptedTurn.output || '', []), 20)}`);
-    tier1Constraints.push(`MANDATORY: Advance forward with a brand new event. DO NOT repeat or quote earlier sentences, descriptions, or the story opening.`);
+    tier1Constraints.push(`LATEST SCENE EVENT: ${truncateWords(stripEchoedPrefix(lastAcceptedTurn.stageText || lastAcceptedTurn.output || '', []), 15)}`);
   } else if (lastAccepted && beat !== 'opening' && lastAccepted.turnIndex > 0) {
-    tier1Constraints.push(`Continue from latest event: ${truncateWords(lastAccepted.description, 16)}`);
+    tier1Constraints.push(`Continue from latest event: ${truncateWords(lastAccepted.description, 15)}`);
   }
 
-const MODEL_CHARACTER_NAMES: Partial<Record<CanonicalModelId, string>> = {
-  text: 'Prism Pure',
-  vision: 'Spectra',
-  audio: 'Echo',
-  omni: 'Omni Pup',
-  d1: 'Prism Thinker',
-  d1_omni: 'Sherlock Omni'
-};
-
   if (modelId === 'text' && beat !== 'opening') {
-    const lastNonText = show.turns.slice().reverse().find(t => t.modelId !== 'text' && t.status === 'completed' && t.output);
+    const lastNonText = committedTurns.slice().reverse().find(t => t.modelId !== 'text' && t.output);
     if (lastNonText) {
-      const sourceName = MODEL_CHARACTER_NAMES[lastNonText.modelId] || lastNonText.modelId;
-      tier1Constraints.push(`INCORPORATE COLLABORATION: Directly acknowledge and react to the latest finding reported by ${sourceName}.`);
+      const finding = stripEchoedPrefix(lastNonText.stageText || lastNonText.output || '', []);
+      if (finding) {
+        tier1Constraints.push(`INCORPORATE RECENT EVENT: Build directly on: "${truncateWords(finding, 12)}".`);
+      }
     }
   }
 
@@ -872,7 +926,7 @@ const MODEL_CHARACTER_NAMES: Partial<Record<CanonicalModelId, string>> = {
   const assemble = (t4: string[], t3: string[], t2: string[]) => {
     const parts = [intro];
     const data: string[] = [...tier1Constraints, ...t2, ...t3, ...t4];
-    if (data.length) parts.push('Story constraints & facts:\n' + data.join('\n'));
+    if (data.length) parts.push('Story constraints:\n' + data.join('\n'));
     return parts.join('\n');
   };
 
@@ -898,20 +952,17 @@ const MODEL_CHARACTER_NAMES: Partial<Record<CanonicalModelId, string>> = {
   }
   if (prompt.length > 980) {
     truncated = true;
-    const compactT1 = tier1Constraints.map(s => s.replace(/DEAD \(cannot act or speak\):/, 'DEAD:').replace(/CONSUMED\/USED:/, 'CONSUMED:'));
-    prompt = [intro, 'Story constraints:\n' + compactT1.join('\n')].join('\n');
-  }
-  if (prompt.length > 980) {
-    truncated = true;
-    prompt = `${intro.slice(0, 520)}\nCanonical facts: ${tier1Constraints.join(' ').slice(0, 420)}`;
+    const compactT2 = tier2Foundation.map(s => truncateWords(s, 8));
+    prompt = [intro.slice(0, 480), 'Story constraints:\n' + [...tier1Constraints, ...compactT2].join('\n')].join('\n').slice(0, 990);
   }
 
   return { prompt, truncated };
 }
 /** The plot direction chosen by a decision model since the writer last spoke. */
 function pendingDirection(show: ShowRecord): string {
-  for (let i = show.turns.length - 1; i >= 0; i--) {
-    const turn = show.turns[i];
+  const committed = getCommittedShowTurns(show.turns);
+  for (let i = committed.length - 1; i >= 0; i--) {
+    const turn = committed[i];
     if (turn.modelId === 'text' && turn.status === 'completed') return '';
     const chosen = turn.decisionData?.valid ? turn.decisionOptions?.[turn.decisionData.predicted_route] : undefined;
     if (chosen) return `Make this happen now: ${chosen} `;
@@ -1021,12 +1072,16 @@ export function sanitizeTurnOutput(text: string): string {
   trimmed = trimmed.replace(/^\s*\*{0,2}Title:\s*[^\n*]+\*{0,2}\s*/i, '');
   trimmed = trimmed.replace(/^\s*Title:\s*[^\n]+\n*/i, '');
 
-  // Strip Act indicators (e.g. **Act IV – Resolution**, **Act I: The Beginning**, Act II - Discovery)
-  trimmed = trimmed.replace(/^\s*\*{0,2}Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*/i, '');
-  trimmed = trimmed.replace(/^\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n]+)?\n*/i, '');
+  // Strip Act indicators (e.g. **Act IV – Resolution**, **Adventure Story – Act III: Turning Point**, Act II - Discovery)
+  trimmed = trimmed.replace(/^\s*\*{0,2}(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*/i, '');
+  trimmed = trimmed.replace(/^\s*(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n]+)?\n*/i, '');
+
+  // Strip scene or location headers and internal constraints headers
+  trimmed = trimmed.replace(/^\s*\*{0,2}(?:Current\s+location|Location|Setting|Scene|Story\s+constraints|Main\s+objective|Active\s+people|Perspective|Director\s+Focus|Known\s+discoveries|World\s+rules):\*{0,2}\s*[^\n]+\n*/i, '');
 
   // Strip bracketed scene cues (e.g. [Scene: The Houseboat], [Setting: ...], [Chapter 1])
-  trimmed = trimmed.replace(/^\s*\[(?:Scene|Setting|Act|Note|Chapter|Turn|Stage)[^\]]*\]\s*/i, '');
+  trimmed = trimmed.replace(/^\s*\[(?:Scene|Setting|Act|Note|Chapter|Turn|Stage|Clue|Routing cue)[^\]]*\]\s*/i, '');
+  trimmed = trimmed.replace(/^\s*(?:Here is the continuation|Here's the next scene|Continuing the story):?\s*/i, '');
 
   // Clean raw speech disfluencies like trailing unclosed (um...)
   trimmed = trimmed.replace(/\s*\((?:um|uh|er|ah)[^)]*\)/gi, '').trim();
@@ -1041,14 +1096,24 @@ export function sanitizeTurnOutput(text: string): string {
   // Fix dangling trailing ellipses before punct (e.g. "hand… He" -> "hand. He")
   trimmed = trimmed.replace(/[.…]{2,}\s*$/g, '.');
 
-  const terminalPunct = /[.!?]"?$/;
+  const terminalPunct = /[.!?]["'”’]?$/;
   if (!terminalPunct.test(trimmed)) {
     const lastPunct = Math.max(trimmed.lastIndexOf('.'), trimmed.lastIndexOf('!'), trimmed.lastIndexOf('?'));
-    if (lastPunct > trimmed.length * 0.5) {
+    if (lastPunct > trimmed.length * 0.4) {
       trimmed = trimmed.slice(0, lastPunct + 1).trim();
     } else {
-      trimmed = trimmed + '.';
+      // Do not conceal genuine mid-clause truncation with a dot
+      const isDangling = /\b(?:and|but|or|because|although|while|as|that|who|which|they share|trying to|ready to|started to|stopped to)\s*$/i.test(trimmed);
+      if (!isDangling && /[a-zA-Z0-9]$/.test(trimmed)) {
+        trimmed = trimmed + '.';
+      }
     }
+  }
+
+  // Preserve legitimate dialogue: auto-close quotation mark if it ended on complete terminal punct
+  const doubleQuotes = (trimmed.match(/"/g) || []).length;
+  if (doubleQuotes % 2 !== 0 && /[.!?]$/.test(trimmed)) {
+    trimmed = trimmed + '"';
   }
 
   // Ensure first character is capitalized
@@ -1057,6 +1122,23 @@ export function sanitizeTurnOutput(text: string): string {
   }
 
   return trimmed;
+}
+
+export function detectPromptLeakage(text: string): { leaked: boolean; reason?: string } {
+  if (!text || typeof text !== 'string') return { leaked: false };
+  if (/Story constraints:\s*\n/i.test(text)) {
+    return { leaked: true, reason: 'Contains internal prompt constraints block' };
+  }
+  if (/\b(?:INCORPORATE RECENT EVENT|DEAD:|MISSING:|CONSUMED\/USED:|PROHIBITED:)\b/.test(text)) {
+    return { leaked: true, reason: 'Contains internal constraint headers' };
+  }
+  if (/\bPerspective:\s*(?:Visual observation|Dialogue & acoustic|Physical action)\b/i.test(text)) {
+    return { leaked: true, reason: 'Contains internal perspective prompt template' };
+  }
+  if (/\bDirector Focus:\s*(?:Causal progression|Continuity & deduction)\b/i.test(text)) {
+    return { leaked: true, reason: 'Contains internal director focus template' };
+  }
+  return { leaked: false };
 }
 
 /**
@@ -1154,12 +1236,13 @@ export function appendShowTurn(show: ShowRecord, turn: ShowTurn): ShowRecord {
     ...show,
     turns,
     updatedAt: turn.finishedAt,
-    status: turns.length === show.turnOrder.length && turns.every(item => item.status === 'completed') ? 'completed' : show.status
+    status: getCommittedShowTurns(turns).length >= show.turnOrder.length ? 'completed' : show.status
   };
 }
 
 export function sanitizeShow(show: ShowRecord): ShowRecord {
-  const cleanTurns = show.turns.filter(t => t.status === 'completed' && !t.rejectionReason && !/unavailable:|returned no response/i.test(t.stageText || ''));
+  const cleanTurns = show.turns.filter(t => t.status === 'failed' || t.status === 'rejected' || t.status === 'skipped' ||
+    (t.status === 'completed' && !t.rejectionReason && !/unavailable:|returned no response/i.test(t.stageText || '')));
   return {
     ...show,
     turns: cleanTurns,
@@ -1245,45 +1328,6 @@ export const STORY_ROLES = [
   'farmer','street painter','swim coach','hotel porter','puppeteer','postal worker','apprentice chef','tour guide','locksmith','bookbinder'
 ];
 
-export const GENRE_STORY_SEEDS: Record<string, { settings: string[]; hooks: string[] }> = {
-  'Detective investigation': {
-    settings: ['a rain-soaked fish market','a closed circus tent','a hilltop observatory','a night train to the coast','a crowded pawn shop','a lakeside boathouse','a theater after the final show','a rooftop greenhouse'],
-    hooks: ['a prize violin vanished during a blackout','a shopkeeper was found asleep beside an empty safe','a stolen ledger reappeared with one page torn out','a witness swears she saw a man walk through a wall','every clock in the building stopped at the same minute','a dog keeps leading people to the same locked shed','a ring was swapped for a perfect fake','a letter arrived signed by someone missing for years']
-  },
-  'Comedy': {
-    settings: ['a chaotic wedding rehearsal','a tiny cooking contest','a seaside talent show','a small-town job interview','a crowded laundromat','a school science fair','a yoga class in a park','a grandma\'s birthday party'],
-    hooks: ['a borrowed parrot will only repeat secrets','a cake order was mixed up with a giant fish','a rented suit is three sizes too small','a goat escaped into the main event','a speech was swapped for a grocery list','a robot vacuum keeps stealing shoes','a fake mustache will not come off','an online date turns out to be the new boss']
-  },
-  'Tragedy': {
-    settings: ['a flooding river village','a failing family orchard','a fishing town before a storm','a hospital night ward','a mountain mining camp','a closing piano bar','a border bus station','a burned-down bakery'],
-    hooks: ['only one ticket remains to leave town','a promise to a dying parent cannot be kept','a best friend\'s secret could ruin both of them','the family home must be sold by morning','a medicine can save only one person','a brave lie starts to cost lives','a lost letter would have changed everything','a debt forces a choice between two people']
-  },
-  'Horror': {
-    settings: ['an abandoned ice rink','a fog-covered campground','an old radio station','a sinking houseboat','a hotel with no other guests','a cornfield at midnight','a sealed subway tunnel','a children\'s museum after closing'],
-    hooks: ['footsteps answer every knock','a phone keeps ringing from an empty room','mirrors show someone standing one step behind','the snowman outside moves closer each night','a lullaby plays from under the floor','every photo now shows an extra guest','the map shows a door that should not exist','something is wearing a neighbor\'s coat']
-  },
-  'Romance': {
-    settings: ['a rainy bookshop café','a late-night ferry','a rooftop community garden','a winter train platform','a summer music festival','a pottery studio','a busy night market','a quiet seaside motel'],
-    hooks: ['two rivals must share one booth','an old pen pal turns up unannounced','a wrong-number text starts a real friendship','a fake date for a party starts to feel real','one of them is moving away in a week','a lost umbrella keeps bringing them together','a shared recipe holds a hidden confession','a bet about the stars goes too far']
-  },
-  'Mystery': {
-    settings: ['a fog-bound island village','a shuttered toy factory','a desert motel','a village bell tower','a university archive','a canal-side warehouse','a forgotten botanical garden','a cable-car station'],
-    hooks: ['a map was drawn in invisible ink','the same stranger appears in old photos','a key arrived with no lock in town to fit it','a radio picks up messages from yesterday','someone leaves fresh flowers on an empty grave','a painting changes overnight','a diary predicts the next day exactly','the town clock chimes thirteen times']
-  },
-  'Fantasy': {
-    settings: ['a floating market of lanterns','a forest where trees whisper names','a castle carved inside a glacier','a city built on a giant turtle','a desert of singing sand','a library that rearranges itself','a village under a frozen waterfall','a sky harbor for winged ships'],
-    hooks: ['a spell that steals one memory for each wish','a dragon egg that hatches only for liars','a crown that makes its wearer forget their name','a talking cat who owes a debt to a witch','a river that flows backward when someone lies','a map that redraws itself toward danger','a curse that turns every song into silence','a wand that works only at sunrise']
-  },
-  'Science fiction': {
-    settings: ['a mining base on a frozen moon','a generation ship\'s greenhouse deck','an underwater research dome','a city where it never gets dark','a repair dock orbiting the red planet','a desert solar farm run by robots','a crowded space elevator','a lab that studies time loops'],
-    hooks: ['the ship AI starts asking to be set free','oxygen is running out after a strange signal','a cloned crew member arrives with new memories','a teleporter sends back two copies','the robots stop obeying orders at night','a message arrives from forty years in the future','the planet\'s gravity begins to shift','a memory chip holds a crime nobody remembers']
-  },
-  'Adventure': {
-    settings: ['a jungle river with old stone bridges','a snowy mountain pass','a pirate island of hidden caves','a sandstorm-swept desert road','a sunken city reachable at low tide','a canyon full of rope bridges','a volcano village','a maze of ancient sea cliffs'],
-    hooks: ['a torn treasure map points two ways','a rival team stole the only boat','a storm closes the path home','a promised guide never arrives','a sacred bell must be returned before the full moon','the bridge collapses behind them','a lost explorer\'s compass points only north-west','a cave fills with water at sunset']
-  }
-};
-
 export function readCastMemory(storage: Pick<Storage, 'getItem'> = localStorage): StoryCast[] {
   try {
     const parsed: unknown = JSON.parse(storage.getItem(CAST_MEMORY_KEY) || '[]');
@@ -1295,7 +1339,130 @@ export function rememberCast(cast: StoryCast, storage: Pick<Storage, 'getItem' |
   try { storage.setItem(CAST_MEMORY_KEY, JSON.stringify([cast, ...readCastMemory(storage)].slice(0, 40))); } catch {}
 }
 
-/** Choose a cast, place and starting problem that were not used by recent stories. */
+const GENRE_SETTING_SEEDS: Record<string, string[]> = {
+  detective: [
+    'a rain-slicked archival wharf warehouse',
+    'the mezzanine reading gallery of the public records office',
+    'an eccentric horologist’s hillside workshop',
+    'a fog-bound railway switching depot after hours',
+    'the private examination room of a municipal botanical conservatory'
+  ],
+  comedy: [
+    'the chaotic backstage prop room of a community theatre',
+    'a frantic bakery kitchen during a county festival morning',
+    'an amateur robotics exhibition hall right before judging',
+    'a neighborhood pet supply shop during an unexpected delivery',
+    'a moving van stuck in midday market traffic'
+  ],
+  tragedy: [
+    'the quiet courtyard of an ancestral stone estate',
+    'a decommissioned coastal shipyard facing demolition',
+    'a drought-stricken hillside orchard at dusk',
+    'a lonely customs checkpoint on an autumn border',
+    'the echoing hall of a long-established family press'
+  ],
+  horror: [
+    'an isolated timber mill beside frozen marshland',
+    'a decommissioned salt mine tunnel network',
+    'a darkened coastal sanitarium annex',
+    'a derelict railway signal tower at twilight',
+    'a boarded stone chapel on the windward bluff'
+  ],
+  romance: [
+    'a quiet paper-restoration studio overlooking the canal',
+    'the glass greenhouse terrace of an alpine herbarium',
+    'a bustling weekend pottery market in the old quarter',
+    'an evening tramway terminus beside a seaside promenade',
+    'a rooftop weather observatory with a view of the harbor'
+  ],
+  mystery: [
+    'a sealed private gallery inside an antiquarian estate',
+    'an abandoned telegraph dispatch cellar',
+    'a mist-covered lake ferry dock at daybreak',
+    'a locked bell-foundry courtyard behind the cathedral',
+    'the attic archives of an unmapped municipal office'
+  ],
+  fantasy: [
+    'a weathered bell tower atop a whispering cliff',
+    'the rune-carved library vault of an ancient guild',
+    'a moonlit cedar grove where the spring runs backwards',
+    'the clockwork terrace of the mountain alchemists',
+    'a forgotten stone bridge spanning a crystalline ravine'
+  ],
+  science_fiction: [
+    'an orbital telemetry relay station during solar eclipse',
+    'a subterranean geothermal processor beneath a red plain',
+    'the cargo catwalks of an automated interstellar freighter',
+    'an atmospheric research dome near a methane sea',
+    'a decommissioned communications array in high polar orbit'
+  ],
+  adventure: [
+    'a narrow suspension trail along a canyon crest',
+    'an overgrown river gorge carved through basalt cliffs',
+    'a limestone cavern network sheltering against a sudden storm',
+    'a high mountain pass where the cairns have tumbled',
+    'the sun-bleached ruins of an abandoned desert outpost'
+  ],
+};
+
+const GENRE_HOOK_SEEDS: Record<string, string[]> = {
+  detective: [
+    'a torn ledger entry directly contradicts the official testimony',
+    'a sealed brass key was found hidden inside a hollowed book',
+    'an unsent telegram arrived hours after the sender went missing',
+    'the watch found at the scene had been wound backwards three hours'
+  ],
+  comedy: [
+    'an accidental label swap leads to a wildly misunderstood assignment',
+    'a misplaced box of theatrical props causes widespread confusion',
+    'two identical coats are taken by the wrong people on a deadline',
+    'a runaway clockwork toy triggers an awkward domino effect'
+  ],
+  tragedy: [
+    'an irreversible sacrifice must be weighed against family honor',
+    'a crucial warning letter was delivered one day too late to prevent loss',
+    'a cherished heirloom must be traded away to settle an ancestral debt',
+    'a long-held promise forces a painful choice between duty and love'
+  ],
+  horror: [
+    'a persistent scratching sound echoes from inside solid foundation stone',
+    'the backup radio broadcasts their own voices repeating words they never spoke',
+    'shadows cast by the oil lamps begin moving slightly out of sync',
+    'every reflection in the tarnished mirrors shows an open door behind them'
+  ],
+  romance: [
+    'an accidental exchange of personal journals sparks unexpected honesty',
+    'competing bids for the same historic workshop force reluctant cooperation',
+    'a sudden storm traps both travelers in a quiet wayside tea room',
+    'a joint restoration project uncovers an old love letter that mirrors their own doubts'
+  ],
+  mystery: [
+    'an unmarked door appears where the building blueprints show only solid masonry',
+    'a mechanical pocket watch that stopped thirty years ago suddenly ticks',
+    'fresh footprints lead straight into a stone alcove and disappear completely',
+    'a wax-sealed cylinder is discovered inside an unbroken ceramic vase'
+  ],
+  fantasy: [
+    'an ancient ward stone fractures, awakening a dormant memory spell',
+    'a cryptic parchment reveals that the royal talisman requires a painful truth',
+    'the convergence approaches with only one uncorrupted focusing prism remaining',
+    'a stray silver fox speaks a riddle that names their deepest secret'
+  ],
+  science_fiction: [
+    'a recurring telemetry signal originates from inside the ship’s own shielding',
+    'an automated airlock locks down due to an unscheduled quarantine flag',
+    'a dormant auxiliary processor suddenly wakes and requests manual override',
+    'the environmental scrubbers begin circulating air from an unlisted compartment'
+  ],
+  adventure: [
+    'a sudden rockfall blocks the primary route, forcing a dangerous detour',
+    'a waterlogged parchment map reveals a forgotten smugglers’ path through the gorge',
+    'the lead equipment harness snaps, leaving vital tools stranded across the divide',
+    'an approaching squall gives them only one hour to cross the exposed ridge'
+  ],
+};
+
+/** Choose distinct cast identities and evocative initial circumstances dynamically. */
 export function chooseStoryCast(theme: string, previousTexts: string[] = [], previousCasts: StoryCast[] = [], random = Math.random): StoryCast {
   const pick = <T,>(items: T[]): T => items[Math.floor(Math.min(0.999999999, Math.max(0, random())) * items.length)];
   const fresh = <T,>(items: T[], used: Set<T>): T[] => { const free = items.filter(item => !used.has(item)); return free.length ? free : items; };
@@ -1308,134 +1475,40 @@ export function chooseStoryCast(theme: string, previousTexts: string[] = [], pre
   const others = names.filter(name => name !== protagonist);
   const preferred = others.filter(name => name[0] !== protagonist[0]);
   const companion = pick(preferred.length ? preferred : others);
-  const seeds = GENRE_STORY_SEEDS[theme] || GENRE_STORY_SEEDS.Adventure;
   const recent = previousCasts.slice(0, 20);
   const role = pick(fresh(STORY_ROLES, new Set(recent.map(cast => cast.role))));
-  const setting = pick(fresh(seeds.settings, new Set(recent.map(cast => cast.setting))));
-  const hook = pick(fresh(seeds.hooks, new Set(recent.map(cast => cast.hook))));
+
+  const genreKey = theme.toLowerCase().replace(/[\s-]+/g, '_');
+  const settings = GENRE_SETTING_SEEDS[genreKey] || GENRE_SETTING_SEEDS.adventure;
+  const hooks = GENRE_HOOK_SEEDS[genreKey] || GENRE_HOOK_SEEDS.adventure;
+  const setting = pick(fresh(settings, new Set(recent.map(cast => cast.setting))));
+  const hook = pick(fresh(hooks, new Set(recent.map(cast => cast.hook))));
+
   return { protagonist, companion, role, setting, hook };
 }
 
-export function generateFreshPremise(theme: string, cast: StoryCast): string {
-  const hook = cast.hook;
-  const setting = cast.setting;
-  const p = cast.protagonist;
-  const c = cast.companion;
-  const role = cast.role;
-  switch (theme) {
-    case 'Romance':
-      return `In ${setting}, ${hook}, bringing ${p} the ${role} and ${c} into an unexpected, delicate encounter.`;
-    case 'Horror':
-      return `At ${setting}, ${hook}, trapping ${p} the ${role} and ${c} in escalating dread.`;
-    case 'Tragedy':
-      return `At ${setting}, ${hook}, forcing ${p} the ${role} and ${c} to face an irreversible loss.`;
-    case 'Adventure':
-      return `Across ${setting}, ${hook}, driving ${p} the ${role} and ${c} on a perilous journey.`;
-    case 'Mystery':
-      return `At ${setting}, ${hook}, challenging ${p} the ${role} and ${c} to uncover the hidden truth.`;
-    case 'Fantasy':
-      return `Within ${setting}, ${hook}, testing ${p} the ${role} and ${c} against ancient magical rules.`;
-    case 'Science fiction':
-      return `Aboard ${setting}, ${hook}, forcing ${p} the ${role} and ${c} to solve a critical crisis.`;
-    case 'Comedy':
-      return `At ${setting}, ${hook}, entangling ${p} the ${role} and ${c} in ridiculous complications.`;
-    case 'Detective investigation':
-      return `At ${setting}, ${hook}, challenging ${p} the ${role} and ${c} to investigate the clues.`;
-    default:
-      return `${p} the ${role} and ${c} face a challenge at ${setting}: ${hook}.`;
-  }
+export function generateFreshPremise(_theme: string, cast: StoryCast): string {
+  if (!cast || !cast.protagonist || !cast.companion) return '';
+  const settingPart = cast.setting ? ` at ${cast.setting}` : '';
+  const hookPart = cast.hook ? ` ${cast.hook.charAt(0).toUpperCase() + cast.hook.slice(1)}.` : '';
+  return `${cast.protagonist}, a ${cast.role || 'traveler'}, and ${cast.companion} find themselves${settingPart}.${hookPart}`.trim();
 }
 
-// ─── Plot-direction choices for the decision models ─────────────────────
-
-const STORY_DIRECTIONS: Record<string, string> = {
-  raise_stakes: '{P} faces a bigger risk as the problem suddenly gets worse.',
-  reveal_secret: '{C} reveals a secret that changes what {P} believes.',
-  hard_choice: '{P} must choose between two things that both matter.',
-  new_clue: '{P} notices a small detail that points in a new direction.',
-  ally_helps: '{C} steps in to help {P}, but it costs something.',
-  setback: 'The plan fails, and {P} has to try another way.',
-  confront: '{P} faces the source of the problem directly.',
-  honest_moment: '{P} and {C} share an honest moment that changes their bond.'
-};
-
-const GENRE_CUSTOM_DIRECTIONS: Record<string, Record<string, string>> = {
-  'Science fiction': {
-    override_system: '{P} overrides the station mainframe to prevent catastrophic systemic failure.',
-    secure_cryo_data: '{P} risks exposure in the vent corridor to extract the encrypted cryo-data chip.',
-    seal_bulkhead: '{C} locks the emergency bulkhead doors to isolate the hazardous breach.',
-    reroute_core: '{P} manually reroutes auxiliary power from the reactor to maintain life support.',
-    trace_anomaly: '{P} and {C} follow the unexpected sensor telemetry deeper into the station.'
-  },
-  'Detective investigation': {
-    analyze_evidence: '{P} isolates a forensic contradiction overlooked during initial inspection.',
-    confront_witness: '{P} directly questions {C} regarding discrepancies in their statement.',
-    secure_crime_scene: '{P} seals off the secondary passage before crucial physical traces vanish.',
-    pursue_lead: '{P} follows an unexpected trail found along the perimeter.'
-  },
-  'Adventure': {
-    scout_alternate_pass: '{P} spots a narrow, untested ledge bypassing the damaged crossing.',
-    anchor_crossing: '{C} secures a lifeline across the fissure, allowing the crossing to proceed.',
-    salvage_supplies: '{P} retrieves essential survival equipment just before it slips away.',
-    push_through_storm: '{P} and {C} brace through the harsh weather to reach higher shelter.'
-  },
-  'Romance': {
-    confess_feelings: '{P} admits their true feelings to {C}, risking emotional vulnerability.',
-    misunderstanding_deepens: 'An awkward misunderstanding between {P} and {C} threatens to push them apart.',
-    share_vulnerability: '{C} confides in {P} about the past hurt holding them back.',
-    stand_together: '{P} and {C} choose each other over outside expectations.',
-    tender_gesture: 'A quiet, honest gesture between {P} and {C} breaks the lingering tension.'
-  },
-  'Horror': {
-    barricade_door: '{P} frantically reinforces the barrier as unnatural scratching starts outside.',
-    flee_corridor: '{C} pulls {P} into a shadowed alcove just before the terrifying presence turns toward them.',
-    examine_talisman: '{P} discovers the protective ward has been broken from the inside.',
-    unmask_presence: '{P} raises the lantern, exposing the true nature of the lurking threat.',
-    sever_binding: '{C} severs the cursed binding before the entity can cross the threshold.'
-  },
-  'Tragedy': {
-    accept_sacrifice: '{P} steps forward to bear the irreversible cost so {C} can survive.',
-    confront_inevitable: '{C} acknowledges that not everyone can be saved before the water rises.',
-    parting_promise: '{P} and {C} exchange a solemn promise before the final farewell.',
-    hold_the_line: '{P} stays behind to buy vital minutes for the evacuation.',
-    solemn_remembrance: '{C} preserves the emblem of the fallen, determined that their memory endures.'
-  },
-  'Comedy': {
-    absurd_disguise: '{P} hastily puts on an outrageous disguise to avoid being recognized by the mayor.',
-    frantic_swap: '{C} tries to swap the ruined prop with a dessert while no one is looking.',
-    topple_display: '{P} accidentally trips over the ribbon, sending the festive centerpiece flying.',
-    double_down: '{C} invents a wildly preposterous excuse that everyone surprisingly believes.',
-    clumsy_rescue: '{P} dives across the table to catch the falling trophy, landing face-first in icing.'
-  },
-  'Fantasy': {
-    invoke_ancient_rune: '{P} channels the glowing glyph carved into the heartwood at great personal strain.',
-    counter_curse: '{C} shatters the obsidian focal stone, releasing trapped spirit energy.',
-    commune_guardian: '{P} offers a treasured memory to the forest guardian in exchange for safe passage.',
-    shield_enchantment: '{C} weaves a barrier of woven light to repel the creeping corruption.',
-    seal_rift: '{P} binds the shimmering tear between realms using the elemental reagent.'
-  },
-  'Mystery': {
-    inspect_hidden_compartment: '{P} unlatches a false panel in the desk revealing a coded correspondence.',
-    expose_timeline_gap: '{P} points out that {C} could not have heard the chime from across the courtyard.',
-    trace_wax_seal: '{C} matches the unique crest on the torn letter to an unrecorded visitor.',
-    interrogate_contradiction: '{P} corners the key witness with their conflicting statements.',
-    reconstruct_sequence: '{P} piecing together the broken glass pattern, proves the latch was opened from inside.'
-  }
-};
-
-export const LATE_DIRECTIONS = ['hard_choice', 'confront', 'reveal_secret', 'honest_moment', 'raise_stakes'];
-
 export function chooseStoryDirections(show: ShowRecord, random = Math.random): { instructions: string; criteria: Record<string, string> } {
-  const names = storyPeople(show);
-  const fill = (text: string) => text.replaceAll('{P}', names[0] || 'The main person').replaceAll('{C}', names[1] || 'another person');
-  const used = new Set(show.turns.flatMap(turn => turn.decisionData?.valid ? [turn.decisionData.predicted_route] : []));
-  const genreSet = GENRE_CUSTOM_DIRECTIONS[show.config.theme];
-  const sourceDict = genreSet ? { ...STORY_DIRECTIONS, ...genreSet } : STORY_DIRECTIONS;
-  const keys = Object.keys(sourceDict);
-  const pool = keys.filter(key => !used.has(key)).length >= 3 ? keys.filter(key => !used.has(key)) : keys;
-  const shuffled = [...pool].sort(() => random() - 0.5).slice(0, 3);
-  const criteria = Object.fromEntries(shuffled.map(key => [key, fill(sourceDict[key] || STORY_DIRECTIONS[key] || key).slice(0, 200)]));
-  return { instructions: `Pick the next event that makes this ${show.config.theme} story more exciting while staying consistent.`.slice(0, 200), criteria };
+  const canonical = show.canonicalWorldState;
+  const contract = getGenreContract(show.config.theme);
+  const recentFact = canonical?.establishedFacts.slice(-1)[0]?.text || show.turns.slice(-1)[0]?.stageText || 'the latest accepted contribution';
+  const openThread = canonical?.unresolvedConflicts.find(conflict => !conflict.resolved)?.description || canonical?.narrativeGoal || 'the central question established by the story';
+  const people = storyPeople(show).join(' and ') || 'the established characters';
+
+  const candidates: Array<[string, string]> = [
+    ['character_choice', `Build on ${people}'s established motivations by making a decisive choice regarding ${openThread}.`],
+    ['causal_development', `Let an established action or discovery (${recentFact}) produce a new consequence that reshapes the active scene.`],
+    ['genre_payoff', `Develop ${openThread} in a manner faithful to ${contract.centralConflict}, paying off an earlier detail.`]
+  ];
+  const rotate = Math.floor(Math.max(0, Math.min(0.999999, random())) * candidates.length);
+  const criteria = Object.fromEntries([...candidates.slice(rotate), ...candidates.slice(0, rotate)].map(([key, value]) => [key, value.slice(0, 200)]));
+  return { instructions: `Choose the most actionable next development for this ${show.config.theme} story. Ground it in canon, state its consequence, and leave the narrator room to write it naturally.`, criteria };
 }
 
 /** Story-voice line for a valid plot-direction vote. */
@@ -1466,9 +1539,11 @@ export function copiesPreviousSentence(candidate: string, previousOutputs: strin
 }
 
 const SUPPORT_VOICES: Partial<Record<CanonicalModelId, string>> = {
-  vision: 'You are Spectra, observing the scene visually. Describe what unfolds in the environment that changes the situation, and how the characters respond.',
-  audio: 'You are Echo, listening closely to the auditory environment. Describe the crucial sounds, transmissions, or spoken words heard and how they impact the characters.',
-  omni: 'You are Omni Pup, perceiving both environmental details and sound. Add the next concrete development in the scene that advances the plot.'
+  vision: 'Perspective: Visual observation & setting. Contribute a visible environmental discovery, physical detail, or spatial clue grounded in the active scene. Show how this observation changes character knowledge or options without citing model names.',
+  audio: 'Perspective: Dialogue & acoustic details. Contribute dialogue between the established characters, an audible clue, or an emotional exchange. Keep character voices consistent with their established personalities and motivations.',
+  omni: 'Perspective: Physical action & sensory impact. Introduce a physical movement, obstacle interaction, or concrete sensory development that advances the situation believably.',
+  d1: 'Director Focus: Causal progression. Choose the most consequential next narrative development supported by the established story state.',
+  d1_omni: 'Director Focus: Continuity & deduction. Connect established clues or unresolved threads to a decisive payoff or turning point.'
 };
 
 export function supportVoice(modelId: CanonicalModelId): string {
