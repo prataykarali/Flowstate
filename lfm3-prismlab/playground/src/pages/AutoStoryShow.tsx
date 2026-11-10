@@ -109,12 +109,16 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const [phase, setPhaseState] = React.useState<ShowPhase>(() => {
     if (!show) return 'configuring';
     if (show.status === 'paused_rate_limit') return 'paused_rate_limit';
+    if (show.status === 'parked' || show.status === 'active') return 'preparing';
     return 'paused';
   });
   const [message, setMessage] = React.useState<string>(() => {
     if (!show) return 'Choose a genre to start a new story.';
     if (show.status === 'paused_rate_limit') return `Your Story is saved at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}.`;
-    return `Story paused at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}. Click "Resume" to continue.`;
+    if (show.status === 'parked' || show.status === 'active') {
+      return `Welcome back! Continuing your ${show.config.theme} story (Turn ${getCommittedShowTurnCount(show) + 1}/${show.config.turnCount})…`;
+    }
+    return `Story paused at Turn ${getCommittedShowTurnCount(show) + 1} of ${show.config.turnCount}.`;
   });
   const [preview, setPreviewState] = React.useState('');
   const previewRef = React.useRef('');
@@ -154,7 +158,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   const showRef = React.useRef<ShowRecord | null>(show);
   const phaseRef = React.useRef<ShowPhase>(phase);
   const pendingRef = React.useRef(false);
-  const pausedRef = React.useRef(!!show);
+  const pausedRef = React.useRef(false);
   const stoppedRef = React.useRef(false);
   const timerRef = React.useRef<number | null>(null);
   const countdownIntervalRef = React.useRef<number | null>(null);
@@ -169,6 +173,15 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
 
   React.useEffect(() => {
     mountedRef.current = true;
+    const current = showRef.current;
+    if (current && current.mode === 'live_local_show' && (current.status === 'parked' || current.status === 'active')) {
+      stoppedRef.current = false;
+      pausedRef.current = false;
+      setPhase('preparing');
+      setMessage(`Welcome back! Continuing your ${current.config.theme} story (Turn ${getCommittedShowTurnCount(current) + 1}/${current.config.turnCount})…`);
+      void resumeParkedActivity(current.showId).catch(() => {});
+      schedule(600);
+    }
     return () => {
       mountedRef.current = false;
       epochRef.current += 1;
@@ -272,7 +285,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
 
     const totalTurns = current?.turnOrder.length || 20;
     const turnNum = currentTurnIdx + 1;
-    setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Shared models busy with another visitor; resuming in ${retryAfter}s…`);
+    setMessage(`Warming up the models for Turn ${turnNum} of ${totalTurns} — grab a coffee or explore the site, your story will continue automatically!`);
 
     let remaining = retryAfter;
     countdownIntervalRef.current = window.setInterval(() => {
@@ -287,7 +300,6 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         resumeFromRateLimit();
       } else {
         setRateLimitCountdown(remaining);
-        setMessage(`Your Story is saved at Turn ${turnNum} of ${totalTurns}. Shared models busy with another visitor; resuming in ${remaining}s…`);
       }
     }, 1000);
   };
@@ -370,9 +382,11 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       let status = await getGatewayStatus();
       if (epochRef.current !== currentEpoch || stoppedRef.current) return;
       let readinessAttempts = 0;
+      if ((status.inference_busy && status.queue && status.queue.waiting >= (status.queue.waiting_limit || 3)) || (!isRouteReady(status, modelId))) {
+        setMessage(`Preparing ${MODELS[modelId].characterName} on stage — grab a coffee or explore the site, we'll continue smoothly once ready!`);
+      }
       while ((status.inference_busy && status.queue && status.queue.waiting >= (status.queue.waiting_limit || 3)) || (!isRouteReady(status, modelId) && readinessAttempts < 3)) {
         readinessAttempts += 1;
-        setMessage(`${MODELS[modelId].characterName} is warming up or waiting for queue slot (${readinessAttempts}/3)…`);
         await new Promise(r => setTimeout(r, 1500));
         if (epochRef.current !== currentEpoch || stoppedRef.current) return;
         status = await getGatewayStatus();
@@ -485,10 +499,9 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           if ((is503 || is429 || isStreamAbort) && retries < 10) {
             retries += 1;
             const delayMs = isStreamAbort ? Math.min(12000, 3000 * retries) : Math.min(5000, 1500 * retries);
-            const reason = isStreamAbort
-              ? `Model is loading (swap in progress); retrying in ${(delayMs / 1000).toFixed(0)}s (${retries}/10)…`
-              : `Models busy with another visitor's turn; waiting in queue (${retries}/10, retrying in ${(delayMs / 1000).toFixed(1)}s)…`;
-            setMessage(reason);
+            if (retries === 1) {
+              setMessage(`Staging ${MODELS[modelId].characterName} — grab a coffee or explore the site, we'll continue smoothly once ready!`);
+            }
             await new Promise(r => setTimeout(r, delayMs));
             if (!mountedRef.current || epochRef.current !== currentEpoch || stoppedRef.current) return;
             continue;
