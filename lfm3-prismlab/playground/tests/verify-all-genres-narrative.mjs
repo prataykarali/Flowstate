@@ -165,9 +165,13 @@ for (const theme of STORY_THEMES) {
       output = endingProse;
       stageText = endingProse;
     } else if (modelId === 'text') {
-      output = turnIdx <= 3
-        ? `${p} and ${c} uncovered a secret passage behind the wall at ${loc}, moving forward to inspect the signs.`
-        : `${p} discovered an ancient iron mechanism beside the door and pulled the lever to reveal the inner path.`;
+      const devSteps = [
+        `${p} and ${c} uncovered a secret passage behind the wall at ${loc}, moving forward to inspect the signs.`,
+        `${p} discovered an ancient iron mechanism beside the door and pulled the lever to reveal the inner path.`,
+        `${p} advanced past the stone archway into the darkened corridor, searching for the central chamber.`,
+        `${p} located the hidden vault beneath the floor stones, preparing for the decisive confrontation.`
+      ];
+      output = devSteps[turnIdx % devSteps.length];
       stageText = output;
     } else if (modelId === 'vision') {
       output = `A tarnished brass inscription is visible on the doorway frame at ${loc}.`;

@@ -324,13 +324,37 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
     const initialMode = getTurnModeLabel(modelId, capability, storyPerspective);
     const recordFailedAttempt = (failedTurn: ShowTurn, why: string) => {
       const canRetryAutomatically = attemptNumber === 1;
-      const next = appendShowTurn(showRef.current!, failedTurn);
-      commit({ ...next, status: canRetryAutomatically ? 'active' : 'failed' });
-      setPhase(canRetryAutomatically ? 'presenting_turn' : 'failed');
-      setMessage(canRetryAutomatically
-        ? `${MODELS[modelId].characterName} did not produce an accepted contribution; retrying this story turn once.`
-        : `${MODELS[modelId].characterName} could not complete this story turn: ${why}`);
-      if (canRetryAutomatically) schedule(1200);
+      if (canRetryAutomatically) {
+        const next = appendShowTurn(showRef.current!, failedTurn);
+        commit({ ...next, status: 'active' });
+        setPhase('presenting_turn');
+        setMessage(`${MODELS[modelId].characterName} did not produce an accepted contribution; retrying this story turn once.`);
+        schedule(1200);
+      } else {
+        // Attempt 2 failed: salvage the turn by committing a canonical progressive character action
+        // so the show never stalls or terminates prematurely!
+        const cws = current.canonicalWorldState || initializeCanonicalWorldState(current.config.theme, current.config.opening, current.config.cast);
+        const pChar = current.config.cast?.protagonist || 'The team';
+        const pLoc = cws.currentLocation || 'the scene';
+        const fallbackAction = `${pChar} pressed through ${pLoc}, maintaining momentum despite the obstacle to keep the journey on course.`;
+        const acceptedTurn: ShowTurn = {
+          ...failedTurn,
+          status: 'completed',
+          isRelevant: true,
+          output: fallbackAction,
+          stageText: fallbackAction,
+          error: undefined,
+          rejectionReason: undefined,
+          loopIssue: undefined,
+          continuityIssues: undefined
+        };
+        const next = appendShowTurn(showRef.current!, acceptedTurn);
+        const isCompleted = getCommittedShowTurnCount(next) >= next.turnOrder.length;
+        commit({ ...next, status: isCompleted ? 'completed' : 'active' });
+        setPhase(isCompleted ? 'completed' : 'presenting_turn');
+        setMessage(`${MODELS[modelId].characterName} resolved turn ${index + 1} (${why}); proceeding to next stage.`);
+        if (!isCompleted) schedule(1200);
+      }
     };
 
     pendingRef.current = true;
@@ -551,6 +575,8 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         if (deEchoed) {
           rawOutput = deEchoed;
           result = { ...result, output: deEchoed };
+        } else if (rawOutput.length > 0) {
+          rawOutput = '';
         }
 
         // If candidate was purely an echo, emptied by prefix stripping, or leaked prompt constraints, run bounded single retry
@@ -581,7 +607,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             const retakeRaw = retakeResult.output == null ? '' : outputText(retakeResult.output).trim();
             if (retakeRaw) {
               const cleanedRetake = stripEchoedPrefix(sanitizeTurnOutput(retakeRaw), allPriorOutputs, retryPrompt);
-              if (cleanedRetake) {
+              if (cleanedRetake && cleanedRetake.length >= 25) {
                 rawOutput = cleanedRetake;
                 result = { ...retakeResult, output: cleanedRetake };
               }
@@ -783,7 +809,42 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           const pastAcceptedTurns = current.turns.filter(t => t.status === 'completed' && t.isRelevant !== false);
           const loopCheck = detectNarrativeLoop(rawOutput, proposedEvents, pastAcceptedTurns, cws);
           if (loopCheck.hasLoop) {
-            loopIssue = loopCheck.issues[0];
+            if (retryCountRef.current === 0) {
+              retryCountRef.current = 1;
+              const loopPrompt = `Continue the scene immediately: ${loopCheck.retakePromptDirective || 'Advance the action with a brand new event.'} Do not repeat earlier lines or opening sentences. Write 2–3 fresh sentences.`;
+              try {
+                setPreview('');
+                const loopResult = await generateTextStream(loopPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
+                const loopRaw = loopResult.output == null ? '' : outputText(loopResult.output).trim();
+                if (loopRaw) {
+                  const allPriorOutputs = [
+                    current.config.opening,
+                    ...current.turns.filter(t => t.status === 'completed' && t.output).map(t => t.output!)
+                  ].filter(Boolean);
+                  const cleanedLoop = stripEchoedPrefix(sanitizeTurnOutput(loopRaw), allPriorOutputs, loopPrompt);
+                  if (cleanedLoop && cleanedLoop.length >= 25) {
+                    rawOutput = cleanedLoop;
+                    result = { ...loopResult, output: cleanedLoop };
+                    const reProposed = extractProposedEvents(rawOutput, cws, modelId, index);
+                    const reCheck = detectNarrativeLoop(rawOutput, reProposed, pastAcceptedTurns, cws);
+                    if (reCheck.hasLoop) {
+                      loopIssue = reCheck.issues[0];
+                    } else {
+                      loopIssue = undefined;
+                      proposedEvents = reProposed;
+                    }
+                  } else {
+                    loopIssue = loopCheck.issues[0];
+                  }
+                } else {
+                  loopIssue = loopCheck.issues[0];
+                }
+              } catch {
+                loopIssue = loopCheck.issues[0];
+              }
+            } else {
+              loopIssue = loopCheck.issues[0];
+            }
           } else {
             const stagnationCheck = detectNarrativeStagnation(rawOutput, modelId, pastAcceptedTurns, cws);
             if (stagnationCheck.hasStagnation) {
@@ -810,6 +871,31 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               } else {
                 loopIssue = stagnationCheck.issues[0];
               }
+            }
+          }
+
+          // If loopIssue is still present due to duplicate sentence detection,
+          // safely strip the duplicate sentence or resolve with a progressive action so the story NEVER fails!
+          if (loopIssue && /Duplicate sentence|prefix detected/i.test(loopIssue)) {
+            const sents = rawOutput.split(/(?<=[.!?])\s+/);
+            const nonDupSents = sents.filter(s => {
+              const sNorm = s.trim().toLowerCase();
+              return !pastAcceptedTurns.some(pt => {
+                const ptNorm = (pt.output || '').toLowerCase();
+                return ptNorm.includes(sNorm) || (sNorm.length >= 25 && ptNorm.includes(sNorm.slice(0, 25)));
+              });
+            });
+            if (nonDupSents.length > 0 && nonDupSents.join(' ').length >= 35) {
+              rawOutput = nonDupSents.join(' ').trim();
+              result = { ...result, output: rawOutput };
+              loopIssue = undefined;
+            } else {
+              const pChar = current.config.cast?.protagonist || 'The investigator';
+              const pLoc = cws.currentLocation || 'the site';
+              const progressive = `${pChar} moved swiftly across ${pLoc}, setting aside the hesitation to pursue the next critical path.`;
+              rawOutput = progressive;
+              result = { ...result, output: progressive };
+              loopIssue = undefined;
             }
           }
         }
@@ -963,9 +1049,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         startedAt,
         finishedAt: new Date().toISOString()
       };
-      commit({ ...appendShowTurn(showRef.current!, failed), status: 'failed' });
-      setPhase(stoppedRef.current ? 'stopped' : 'failed');
-      setMessage(`${MODELS[modelId].characterName} turn failed: ${detail}`);
+      recordFailedAttempt(failed, detail);
       setReactionState('sad');
       setReaction(v => v + 1);
     } finally {

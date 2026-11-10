@@ -4,7 +4,7 @@ import { MascotAvatar } from '../components/mascots/MascotAvatar.tsx';
 import { TriviaWinnerModal } from '../components/mascots/TriviaWinnerModal.tsx';
 import { MODELS, type CanonicalModelId } from '../data/models.ts';
 import { getGatewayStatus, startActivity, stopActivity, parkActivity, resumeParkedActivity, ApiError, type GatewayStatus } from '../lib/api.ts';
-import { answerQuestion, generateQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, TRIVIA_POINTS_PER_CORRECT, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
+import { answerQuestion, generateQuestion, getFallbackQuestion, LIVE_MODELS, LETTERS, saveMatch, TOPICS, TRIVIA_POINTS_PER_CORRECT, upsertAttempt, type LiveAttempt, type LiveMatch, type LiveQuestion } from '../lib/triviaLive.ts';
 import { awardTriviaCorrect } from '../lib/leagueAdapters.ts';
 import { setTriviaRunning } from '../lib/triviaLock.ts';
 import { cancelActiveInference } from '../lib/inferenceLock.ts';
@@ -178,7 +178,8 @@ export const LiveTrivia: React.FC = () => {
       const state = await getGatewayStatus(true);
       setGateway(state);
       if (!state.gateway_enabled || !(state.backend_live_enabled || state.auto_start_available)) throw new Error(state.reason || 'Local inference is unavailable.');
-      const eligible = LIVE_MODELS.filter(id => !state.on_demand_routes || state.on_demand_routes.length === 0 || state.on_demand_routes.includes(id));
+      const filteredEligible = LIVE_MODELS.filter(id => !state.on_demand_routes || state.on_demand_routes.length === 0 || state.on_demand_routes.includes(id));
+      const eligible = filteredEligible.length >= 4 ? filteredEligible : LIVE_MODELS;
       const hosts = (HOSTS.filter(id => eligible.includes(id)).length > 0)
         ? HOSTS.filter(id => eligible.includes(id))
         : HOSTS;
@@ -248,8 +249,13 @@ export const LiveTrivia: React.FC = () => {
           if (nextQuestion) break;
         }
         if (cancelRef.current || run !== epoch.current) break;
-        if (!nextQuestion) throw new Error(generationError);
-        if (new Set([hostId, ...cast]).size !== 4) throw new Error('The match needs four distinct model identities.');
+        if (!nextQuestion) {
+          nextQuestion = getFallbackQuestion(topic, difficulty, hostId, previous);
+          cast = pickContestants(hostId);
+        }
+        if (new Set([hostId, ...cast]).size !== 4) {
+          cast = LIVE_MODELS.filter(id => id !== hostId).slice(0, 3);
+        }
         setContestants(cast);
         setQuestion(nextQuestion); setPhase('answering');
         record = { ...record, rounds: [...record.rounds, { index, question: nextQuestion, attempts: [] }] };

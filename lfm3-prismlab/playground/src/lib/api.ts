@@ -306,7 +306,13 @@ async function post<T>(path: string, body: unknown, jobId?: string): Promise<T> 
   };
   if (jobId) headers['X-Job-Id'] = jobId;
   try {
-    return await jsonResponse<T>(await fetch(`${API}${path}`, { method:'POST', headers, body:JSON.stringify(body), cache:'no-store' }));
+    return await jsonResponse<T>(await fetch(`${API}${path}`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(20_000)
+    }));
   } catch (err) {
     if (err instanceof TypeError || (err instanceof Error && /failed to fetch|network|refused/i.test(err.message))) {
       triggerOfflineModal();
@@ -364,7 +370,7 @@ export async function executeLocalStream(request: ExecuteRequest, onUpdate: (upd
       headers,
       body: JSON.stringify(request),
       cache: 'no-store',
-      signal: combinedSignal
+      signal: combinedSignal || AbortSignal.timeout(25_000)
     });
     if (response.status === 404) {
       fallback = true;
@@ -505,7 +511,7 @@ export async function generateTextStream(
         checkpoint
       }),
       cache: 'no-store',
-      signal
+      signal: signal || AbortSignal.timeout(25_000)
     });
     if (response.status === 404) {
       if (cappedTokens !== 128) throw new ApiError('Restart the local backend to use bounded streaming output.', 503);

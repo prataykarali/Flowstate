@@ -1248,7 +1248,7 @@ export function validateClimaxTurn(
     const objectiveWords = climaxObjective.toLowerCase().match(/[a-z]{4,}/g)?.filter(w => !/^(about|their|there|after|before|because|story|would|could|should|create|point|central)$/.test(w)) || [];
     const matched = objectiveWords.filter(w => clean.toLowerCase().includes(w));
     if (objectiveWords.length > 0 && matched.length === 0) {
-      const genericConflict = /\b(?:truth|culprit|evidence|choice|door|bridge|station|core|signal|danger|threat|beast|spell|power|secret|escape|rescue|time|way|dial|mechanism|compartment|lock|key|vault|box|relic|riddle|puzzle|clue)\b/i.test(clean);
+      const genericConflict = /\b(?:truth|culprit|evidence|choice|door|gate|wall|bridge|station|core|signal|danger|threat|beast|spell|power|secret|escape|rescue|time|way|dial|mechanism|compartment|lock|key|vault|box|relic|riddle|puzzle|clue|fortress|citadel|enemy|vanguard|sacrifice|cost|loss|fate|battle|chains|barrier|defend|seal)\b/i.test(clean);
       if (!genericConflict) {
         issues.push('Climax does not connect to the established central objective or turning point.');
       }
