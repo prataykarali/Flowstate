@@ -331,28 +331,23 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
         setMessage(`${MODELS[modelId].characterName} did not produce an accepted contribution; retrying this story turn once.`);
         schedule(1200);
       } else {
-        // Attempt 2 failed: salvage the turn by committing a canonical progressive character action
-        // so the show never stalls or terminates prematurely!
-        const cws = current.canonicalWorldState || initializeCanonicalWorldState(current.config.theme, current.config.opening, current.config.cast);
-        const pChar = current.config.cast?.protagonist || 'The team';
-        const pLoc = cws.currentLocation || 'the scene';
-        const fallbackAction = `${pChar} pressed through ${pLoc}, maintaining momentum despite the obstacle to keep the journey on course.`;
-        const acceptedTurn: ShowTurn = {
+        // Attempt 2 failed: honestly skip this turn so the show progresses
+        // without fabricating prose that masquerades as model output.
+        // isCommittedShowTurn already accepts status === 'skipped' to advance the cursor.
+        const skippedTurn: ShowTurn = {
           ...failedTurn,
-          status: 'completed',
-          isRelevant: true,
-          output: fallbackAction,
-          stageText: fallbackAction,
-          error: undefined,
-          rejectionReason: undefined,
+          status: 'skipped',
+          isRelevant: false,
+          error: `Both attempts failed: ${why}`,
+          rejectionReason: why,
           loopIssue: undefined,
           continuityIssues: undefined
         };
-        const next = appendShowTurn(showRef.current!, acceptedTurn);
+        const next = appendShowTurn(showRef.current!, skippedTurn);
         const isCompleted = getCommittedShowTurnCount(next) >= next.turnOrder.length;
         commit({ ...next, status: isCompleted ? 'completed' : 'active' });
         setPhase(isCompleted ? 'completed' : 'presenting_turn');
-        setMessage(`${MODELS[modelId].characterName} resolved turn ${index + 1} (${why}); proceeding to next stage.`);
+        setMessage(`${MODELS[modelId].characterName} could not contribute to turn ${index + 1} (${why}); skipping to next stage.`);
         if (!isCompleted) schedule(1200);
       }
     };
@@ -452,7 +447,9 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
       while (true) {
         try {
           if (modelId === 'text') {
-            const tokensToGen = Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72));
+            const isClimaxOrEnding = showBeat(current, index) === 'climax' || showBeat(current, index) === 'ending';
+            const defaultTokens = isClimaxOrEnding ? 96 : 84;
+            const tokensToGen = Math.min(108, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 108) : defaultTokens));
             result = await generateTextStream(
               built.prompt,
               onTextUpdate,
@@ -674,7 +671,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
           const climaxCorrectionPrompt = `Continue this ${genre.displayName} story at its decisive turning point. Act III Climax. Objective: "${director?.climaxObjective || 'Confront the central obstacle'}". Characters must directly confront the obstacle and make an irreversible choice or take decisive action now. Three concise sentences. No recap, no passive description.`;
           try {
             setPreview('');
-            const correctiveResult = await generateTextStream(climaxCorrectionPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
+            const correctiveResult = await generateTextStream(climaxCorrectionPrompt, onTextUpdate, Math.min(108, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 108) : 96)));
             const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
             if (correctiveRaw) {
               rawOutput = sanitizeTurnOutput(correctiveRaw);
@@ -701,7 +698,7 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
             const endingCorrectionPrompt = `Conclude this ${getGenreContract(current.config.theme).displayName} story. Act IV Resolution.${climaxOutcome} State the definitive outcome of the climax choice and the original goal. Address and conclude the principal conflict: "${goal}". Show the final consequence and aftermath for the characters and world. Write three concise sentences, about 400–500 characters total. No recap.`;
             try {
               setPreview('');
-              const correctiveResult = await generateTextStream(endingCorrectionPrompt, onTextUpdate, Math.min(72, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 72) : 72)));
+              const correctiveResult = await generateTextStream(endingCorrectionPrompt, onTextUpdate, Math.min(108, Math.max(24, current.config.maxTokens ? Math.min(current.config.maxTokens, 108) : 96)));
               const correctiveRaw = correctiveResult.output == null ? '' : outputText(correctiveResult.output).trim();
               if (correctiveRaw) {
                 rawOutput = correctiveRaw;
@@ -890,12 +887,10 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
               result = { ...result, output: rawOutput };
               loopIssue = undefined;
             } else {
-              const pChar = current.config.cast?.protagonist || 'The investigator';
-              const pLoc = cws.currentLocation || 'the site';
-              const progressive = `${pChar} moved swiftly across ${pLoc}, setting aside the hesitation to pursue the next critical path.`;
-              rawOutput = progressive;
-              result = { ...result, output: progressive };
-              loopIssue = undefined;
+              // All sentences are duplicates and stripping leaves nothing.
+              // Preserve the loopIssue so the turn gets properly rejected/retried
+              // by the upstream handler rather than injecting fabricated prose.
+              // loopIssue stays set — recordFailedAttempt will handle it.
             }
           }
         }

@@ -871,7 +871,10 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   if (canonical.narrativeGoal && beat !== 'opening') tier1Constraints.push(`Main objective: ${truncateWords(canonical.narrativeGoal, 14)}`);
   if (aliveChars.length && beat !== 'opening') tier1Constraints.push(`Active people: ${aliveChars.join(', ')}`);
   
-  const lastAcceptedTurn = show.turns.slice().reverse().find(t => t.status === 'completed' && t.isRelevant !== false && t.output);
+  // CRITICAL: Exclude decision_assistant turns — their votes are routing metadata,
+  // not scene events. Feeding "My vote: causal development (61%)" to the writer
+  // as "LATEST SCENE EVENT" causes the model to literally narrate about votes.
+  const lastAcceptedTurn = show.turns.slice().reverse().find(t => t.status === 'completed' && t.isRelevant !== false && t.output && t.role !== 'decision_assistant');
   if (lastAcceptedTurn && beat !== 'opening') {
     tier1Constraints.push(`LATEST SCENE EVENT: ${truncateWords(stripEchoedPrefix(lastAcceptedTurn.stageText || lastAcceptedTurn.output || '', []), 15)}`);
   } else if (lastAccepted && beat !== 'opening' && lastAccepted.turnIndex > 0) {
@@ -879,7 +882,9 @@ export function buildShowPrompt(show: ShowRecord, modelId: CanonicalModelId): { 
   }
 
   if (modelId === 'text' && beat !== 'opening') {
-    const lastNonText = committedTurns.slice().reverse().find(t => t.modelId !== 'text' && t.output);
+    // CRITICAL: Exclude decision_assistant turns from specialist incorporation.
+    // Director outputs are routing metadata, not narrative discoveries.
+    const lastNonText = committedTurns.slice().reverse().find(t => t.modelId !== 'text' && t.output && t.role !== 'decision_assistant');
     if (lastNonText) {
       const finding = stripEchoedPrefix(lastNonText.stageText || lastNonText.output || '', []);
       if (finding) {
@@ -968,7 +973,7 @@ function pendingDirection(show: ShowRecord): string {
     const turn = committed[i];
     if (turn.modelId === 'text' && turn.status === 'completed') return '';
     const chosen = turn.decisionData?.valid ? turn.decisionOptions?.[turn.decisionData.predicted_route] : undefined;
-    if (chosen) return `Make this happen now: ${chosen} `;
+    if (chosen) return `Selected action to narrate: ${chosen.replace(/[.]+$/, '')}. Turn this concrete choice into story prose. `;
   }
   return '';
 }
@@ -1067,9 +1072,13 @@ export function sanitizeTurnOutput(text: string): string {
     }
   }
 
-  // Strip code blocks and markdown headings
+  // Strip code blocks, horizontal rules, and markdown headings anywhere in the text
   trimmed = trimmed.replace(/^```[a-z]*\n/i, '').replace(/```$/i, '').trim();
-  trimmed = trimmed.replace(/^#+\s+[^\n]+(?:\n+|$)/g, '').trim();
+  trimmed = trimmed.replace(/(?:^|\n)\s*---+\s*/g, '\n');
+  trimmed = trimmed.replace(/(?:^|\n)\s*#+\s+[^\n]+(?:\n+|$)/g, '\n').trim();
+
+  // Strip standalone italicized/bold title lines (e.g. *The Red Plain's Geothermal Gambit*)
+  trimmed = trimmed.replace(/^\s*\*[A-Z][^*]+\*\s*(?:\n+|$)/, '');
 
   // Strip unwanted planning artifacts and titles (e.g. **Title: The Coat on the Boat**, Title: ...)
   trimmed = trimmed.replace(/^\s*\*{0,2}Title:\s*[^\n*]+\*{0,2}\s*/i, '');
@@ -1080,11 +1089,11 @@ export function sanitizeTurnOutput(text: string): string {
   trimmed = trimmed.replace(/^\s*(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n]+)?\n*/i, '');
   trimmed = trimmed.replace(/\n+\s*\*{0,2}(?:[A-Za-z\s]+[-–—:])?\s*Act\s+[IVXLCDM]+(?:\s*[-–—:]\s*[^\n*]+)?\*{0,2}\s*\n*/gi, '\n');
 
-  // Strip markdown bold/italic section headers (e.g. **Act III**, **Chapter 1**, **Scene:**)
-  trimmed = trimmed.replace(/^\s*\*{1,3}(?:Act|Chapter|Scene|Part|Stage|Turn|Note|Direction|Director Focus|Perspective|Title|Objective)[^*]+\*{1,3}\s*\n*/i, '');
+  // Strip markdown bold/italic section headers (e.g. **Act III**, **Chapter 1**, **Scene:**, **Setting the Stage**)
+  trimmed = trimmed.replace(/^\s*\*{1,3}(?:Act|Chapter|Scene|Part|Stage|Turn|Note|Direction|Director Focus|Perspective|Title|Objective|Setting the Stage)[^*]+\*{1,3}\s*\n*/i, '');
 
-  // Strip scene or location headers and internal constraints headers
-  trimmed = trimmed.replace(/^\s*\*{0,2}(?:Current\s+location|Location|Setting|Scene|Story\s+constraints|Main\s+objective|Active\s+people|Perspective|Director\s+Focus|Known\s+discoveries|World\s+rules):\*{0,2}\s*[^\n]+\n*/i, '');
+  // Strip scene or location headers and internal constraints headers (even mid-text)
+  trimmed = trimmed.replace(/(?:^|\n)\s*\*{0,2}(?:Current\s+location|Location|Setting|Scene|Story\s+constraints|Main\s+objective|Active\s+people|Perspective|Director\s+Focus|Known\s+discoveries|World\s+rules):\*{0,2}\s*[^\n]+/gi, '\n');
 
   // Strip bracketed scene cues (e.g. [Scene: The Houseboat], [Setting: ...], [Chapter 1])
   trimmed = trimmed.replace(/^\s*\[(?:Scene|Setting|Act|Note|Chapter|Turn|Stage|Clue|Routing cue)[^\]]*\]\s*/i, '');
@@ -1618,33 +1627,40 @@ export function chooseStoryDirections(show: ShowRecord, random = Math.random): {
   const people = storyPeople(show).join(' and ') || (cast ? `${cast.protagonist} and ${cast.companion}` : 'the characters');
   const location = canonical?.currentLocation || cast?.setting || 'the active scene';
 
-  const lastAccepted = show.turns.slice().reverse().find(t => t.status === 'completed' && t.output);
-  const rawClue = canonical?.discoveredClues?.slice(-1)[0]?.replace(/_/g, ' ') ||
-    (lastAccepted?.output ? truncateWords(stripEchoedPrefix(lastAccepted.output, []), 8) : cast?.hook || 'the active situation');
-  const clue = rawClue.replace(/^(?:the latest accepted contribution|established action|openThread)\b/i, cast?.hook || 'the recent discovery');
-  const rawGoal = canonical?.narrativeGoal || cast?.hook || show.config.opening || contract.centralConflict;
-  const goal = truncateWords(rawGoal.replace(/^(?:the central question established by the story|the latest accepted contribution)\b/i, 'resolving the central conflict'), 10);
+  // CRITICAL: Exclude decision_assistant turns from lastAccepted — we want the last
+  // genuine narrative contribution, not a routing vote.
+  const lastAccepted = show.turns.slice().reverse().find(t => t.status === 'completed' && t.output && t.role !== 'decision_assistant');
+
+  // Build scene-grounded fragments from live canonical state
+  const latestClue = canonical?.discoveredClues?.slice(-1)[0]?.replace(/_/g, ' ') || '';
+  const latestEvent = lastAccepted?.output ? truncateWords(stripEchoedPrefix(lastAccepted.output, []), 10) : '';
+  const unresolvedThread = canonical?.unresolvedConflicts?.slice(-1)[0]?.description || '';
+  const narrativeGoal = canonical?.narrativeGoal || cast?.hook || show.config.opening || contract.centralConflict;
+  const goal = truncateWords(narrativeGoal, 12);
+
+  // Construct 3 distinct, scene-grounded direction candidates
+  // Each grounded in different live story facts to avoid repetitive abstract scaffolding
+  const choiceContext = latestEvent || `the situation at ${location}`;
+  const clueContext = latestClue || unresolvedThread || `an unresolved question at ${location}`;
+  const goalContext = goal || 'their central objective';
 
   const candidates: Array<[string, string]> = [
-    ['character_choice', `${people} must make a decisive choice: confront the immediate risk at ${location} regarding ${goal}.`],
-    ['causal_development', `The development concerning ${clue} triggers an immediate consequence that reshapes the situation at ${location}.`],
-    ['genre_payoff', `Advance the central tension by forcing ${people} to commit to an irreversible action toward ${goal}.`]
+    ['character_choice', `${people} must decide how to respond to ${choiceContext}.`],
+    ['causal_development', `The discovery of ${clueContext} forces a consequence that changes ${people}'s options.`],
+    ['genre_payoff', `${people} take an irreversible step toward ${goalContext}.`]
   ];
   const rotate = Math.floor(Math.max(0, Math.min(0.999999, random())) * candidates.length);
   const criteria = Object.fromEntries([...candidates.slice(rotate), ...candidates.slice(0, rotate)].map(([key, value]) => [key, value.slice(0, 200)]));
-  return { instructions: `Choose the most actionable next development for this ${show.config.theme} story. Ground it in canon, state its consequence, and leave the narrator room to write it naturally.`, criteria };
+  return { instructions: `Choose the most actionable next development for this ${show.config.theme} story. Ground it in established facts, state its consequence, and leave the narrator room to write it naturally.`, criteria };
 }
 
 /** Story-voice line for a valid plot-direction vote. */
 export function presentStoryDirection(modelId: CanonicalModelId, decision: ValidatedDecision, options?: Record<string, string>): string | null {
   const rawDescription = options?.[decision.predicted_route];
   if (!decision.valid || !rawDescription) return null;
-  const description = rawDescription
-    .replace(/^(?:Build on [^.]+ motivations by making a decisive choice regarding |Let an established action or discovery \([^)]+\) produce a new consequence that reshapes the active scene\.|Develop [^.]+ in a manner faithful to [^.]+, paying off an earlier detail\.)/i, '')
-    .trim() || rawDescription;
 
   // Clean trailing period for uniform voice assembly
-  const cleanDesc = description.replace(/[.]+$/, '');
+  const cleanDesc = rawDescription.replace(/[.]+$/, '');
   if (modelId === 'd1') {
     return `Prism Thinker directs the tactical priority: ${cleanDesc}.`;
   }
@@ -1661,19 +1677,20 @@ export function storyPeople(show: ShowRecord): string[] {
   return names.slice(0, 4);
 }
 
-/** True when the candidate copies a whole sentence (≥6 words) from an earlier turn. */
+/** True when the candidate copies a sentence or major clause (≥6 words) from an earlier turn. */
 export function copiesPreviousSentence(candidate: string, previousOutputs: string[]): boolean {
   const norm = (value: string) => value.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
   const earlier = previousOutputs.map(norm).filter(Boolean);
-  return candidate.split(/(?<=[.!?])\s+/).map(norm).some(sentence => sentence.split(' ').length >= 6 && earlier.some(previous => previous.includes(sentence)));
+  const segments = candidate.split(/[,;:—–]+|(?<=[.!?])\s+/).map(norm).filter(Boolean);
+  return segments.some(segment => segment.split(' ').length >= 6 && earlier.some(previous => previous.includes(segment)));
 }
 
 const SUPPORT_VOICES: Partial<Record<CanonicalModelId, string>> = {
-  vision: 'Perspective: Visual observation & setting. Contribute a visible environmental discovery, physical detail, or spatial clue grounded in the active scene. Show how this observation changes character knowledge or options without citing model names.',
-  audio: 'Perspective: Dialogue & acoustic details. Contribute dialogue between the established characters, an audible clue, or an emotional exchange. Keep character voices consistent with their established personalities and motivations.',
-  omni: 'Perspective: Physical action & sensory impact. Introduce a physical movement, obstacle interaction, or concrete sensory development that advances the situation believably.',
-  d1: 'Director Focus: Causal progression. Choose the most consequential next narrative development supported by the established story state.',
-  d1_omni: 'Director Focus: Continuity & deduction. Connect established clues or unresolved threads to a decisive payoff or turning point.'
+  vision: 'Spectra — Visual worldbuilding: Provide camera shots, lighting, subtle character expressions, and spatial/environmental details grounded in the active scene. Expand the visual atmosphere for the narrator to build upon.',
+  audio: 'Echo — Soundscape & dialogue delivery: Provide auditory atmosphere, acoustic clues, dialogue delivery, and vocal emotion. Keep character voices consistent and do not rewrite past plot.',
+  omni: 'Omni Pup — Multimodal scene integration: Synchronize action, sound, and visual details into a unified physical beat. Advance character movement or obstacle interaction based on what was seen and heard.',
+  d1: 'Prism Thinker — Action decision: Rank explicit candidate actions and immediate consequences based on established story state.',
+  d1_omni: 'Sherlock Omni — Continuity & direction decision: Select the next narrative direction using multimodal clues and established canon facts.'
 };
 
 export function supportVoice(modelId: CanonicalModelId): string {

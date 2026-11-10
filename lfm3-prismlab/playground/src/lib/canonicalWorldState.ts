@@ -1395,12 +1395,12 @@ export function detectNarrativeLoop(
     }
   }
 
-  // 2. Sentence Duplication Check (> 6 content words) with prefix & fuzzy matching
-  const currentSentences = clean.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
+  // 2. Sentence & Clause Duplication Check (≥ 6 words) with prefix & fuzzy matching
+  const currentSentences = clean.split(/[,;:—–]+|[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
   for (let i = 0; i < pastTurns.length; i++) {
     const priorTurn = pastTurns[i];
     if (!priorTurn.output) continue;
-    const priorSentences = priorTurn.output.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
+    const priorSentences = priorTurn.output.split(/[,;:—–]+|[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.split(/\s+/).length >= 6);
     for (const cSent of currentSentences) {
       const match = priorSentences.find(pSent => {
         if (pSent === cSent) return true;
@@ -1480,9 +1480,12 @@ export function auditStoryQuality(
   const completedTurns = turns.filter(t => t.status === 'completed' && t.output);
 
   // 1. Inference Completed Check
-  const inferenceCompleted = turns.length > 0 && turns.every(t => t.status === 'completed' || t.status === 'rejected');
+  const inferenceCompleted = turns.length > 0 && turns.every(t => t.status === 'completed' || t.status === 'rejected' || t.status === 'skipped');
+  const skippedTurns = turns.filter(t => t.status === 'skipped');
   if (!inferenceCompleted) {
     issues.push('One or more turns failed model execution.');
+  } else if (skippedTurns.length > 0) {
+    issues.push(`${skippedTurns.length} turn(s) were skipped in honest degraded mode.`);
   }
 
   // 2. Output Complete Check
