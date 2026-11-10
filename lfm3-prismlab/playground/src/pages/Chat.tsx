@@ -463,7 +463,7 @@ export const Chat: React.FC = () => {
         <button type="button" aria-label="Next character" onClick={() => step(1)} disabled={isBusy||storyMode}>›</button>
       </div>
       <div className="chat-topline-right">
-        <button type="button" className="chat-story-toggle" onClick={() => { setHistoryDrawerOpen(false);setChapterCue('');setStoryMode(value=>!value); }} disabled={pending||storyView.pending||(storyMode&&storyShow?.status==='active'&&storyView.phase!=='paused')} title={storyMode&&storyShow?.status==='active'&&storyView.phase!=='paused'?'Pause or stop the story before returning to Normal Chat.':undefined} aria-pressed={storyMode}>{storyMode?'← Normal Chat':'✦ Auto Story'}</button>
+        <button type="button" className="chat-story-toggle" onClick={() => { setHistoryDrawerOpen(false); setChapterCue(''); setStoryMode(value => { const next = !value; if (next) window.dispatchEvent(new CustomEvent('prismlab_resume_story')); return next; }); }} disabled={pending||storyView.pending||(storyMode&&storyShow?.status==='active'&&storyView.phase!=='paused')} title={storyMode&&storyShow?.status==='active'&&storyView.phase!=='paused'?'Pause or stop the story before returning to Normal Chat.':undefined} aria-pressed={storyMode}>{storyMode?'← Normal Chat':'✦ Auto Story'}</button>
         <span className={`chat-runtime ${ready ? 'is-ready' : ''}`} role="status">
           {ready ? gateway?.inference_busy ? '◐ AI busy (in queue)' : gateway?.auto_start_available && !gateway.backend_live_enabled ? '● Starts when you send' : gateway?.on_demand_routes?.includes(model) ? '● Ready on request' : '● Local model ready' : '○ Local model offline'}
         </span>

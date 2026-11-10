@@ -204,17 +204,36 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
   }, []);
 
   React.useEffect(() => {
-    const handleGlobalResume = (e: Event) => {
+    const handleGlobalResume = (e?: Event) => {
       const detail = (e as CustomEvent)?.detail;
       if (!detail || !detail.activity || detail.activity === 'STORY') {
-        void resume();
+        const curr = showRef.current;
+        if (curr && (curr.status === 'parked' || curr.status === 'active' || phaseRef.current === 'paused')) {
+          void resume();
+        }
+      }
+    };
+    const handleHash = () => {
+      if (window.location.hash === '#chat') {
+        handleGlobalResume();
+      }
+    };
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        handleGlobalResume();
       }
     };
     window.addEventListener('prismlab_resume_activity', handleGlobalResume);
     window.addEventListener('prismlab_resume_story', handleGlobalResume);
+    window.addEventListener('prismlab_open_story', handleGlobalResume);
+    window.addEventListener('hashchange', handleHash);
+    document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       window.removeEventListener('prismlab_resume_activity', handleGlobalResume);
       window.removeEventListener('prismlab_resume_story', handleGlobalResume);
+      window.removeEventListener('prismlab_open_story', handleGlobalResume);
+      window.removeEventListener('hashchange', handleHash);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
 
@@ -1415,10 +1434,9 @@ export const AutoStoryShow: React.FC<{ onState: (view: AutoStoryView) => void; o
                     if (item.mode === 'live_local_show' && (item.status === 'parked' || item.status === 'active')) {
                       showRef.current = item;
                       setShow(item);
-                      setPhase('paused');
-                      setMessage(`Story paused at Turn ${getCommittedShowTurnCount(item) + 1} of ${item.turnOrder.length}. Click "Resume" to continue.`);
                       stoppedRef.current = false;
-                      pausedRef.current = true;
+                      pausedRef.current = false;
+                      void resume();
                     } else {
                       replay(item);
                     }
