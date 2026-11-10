@@ -184,11 +184,12 @@ def runtime_specs() -> list[RuntimeSpec]:
         command = (
             str(executable), "-m", str(model), "--mmproj", str(projector),
             "--alias", alias, "--host", "127.0.0.1", "--port", str(model_port),
-            "-c", str(context), *acceleration_flags(executable),
+            "-c", str(min(1536, context)), *acceleration_flags(executable),
             "-t", str(threads), "-tb", str(threads),
             "--parallel", "1", "--no-reasoning-preserve",
             "--reasoning", "off", "--reasoning-budget", "0",
-            "--cache-reuse", "256",
+            "--cache-reuse", "64",
+            "-ctk", "q8_0", "-ctv", "q8_0",
         )
         if key in {"d1", "d1_omni"}:
             batch = "4096" if key == "d1_omni" else "2048"

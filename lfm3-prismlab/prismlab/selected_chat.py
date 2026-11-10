@@ -80,7 +80,7 @@ def execute_selected(request: PrismRequest, manager, model: str, *, auto_start: 
         endpoint = "/v1/systemone"
     else:
         parts = media + ([{"type": "text", "text": request.text.strip()}] if request.text.strip() else [])
-        token_limit = max_tokens or 96
+        token_limit = max_tokens or 48
         payload = {
             "model": spec.model_id,
             "temperature": 0.1,

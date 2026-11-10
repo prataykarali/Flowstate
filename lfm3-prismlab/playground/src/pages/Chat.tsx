@@ -298,7 +298,7 @@ export const Chat: React.FC = () => {
         else setStreamStatus(update.message);
       };
       const result: LiveResult = model === 'text'
-        ? await generateTextStream(built!.prompt, onStream, 80)
+        ? await generateTextStream(built!.prompt, onStream, 48)
         : (model === 'd1' || model === 'd1_omni')
         ? await executeLocal({
             model,
@@ -309,7 +309,7 @@ export const Chat: React.FC = () => {
             video: activeVideo ? await readMedia(activeVideo, 'video') : undefined,
             required_media: selectedMedia.length ? selectedMedia : undefined,
             decision_question: parsedDecision?.question,
-            max_tokens: 48,
+            max_tokens: 36,
           })
         : await executeLocalStream({
             model,
@@ -319,7 +319,7 @@ export const Chat: React.FC = () => {
             audio: activeAudio ? await readMedia(activeAudio, 'audio') : undefined,
             video: activeVideo ? await readMedia(activeVideo, 'video') : undefined,
             required_media: selectedMedia.length ? selectedMedia : undefined,
-            max_tokens: 80,
+            max_tokens: 48,
           }, onStream);
       if (result.status === 'completed' && result.output != null) {
         const rawOutput = typeof result.output === 'object' ? JSON.stringify(result.output, null, 2) : outputText(result.output).trim();

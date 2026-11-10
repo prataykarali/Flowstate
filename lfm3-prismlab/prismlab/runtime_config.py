@@ -91,11 +91,12 @@ class TextRuntimeConfig:
         command = (
             str(self.executable), "-m", str(self.model_path),
             "--alias", self.model_id, "--host", parsed.hostname or "127.0.0.1", "--port", str(parsed.port),
-            "-c", str(self.context_size), *acceleration_flags(self.executable), "-t", str(self.cpu_threads),
+            "-c", str(min(1536, self.context_size)), *acceleration_flags(self.executable), "-t", str(self.cpu_threads),
             "-tb", str(self.cpu_threads), "-b", "2048", "-ub", "512",
             "--parallel", str(self.max_concurrency), "--no-reasoning-preserve",
             "--reasoning", "off", "--reasoning-budget", "0",
-            "--cache-reuse", "256",
+            "--cache-reuse", "64",
+            "-ctk", "q8_0", "-ctv", "q8_0",
             "--cors-origins", "http://127.0.0.1:8000",
         )
         if self.auth_key_file:

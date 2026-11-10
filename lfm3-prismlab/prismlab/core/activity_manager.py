@@ -409,9 +409,13 @@ class ActivitySessionManager:
                     return False, "ACTIVE_ACTIVITY_CONFLICT", active
 
             # Request provided NO activity_session_id
-            # If active activity is STORY or TRIVIA, reject arbitrary unlinked requests
+            # If active activity is STORY or TRIVIA:
             if active.activity_type in {"STORY", "TRIVIA"}:
-                return False, "ACTIVE_ACTIVITY_CONFLICT", active
+                if active.current_job_id:
+                    return False, "ACTIVE_ACTIVITY_CONFLICT", active
+                # Idle background game turn finished: auto-park so user can chat freely without being locked out
+                self.park_activity(visitor_id, active.session_id)
+                return True, None, None
 
             # Active CHAT allows casual continuation
             active.expires_at = now + DEFAULT_LEASE_TTL_S

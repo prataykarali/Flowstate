@@ -451,7 +451,7 @@ export function contestantRequest(modelId: CanonicalModelId, question: LiveQuest
     };
   }
   const prompt = `Choose the single best option (A, B, C, or D).\nQuestion: ${question.question}\nA: ${question.options.A}\nB: ${question.options.B}\nC: ${question.options.C}\nD: ${question.options.D}\nAnswer (single capital letter only):`;
-  return { task: 'chat' as const, model: modelId, prompt: prompt.slice(0, 1000), max_tokens: 32 };
+  return { task: 'chat' as const, model: modelId, prompt: prompt.slice(0, 1000), max_tokens: 12 };
 }
 
 export async function generateQuestion(
@@ -467,12 +467,12 @@ export async function generateQuestion(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     if (shouldContinue && !shouldContinue()) break;
     try {
-      // Budgeted for fast generation (30-55 tokens, 3-5s latency target)
+      // Budgeted for fast generation (30-50 tokens, ~3.5s latency target)
       const result = await executeLocal({
         task: 'chat',
         model: hostId,
         prompt: hostPrompt(topic, difficulty, previous, attempt ? lastError : ''),
-        max_tokens: 100,
+        max_tokens: 52,
         response_format: { type: 'json_object' },
         activity_session_id: matchId,
       });
