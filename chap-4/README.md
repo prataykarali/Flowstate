@@ -38,6 +38,12 @@ For the autonomous linear recurrence:
 - **`ρ(A) > 1`** — at least some initial states lead to unbounded growth.
 - **`ρ(A) = 1`** — a boundary case; boundedness requires additional analysis.
 
+The four illustrative cases below show how a state component decays, persists, alternates in sign, or grows under repeated transitions.
+
+![Four linear state trajectories: decay, persistence, damped sign alternation, and instability](plots/stability_cases.png)
+
+*Figure 1. Qualitative stability regimes and their spectral radii, computed from diagonal transition matrices.*
+
 ### Continuous-time dynamics
 
 A simple decay process is described by
@@ -78,6 +84,10 @@ the recurrence produces `h1 = [9.2, 4.0]`, `h2 = [8.16, 2.92]`, and `h10 ≈ [2.
 
 Changing only `A[0,0]` from `0.8` to `1.2` gives `h10 ≈ [87.17267, 11.98520]` and spectral radius approximately **1.2275**. Both components ultimately grow for this initial state, illustrating how coupled systems can behave differently from what an individual diagonal coefficient might suggest.
 
+![Stable and unstable two-component recurrent-state trajectories](plots/coupled_dynamics.png)
+
+*Figure 2. Matched initial states, with only the first diagonal coefficient changed between runs.*
+
 ### Input-driven state propagation
 
 With
@@ -101,6 +111,10 @@ the state follows
 | 5 | 0.6970 | 0.1351 |
 
 Although no further inputs arrive after step 1, the hidden state continues to evolve. The second component crosses zero because the first component supplies a positive cross-state contribution.
+
+![Two hidden-state components responding to a single input pulse](plots/input_memory.png)
+
+*Figure 3. The first input changes the hidden state; subsequent zero-input steps still propagate its influence through the recurrent transition matrix.*
 
 ## Running the examples
 
