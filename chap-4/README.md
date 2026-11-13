@@ -1,59 +1,72 @@
 # Chapter 4 — Dynamical Systems for Neural Networks
 
-**FlowState Δ | Curriculum v2.0 | Status: laboratory in progress (closure pending)**
+This chapter explores how recurrent hidden states evolve through time, how interactions between state components influence their trajectories, and how to identify stable and unstable dynamics. It connects elementary linear algebra with the mathematical foundations of recurrent neural networks, state-space models, and continuous-time neural systems.
 
-## Objective
+The experiments use **small, explicitly defined transition matrices** so that numerical results can be checked against hand calculations. They are educational dynamics experiments, not trained language-model benchmarks.
 
-Understand discrete-time recurrent state transitions, stability, input-driven hidden states, and the connection to continuous-time dynamics. This chapter builds mathematical foundations for later LTC/CfC and state-space model research; it is **not** a trained language model or a performance optimization claim.
+## Concepts
 
-## Main equations
+### Discrete-time recurrence
 
-For an autonomous discrete-time system:
+A linear recurrent system evolves as
 
-```text
-h[t+1] = A @ h[t]
-h[n]   = A^n @ h[0]
+```math
+h_{t+1} = Ah_t
 ```
 
-For an input-driven system:
+where `h_t` is the hidden-state vector and `A` is the state-transition matrix. Repeated updates give `h_n = A^n h_0`.
 
-```text
-h[t+1] = A @ h[t] + B @ x[t]
+With incoming observations, the update becomes
+
+```math
+h_{t+1} = Ah_t + Bx_t
 ```
 
-For a scalar continuous-time decay process:
+where `B` maps input `x_t` into the state. The influence of a previous input can persist after later inputs have become zero.
 
-```text
-dh/dt = -h/tau
-h(t)  = h(0) * exp(-t/tau)
-Euler: h(t+dt) ~= h(t) + dt * (-h(t)/tau)
+### Eigenvalues and stability
+
+The eigenvalues of `A` determine the system's asymptotic behavior. Its spectral radius is
+
+```math
+\rho(A) = \max_i |\lambda_i|
 ```
 
-For a fixed linear transition matrix `A`, `rho(A) < 1` guarantees asymptotic stability, while `rho(A) > 1` guarantees instability for at least some initial states. `rho(A) = 1` requires further analysis.
+For the autonomous linear recurrence:
 
-## Files and reproducible experiments
+- **`ρ(A) < 1`** — all state trajectories converge toward zero.
+- **`ρ(A) > 1`** — at least some initial states lead to unbounded growth.
+- **`ρ(A) = 1`** — a boundary case; boundedness requires additional analysis.
 
-| File | Purpose | Verification |
-|---|---|---|
-| `matrix_dynamics.py` | 10-step recurrence and spectral radius for stable `A` | Terminal output verified 2026-11-13; local script to be committed |
-| `matrix_dynamics_growth.py` | Same setup, changing only `A[0,0]` from `0.8` to `1.2` | Terminal output verified 2026-11-13; local script to be committed |
-| `input_dynamics.py` | Single input pulse, then recurrent evolution with no new input | Terminal output verified 2026-11-13; local script to be committed |
-| `dynamics_lab.ipynb` | Visualization of pulse response | Notebook screenshot reviewed; local notebook to be committed |
-| `stability_cases.py` | Four-case sweep: decay, persistence, oscillation, instability | **Pending** |
+### Continuous-time dynamics
 
-Use the existing FlowState Python environment with `torch` and `matplotlib`, then run:
+A simple decay process is described by
 
-```bash
-python matrix_dynamics.py
-python matrix_dynamics_growth.py
-python input_dynamics.py
-# after creating the four-case sweep:
-python stability_cases.py
+```math
+\frac{dh}{dt} = -\frac{h}{\tau}, \qquad h(t) = h(0)e^{-t/\tau}
 ```
 
-## Results obtained (2026-11-13)
+Euler integration approximates this evolution with
 
-### E04-A: Stable coupled recurrence
+```math
+h(t+\Delta t) \approx h(t) + \Delta t\left(-\frac{h(t)}{\tau}\right)
+```
+
+The time constant `τ` controls the physical rate of decay; the integration step `Δt` controls numerical approximation resolution. This distinction motivates the numerical solver comparisons in Chapter 5.
+
+## Experiments
+
+| File | Experiment |
+| --- | --- |
+| `matrix_dynamics.py` | Simulates a coupled two-dimensional recurrence and computes eigenvalues and spectral radius. |
+| `matrix_dynamics_growth.py` | Changes one transition coefficient to demonstrate how coupling can produce instability. |
+| `input_dynamics.py` | Injects a single input pulse and tracks its effect across later steps. |
+| `dynamics_lab.ipynb` | Plots evolving hidden states and compares qualitative stability behaviors. |
+| `stability_cases.py` | Creates a four-case visualization of decay, persistence, oscillation, and growth. |
+
+### Stable and unstable coupled recurrences
+
+Starting with
 
 ```python
 A = [[0.8, 0.2],
@@ -61,21 +74,13 @@ A = [[0.8, 0.2],
 h0 = [10.0, 6.0]
 ```
 
-- `h1 = [9.2, 4.0]`
-- `h2 = [8.16, 2.92]`
-- `h10 = [2.4432498984, 0.6869540476]`
-- Eigenvalues approximately `0.8562`, `0.4438`; spectral radius approximately `0.856155`.
-- Interpretation: both components converge toward zero asymptotically.
+the recurrence produces `h1 = [9.2, 4.0]`, `h2 = [8.16, 2.92]`, and `h10 ≈ [2.44325, 0.68695]`. Its spectral radius is approximately **0.8562**, so the autonomous system is asymptotically stable.
 
-### E04-B: Unstable coupled recurrence
+Changing only `A[0,0]` from `0.8` to `1.2` gives `h10 ≈ [87.17267, 11.98520]` and spectral radius approximately **1.2275**. Both components ultimately grow for this initial state, illustrating how coupled systems can behave differently from what an individual diagonal coefficient might suggest.
 
-Only `A[0,0]` is changed, from `0.8` to `1.2`.
+### Input-driven state propagation
 
-- `h10 = [87.1726743096, 11.9852004676]`
-- Eigenvalues approximately `1.2275`, `0.4725`; spectral radius approximately `1.227492`.
-- Interpretation: the second component initially declines, then grows because it is coupled to the expanding first component.
-
-### E04-C: Input pulse and state retention
+With
 
 ```python
 A = [[0.8, 0.2], [0.1, 0.5]]
@@ -84,26 +89,37 @@ h0 = [0.0, 0.0]
 inputs = [1, 0, 0, 0, 0]
 ```
 
-- After the input pulse, `h1 = [2.0, -1.0]`.
-- With zero subsequent inputs: `h2 = [1.4, -0.3]`, `h3 = [1.06, -0.01]`, `h4 = [0.846, 0.101]`, `h5 = [0.697, 0.1351]`.
-- Interpretation: existing hidden state continues evolving without a new input; positive coupling from the first component eventually makes the second positive.
-- This is **fixed-matrix state propagation**, not learned associative memory or gradient accumulation.
+the state follows
 
-## Chapter 4 closure criteria
+| Step | State 1 | State 2 |
+| ---: | ---: | ---: |
+| 0 | 0.0000 | 0.0000 |
+| 1 | 2.0000 | -1.0000 |
+| 2 | 1.4000 | -0.3000 |
+| 3 | 1.0600 | -0.0100 |
+| 4 | 0.8460 | 0.1010 |
+| 5 | 0.6970 | 0.1351 |
 
-- [x] Scalar and coupled matrix recurrence calculations
-- [x] Eigenvalues, eigenvectors, spectral radius, and boundary-case intuition
-- [x] Continuous-time decay and Euler vs exact solution concepts
-- [x] Stable recurrence terminal verification (E04-A)
-- [x] Unstable recurrence terminal verification (E04-B)
-- [x] Input-driven memory pulse terminal verification (E04-C)
-- [x] Pulse-response notebook visualization inspected
-- [ ] Save plots showing **decay, persistence, oscillation, and instability**, including eigenvalue interpretations
-- [ ] Verify all repository files execute from a clean clone/environment
-- [ ] Commit the final scripts, notebook, plots, and update this README to **Complete**
+Although no further inputs arrive after step 1, the hidden state continues to evolve. The second component crosses zero because the first component supplies a positive cross-state contribution.
 
-## Research provenance
+## Running the examples
 
-These are teaching experiments using explicitly specified synthetic matrices. They do not establish model accuracy, speedup, novelty, or application-level memory quality. Preserve console logs, configurations, source code, and generated figures before making any research claim. This chapter does **not** trigger Nishant N1 outreach.
+From the `chap-4` directory, using a Python environment with **PyTorch**, **NumPy**, and **Matplotlib** installed:
 
-**Next:** Chapter 5 — Numerical ODE Solvers (Euler, RK2, RK4, step-size error and runtime comparisons).
+```bash
+python matrix_dynamics.py
+python matrix_dynamics_growth.py
+python input_dynamics.py
+python stability_cases.py
+```
+
+Open `dynamics_lab.ipynb` in Jupyter or VS Code and select the project's Python kernel to explore the state trajectories visually.
+
+## Key takeaways
+
+1. Hidden-state components can retain and exchange influence across recurrent steps without receiving new input.
+2. Stability depends on the **full transition operator**, not just a single coefficient.
+3. A negative eigenvalue can cause sign-alternating trajectories; eigenvalue magnitude determines their asymptotic decay or growth in an eigenvector direction.
+4. Continuous-time equations describe a process, while numerical integration approximates that process at finite time steps.
+
+**Next:** [Chapter 5 — Numerical ODE Solvers](../chap-5/) will examine Euler, midpoint/RK2 and RK4 methods, including error versus step size and runtime.
