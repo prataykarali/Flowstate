@@ -30,13 +30,39 @@ PrismLab's exploratory observations may inform future FlowState experiments. Its
 
 **Important scope distinction:** these chapters establish understanding and reproducible examples. They do not yet constitute a new competitive language-model architecture or publication-grade model comparison.
 
-## Evidence snapshot
+## Chapter highlights — 1 through 6
+
+The examples below are educational, limited-scope measurements. Each chapter's linked files contain the implementation and its specific assumptions.
+
+### Chapter 1 — from-scratch hybrid language model
+
+Implemented a tiny **Qwen3.5-inspired**, but **not architecture-identical**, decoder in PyTorch: byte embeddings (vocabulary 256), **3 GatedDeltaNet-style token-mixing layers + 1 causal grouped-query attention layer**, RMSNorm, SwiGLU and an autoregressive output head. Configuration: hidden dimension 128, four query heads and two shared key/value heads. Shape, gradient and causal-prefix smoke tests were reported.
+
+On **one training sentence** (“A dragon guards a tiny library.”), next-token cross-entropy dropped from **5.6243** at step 0 to **0.0023** at step 200; greedy decoding reproduced the memorized continuation. A novel prompt (“A rabbit”) generated incoherent text. **This is evidence of memorization, not language-model generalization.**
+
+[Chapter 1 methods and limitations](chap-1/README.md) · [Model implementation](chap-1/mini_qwen.py) · [Training script](chap-1/train_hybrid.py) · [Architecture tests](chap-1/test_hybrid.py)
 
 ### Chapter 2 — optimization and associative memory
 
 In a small held-out text experiment (5 seeds, 50 updates), learning rate 0.001 produced a mean validation loss of **0.4083**, compared with **0.5915** for learning rate 0.01. Separate synthetic experiments explored key overlap, fixed-state capacity, orthogonal-key / explicit-slot storage and cosine-gated abstention. Results are specific to the tested setups; see the [full Chapter 2 report](chap-2/README.md).
 
 ![Synthetic memory storage scaling](chap-2/figures/memory_storage.png)
+
+### Chapter 3 — autodiff, Jacobians, JVP/VJP and Hessians
+
+Verified small derivatives against PyTorch autodiff, analytic expectations and finite differences. For `f(x₁,x₂) = x₁² + 3x₁x₂ + 2x₂²` at `x = [1, 2]`, the code checks **gradient [8, 11]** and **Hessian [[2, 3], [3, 4]]**. Central finite differences at `h=1e-3` pass a strict gradient check. Separate examples compare a vector-Jacobian product with explicit matrix multiplication and calculate a Jacobian-vector product.
+
+These are foundational **small-scale correctness exercises**, not evidence of new autodiff algorithms or performance gains. Chapter 3 currently has scripts but no dedicated README/notebook.
+
+[Finite-difference verification](chap-3/finite_diff.py) · [Hessian and eigenvector checks](chap-3/hessian.py) · [VJP verification](chap-3/vector_vjp.py) · [JVP demo](chap-3/jvp.py)
+
+### Chapter 4 — dynamical systems and state stability
+
+Explored `h[t+1] = A h[t] + B x[t]`, connecting state-transition eigenvalues with decay, persistence, alternating signs and instability. In one coupled two-dimensional example, the stable matrix had spectral radius **≈0.8562**; changing a single diagonal coefficient gave a system with spectral radius **≈1.2275** and growing trajectories. An input-pulse experiment also showed that internal state continues evolving after external input becomes zero.
+
+![Stable, persistent, sign-alternating and unstable recurrent state trajectories](chap-4/plots/stability_cases.png)
+
+[Chapter 4 derivations and experiments](chap-4/README.md) · [Executed dynamics lab](chap-4/dynamics_lab.ipynb) · [Coupled-system figure](chap-4/plots/coupled_dynamics.png)
 
 ### Chapter 5 — solver convergence on a controlled ODE
 
