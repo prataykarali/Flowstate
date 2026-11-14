@@ -1,0 +1,193 @@
+{
+  "project": "FlowState \u0394",
+  "chapter": "5.7",
+  "generated_at_utc": "2026-11-14T06:45:31.667635+00:00",
+  "python_version": "3.12.3",
+  "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.39",
+  "equation": "dh/dt = -2h, h(0)=1",
+  "convergence": {
+    "T": 1.0,
+    "dt_values": [
+      0.2,
+      0.1,
+      0.05,
+      0.025,
+      0.0125
+    ],
+    "errors": {
+      "Euler": [
+        0.057575283236612707,
+        0.02796110083661267,
+        0.013758628646043422,
+        0.006823126671509361,
+        0.003397477849709951
+      ],
+      "RK2": [
+        0.010058073563387282,
+        0.002112748099347833,
+        0.00048717426547159604,
+        0.00011714380550750803,
+        2.873183892276865e-05
+      ],
+      "RK4": [
+        8.073139156908327e-05,
+        4.265193897429187e-06,
+        2.4518517804938966e-07,
+        1.4697591449452929e-08,
+        8.996432487862194e-10
+      ]
+    },
+    "empirical_order_last_halving": {
+      "Euler": 1.0059688550262464,
+      "RK2": 2.0275584296976104,
+      "RK4": 4.030082926408832
+    }
+  },
+  "stability_at_T3": [
+    {
+      "dt": 0.1,
+      "solver": "Euler",
+      "R": 0.8,
+      "status": "decays",
+      "final": 0.0012379400392853806,
+      "error": 0.001240812137380978
+    },
+    {
+      "dt": 0.1,
+      "solver": "RK2",
+      "R": 0.8200000000000001,
+      "status": "decays",
+      "final": 0.0025966628912522513,
+      "error": 0.00011791071458589278
+    },
+    {
+      "dt": 0.1,
+      "solver": "RK4",
+      "R": 0.8187333333333334,
+      "status": "decays",
+      "final": 0.002478986543306092,
+      "error": 2.3436663973332855e-07
+    },
+    {
+      "dt": 0.6,
+      "solver": "Euler",
+      "R": -0.19999999999999996,
+      "status": "decays",
+      "final": -0.00031999999999999976,
+      "error": 0.0027987521766663585
+    },
+    {
+      "dt": 0.6,
+      "solver": "RK2",
+      "R": 0.52,
+      "status": "decays",
+      "final": 0.038020403200000004,
+      "error": 0.03554165102333365
+    },
+    {
+      "dt": 0.6,
+      "solver": "RK4",
+      "R": 0.3184,
+      "status": "decays",
+      "final": 0.0032723917969712767,
+      "error": 0.0007936396203049182
+    },
+    {
+      "dt": 1.0,
+      "solver": "Euler",
+      "R": -1.0,
+      "status": "boundary",
+      "final": -1.0,
+      "error": 1.0024787521766663
+    },
+    {
+      "dt": 1.0,
+      "solver": "RK2",
+      "R": 1.0,
+      "status": "boundary",
+      "final": 1.0,
+      "error": 0.9975212478233336
+    },
+    {
+      "dt": 1.0,
+      "solver": "RK4",
+      "R": 0.33333333333333337,
+      "status": "decays",
+      "final": 0.03703703703703706,
+      "error": 0.03455828486037071
+    },
+    {
+      "dt": 1.5,
+      "solver": "Euler",
+      "R": -2.0,
+      "status": "diverges",
+      "final": 4.0,
+      "error": 3.9975212478233337
+    },
+    {
+      "dt": 1.5,
+      "solver": "RK2",
+      "R": 2.5,
+      "status": "diverges",
+      "final": 6.25,
+      "error": 6.247521247823333
+    },
+    {
+      "dt": 1.5,
+      "solver": "RK4",
+      "R": 1.375,
+      "status": "diverges",
+      "final": 1.890625,
+      "error": 1.8881462478233337
+    }
+  ],
+  "equal_nfe_at_T1": [
+    {
+      "solver": "Euler",
+      "dt": 0.05,
+      "steps": 20,
+      "nfe": 20,
+      "estimate": 0.12157665459056928,
+      "abs_error": 0.013758628646043422
+    },
+    {
+      "solver": "RK2",
+      "dt": 0.1,
+      "steps": 10,
+      "nfe": 20,
+      "estimate": 0.13744803133596054,
+      "abs_error": 0.002112748099347833
+    },
+    {
+      "solver": "RK4",
+      "dt": 0.2,
+      "steps": 5,
+      "nfe": 20,
+      "estimate": 0.13541601462818179,
+      "abs_error": 8.073139156908327e-05
+    }
+  ],
+  "runtime_us_per_solve": {
+    "Euler": {
+      "median_us": 8.09871299952647,
+      "min_us": 5.642604500280868,
+      "max_us": 9.478324999690813
+    },
+    "RK2": {
+      "median_us": 6.741663000866538,
+      "min_us": 5.748940000557923,
+      "max_us": 8.182158999261446
+    },
+    "RK4": {
+      "median_us": 5.423526000413403,
+      "min_us": 4.939487000228837,
+      "max_us": 8.754525999393081
+    }
+  },
+  "limitations": [
+    "Single scalar linear ODE; not a neural ODE benchmark",
+    "Fixed-step explicit solvers; no adaptive-step or stiff-ODE tests",
+    "Equal NFE is not equal hardware runtime or energy",
+    "Microsecond Python timings are environment-sensitive"
+  ]
+}
