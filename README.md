@@ -8,6 +8,8 @@ This is a work in progress, **not** a pretrained foundation model or a claim of 
 
 > **Current status (14 November 2026):** Chapters **1–6** have code or experiment artifacts; Chapter 6's introductory LTC-style lab and evidence package are published. Chapter 7 (CfC) is next. Faithful reproduction of published LTC/CfC experiments belongs to Chapter 8.
 
+**Research progress ledger:** [Parallel milestones (C/P/E/B/M/N/W/R/T)](RESEARCH_MILESTONES.md) — current evidence status, paper-reading gates, Nishant N1 trigger and memory-research timing. This is the source of truth for *planned vs actually completed* activities.
+
 ## Start here
 
 | Track | Focus | Entry point |
