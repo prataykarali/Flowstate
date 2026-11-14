@@ -1,180 +1,115 @@
 # FlowState Δ
 
-### A Research-Driven Exploration of Hybrid Language Models, Neural Associative Memory & Efficient Cognitive Systems
+**First-principles research training in recurrent dynamics, efficient sequence models, and reproducible neural-network experiments.**
 
-**FlowState Δ** is an independent, foundational research project investigating the mathematical principles, stateful recurrent dynamics, and memory limits of modern neural architectures.
+FlowState Δ is an independent research and learning project. It starts with mathematical derivations and small PyTorch implementations, then progresses toward testing a focused hypothesis: **can input-varying liquid/state dynamics improve sequence modeling or efficiency under matched model, compute, and evaluation budgets?**
 
-The project emphasizes **first-principles mathematical derivation, component-level implementations in PyTorch, rigorous multi-seed experimental reproducibility, and empirical capacity characterization.**
+This is a work in progress, **not** a pretrained foundation model or a claim of architectural novelty. An educational result is recorded even when a simpler baseline performs better.
 
-Rather than treating deep language models as inscrutable black boxes, FlowState isolates and probes their core computational mechanisms—layer by layer, equation by equation.
+> **Current status (14 November 2026):** Chapters **1–6** have code or experiment artifacts; Chapter 6's introductory LTC-style lab and evidence package are published. Chapter 7 (CfC) is next. Faithful reproduction of published LTC/CfC experiments belongs to Chapter 8.
 
----
+## Start here
 
-## 1. Research Tracks at a Glance
+| Track | Focus | Entry point |
+| --- | --- | --- |
+| **FlowState Δ** | From-scratch architectures, autodiff, dynamical systems, ODE solvers, liquid networks, then state-space / hybrid-model experiments | [Chapter index](#chapter-index) |
+| **PrismLab** *(separate exploratory workbench)* | Quantized local inference, six LFM-family model pathways, modality routing and comparative measurements | [PrismLab README](lfm3-prismlab/README.md) |
 
-The repository hosts two independent, complementary research tracks:
+PrismLab's exploratory observations may inform future FlowState experiments. Its local benchmarks are **not** evidence that a proposed FlowState architecture is more accurate or efficient, and PrismLab does not form part of the numbered curriculum.
 
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        FLOWSTATE REPOSITORY                            │
-├──────────────────────────────────┬─────────────────────────────────────┤
-│      FlowState Δ Track           │          PrismLab Track             │
-│   (Foundational Neural Theory)   │    (Applied Multimodal Systems)     │
-├──────────────────────────────────┼─────────────────────────────────────┤
-│ • Hybrid Recurrent Decoders      │ • Liquid AI (LFM3) Model Family     │
-│ • GatedDeltaNet & Causal GQA     │ • Deterministic Modality Routing    │
-│ • Associative Memory Capacity    │ • Quantized CPU Inference (Q4_0)    │
-│ • Confidence Gating & Noise      │ • Vision-Language OCR Benchmarks    │
-│ • Completed: Chapters 1 & 2      │ • Completed: Phases 1 & 2           │
-│ ➔ Explore: chap-1/ & chap-2/     │ ➔ Explore: lfm3-prismlab/           │
-└──────────────────────────────────┴─────────────────────────────────────┘
+## Chapter index
+
+| Chapter | Focus | Evidence and code | Status |
+| --- | --- | --- | --- |
+| **[01](chap-1/README.md)** | Miniature Qwen3.5-inspired hybrid decoder: recurrent mixing, causal GQA, RMSNorm, SwiGLU | [Model](chap-1/mini_qwen.py) · [Tests](chap-1/test_hybrid.py) | Educational implementation |
+| **[02](chap-2/README.md)** | Research engineering, learning-rate sensitivity, associative memory and confidence gating | [Memory benchmark](chap-2/final_memory_benchmark.ipynb) · [Figures](chap-2/figures/) | Exploratory experiments |
+| **[03](chap-3/)** | Vector calculus, Jacobian/VJP/JVP/Hessian and finite-difference checks | [Gradient checks](chap-3/finite_diff.py) · [Hessian](chap-3/hessian.py) | Educational exercises |
+| **[04](chap-4/README.md)** | Discrete/continuous state dynamics, eigenvalues, persistence and instability | [Dynamics lab](chap-4/dynamics_lab.ipynb) · [Plots](chap-4/plots/) | Educational experiments |
+| **[05](chap-5/README.md)** | Euler, midpoint RK2, RK4; error, stability, function-evaluation cost | [Final lab](chap-5/07_final_lab.ipynb) · [Figures](chap-5/figures/) | Numerical experiments |
+| **[06](chap-6/README.md)** | Scalar LTC-style neuron, BPTT training, EMA baseline and Euler/RK4 stability | [Executed lab](chap-6/FlowState_Ch06_LTC_Lab.ipynb) · [Figures and CSVs](chap-6/chapter6_outputs/) | **Introductory lab complete** |
+
+**Important scope distinction:** these chapters establish understanding and reproducible examples. They do not yet constitute a new competitive language-model architecture or publication-grade model comparison.
+
+## Evidence snapshot
+
+### Chapter 2 — optimization and associative memory
+
+In a small held-out text experiment (5 seeds, 50 updates), learning rate 0.001 produced a mean validation loss of **0.4083**, compared with **0.5915** for learning rate 0.01. Separate synthetic experiments explored key overlap, fixed-state capacity, orthogonal-key / explicit-slot storage and cosine-gated abstention. Results are specific to the tested setups; see the [full Chapter 2 report](chap-2/README.md).
+
+![Synthetic memory storage scaling](chap-2/figures/memory_storage.png)
+
+### Chapter 5 — solver convergence on a controlled ODE
+
+For the smooth scalar decay problem in Chapter 5, observed last-halving global orders were approximately **1.006** (Euler), **2.028** (RK2) and **4.030** (RK4). Accuracy, numerical stability and per-step cost are separate considerations; see the [full methods and caveats](chap-5/README.md).
+
+![ODE solver convergence experiment](chap-5/figures/ch5_convergence.png)
+
+### Chapter 6 — the simpler baseline wins
+
+A **five-parameter scalar LTC-style cell** was trained on an 80-step synthetic pulse sequence generated by a fixed exponential moving average (EMA). It fitted the target and tracked new pulse timings, but a **one-parameter trainable EMA** represented the generating rule almost exactly.
+
+| Model | Parameters | Train MSE | Test MSE |
+| --- | ---: | ---: | ---: |
+| Scalar LTC-style neuron | 5 | 0.00015758 | 0.00014072 |
+| Trainable EMA | 1 | ~6.70e-12 | ~5.51e-12 |
+
+Source: [Chapter 6 machine-readable results](chap-6/chapter6_outputs/summary_metrics.csv). The test pulses change timing, **not** the underlying target law. This is a baseline sanity check, not evidence of LTC superiority or real-world generalization.
+
+![Training error of scalar LTC and one-parameter EMA](chap-6/chapter6_outputs/04_baseline_comparison.png)
+
+The same chapter shows that **a stable continuous-time equation can become numerically unstable under explicit Euler integration** when the time step is too large. In the tested frozen-gate linear problem, Euler diverged at step size 2.5 while RK4 stayed bounded but inaccurate. [Read Chapter 6](chap-6/README.md).
+
+## Research roadmap — curriculum v2.0 (October 2026)
+
+The numbered roadmap follows the **72-chapter FlowState Research Curriculum v2.0**. It is a learning and experimentation sequence, not a claim that all phases have been implemented.
+
+| Phase | Chapters | Subject |
+| --- | --- | --- |
+| 0 | 01–02 | Transformer competency and reproducible research setup |
+| I | 03–08 | Autodiff, dynamical systems, numerical ODEs, LTC, CfC, reproduction |
+| II | 09–15 | SSMs, S4/HiPPO, Mamba, input-varying state dynamics, liquid + LIV |
+| III | 16–21 | Tokenization, local convolutions, state mixing, GQA and hybrid backbone |
+| IV | 22–28 | Tiny LM training, matched baselines, efficiency, long-context evaluation, ablations |
+| V | 29–36 | Vision, audio, multimodal fusion and evaluation |
+| VI | 37–43 | Distillation, continual learning and internal/external memory |
+| VII | 44–51 | Reinforcement learning, preference optimization and reasoning |
+| VIII | 52–60 | Tool interfaces, agent loops, proactivity and action policies |
+| IX | 61–66 | Quantization, native Rust inference, profiling and mobile edge deployment |
+| X | 67–72 | Experimental methodology, literature, thesis writing, reproducible release |
+
+The initial research claim should stay **narrow and falsifiable**. Multimodal, RL, agentic and edge systems are extensions, not prerequisites for every architecture experiment. Research logs, paper reading and reproducibility checks should begin early rather than waiting until Chapter 67.
+
+## Reproduce the learning experiments
+
+The repository contains independent chapter folders rather than a single ready-to-install LLM product. Use a Python environment with the dependencies described in each chapter README, and run the relevant notebook or script from its documented working directory.
+
+For example, for the Chapter 6 lab:
+
+```bash
+cd chap-6
+python ltc_neuron.py
+python ltc_train.py
+python ltc_stability.py
+# Open FlowState_Ch06_LTC_Lab.ipynb in VS Code/Jupyter and Run All
 ```
 
-> **Repository Boundary:** **PrismLab** is an independent applied engineering workbench testing quantized Liquid AI models on local hardware—it is **not** another chapter of the foundational FlowState Δ curriculum.
+The [Chapter 6 notebook](chap-6/FlowState_Ch06_LTC_Lab.ipynb) exports figures and CSV records to [`chapter6_outputs/`](chap-6/chapter6_outputs/). See each chapter's README for dataset, seed, solver and environment caveats.
+
+## PrismLab — related, but separate
+
+[PrismLab](lfm3-prismlab/README.md) is an exploratory local multimodal-inference workbench, with six registered and locally validated model pathways: LFM3-1.7B, LFM3-VL-2B, LFM3-Audio-2B, LFM3-Omni-2B, d1-2B and d1-Omni-2B. Its report documents quantized CPU inference, routing, vision/audio and decision-model tests. Any hosted playground depends on a separately operated local backend; the repository does **not** imply a permanently available inference service.
+
+Liquid AI's **LFM3** model family and the classical **LTC** equation studied in Chapter 6 are not interchangeable architectures. We will inspect published LFM model components separately when relevant to later backbone, multimodal and edge studies.
+
+## Research integrity
+
+- Record assumptions, exact code, seeds, metrics, artifacts and negative results. Distinguish measurement from interpretation.
+- Compare against the **simplest strong baseline** before claiming a gain; match budgets as closely as feasible.
+- Do not generalize synthetic one-seed experiments to full-scale foundation models or edge-device efficiency.
+- No commercial affiliation with Liquid AI, Qwen/Alibaba, or authors of the referenced architectures is implied.
+
+**Reading:** [Hasani et al., *Liquid Time-constant Networks*](https://arxiv.org/abs/2006.04439) · [Hasani et al., *Closed-form Continuous-time Neural Networks*](https://www.nature.com/articles/s42256-022-00556-7) · [S4](https://arxiv.org/abs/2111.00396) · [Mamba](https://arxiv.org/abs/2312.00752).
 
 ---
 
-## 2. Completed Research Chapters
-
-| Chapter | Topic | Status | Key Artifacts | Notebooks & Code |
-| :--- | :--- | :---: | :--- | :--- |
-| **[Chapter 1](chap-1/README.md)** | Miniature Qwen3.5-inspired Hybrid Decoder from Scratch | **Completed** | Full PyTorch Hybrid LM, SwiGLU, RMSNorm, Causal GQA | [`mini_qwen.py`](chap-1/mini_qwen.py)<br>[`train_hybrid.py`](chap-1/train_hybrid.py) |
-| **[Chapter 2](chap-2/README.md)** | Reproducibility, Optimization & Associative Memory | **Completed** | 5-Seed Validation, Capacity Benchmarks, Confidence Gate | [`associative_memory_A.ipynb`](chap-2/associative_memory_A.ipynb)<br>[`final_memory_benchmark.ipynb`](chap-2/final_memory_benchmark.ipynb) |
-
----
-
-### Chapter 1 — Hybrid Decoder Foundations
-
-Chapter 1 implemented an educational decoder-only language model combining **GatedDeltaNet-style recurrent token mixing** with **causal Grouped Query Attention (GQA)** in PyTorch.
-
-**Core Mathematical Pipeline:**
-$$\text{Tokens} \xrightarrow{\text{Byte Embedding}} \left[ 3 \times \text{GatedDeltaNet Blocks} \right] \xrightarrow{} \left[ 1 \times \text{GQA Block} \right] \xrightarrow{\text{RMSNorm}} \text{Linear Head} \xrightarrow{} \text{Logits}$$
-
-- **GatedDeltaNet Recurrence:** Implements delta-rule associative state updates with learned input and decay gating:
-  $$S_t = \alpha_t S_{t-1} + \beta_t (v_t - S_{t-1} k_t) k_t^T$$
-- **Grouped Query Attention (GQA):** 4 query heads sharing 2 key/value heads (head dimension 32), providing an efficient causal attention baseline.
-- **Verification:** Unit tests confirm strict lower-triangular causal masking and non-zero gradient backpropagation across all layers (`chap-1/test_hybrid.py`).
-
-[Explore Chapter 1 Documentation](chap-1/README.md)
-
----
-
-### Chapter 2 — Experimental Foundations & Associative Memory
-
-Chapter 2 moved from architectural construction to empirical characterization, investigating learning rate optimization, recurrent associative memory capacity, cross-key interference, and noisy-query retrieval.
-
-[Explore Chapter 2 Documentation](chap-2/README.md)
-
----
-
-## 3. Chapter 2 Research Highlights (Verified Measurements)
-
-All findings are derived directly from committed experimental JSON records (`chap-2/results/`):
-
-1. **Learning-Rate Sensitivity Across Multi-Seed Trials:**
-   - Over 5 random initialization seeds and 50 training updates on held-out text, **$\text{LR}=0.001$** converged to a mean validation loss of **$0.4083 \pm 0.041$**, whereas **$\text{LR}=0.01$** produced severe underfitting and divergence with a mean loss of **$0.5915 \pm 0.089$** (`chap-2/results/lr_validation_50steps.json`).
-2. **Associative Memory Capacity & Scaling (1 to 100 Associations):**
-   - **Fixed 2D Recurrent Matrix:** Demonstrates strictly constant memory footprint (**36 raw payload bytes** from 1 to 100 associations), but experiences severe cross-key retrieval interference as overlapping key vectors are written.
-   - **Orthogonal Matrix & Explicit Slots:** Eliminate retrieval interference under ideal indexing, but require linearly growing storage (**1,200 bytes** at 100 associations) and $N$ mutually orthogonal key dimensions (`chap-2/results/chapter2_memory_benchmark.json`).
-3. **Variable-Dimensional Payload Storage:**
-   - Evaluated storing differently-sized feature vectors under a single entity key: dynamic tensor storage required **64 bytes** vs. padded fixed-width storage requiring **96 bytes** (+ 24 bytes length metadata = **120 bytes**).
-4. **Confidence-Gated Abstention Under Gaussian Query Noise:**
-   - When queries are degraded by synthetic Gaussian noise ($q_{\text{noisy}} = q + \sigma \epsilon$), linear retrieval error rises from $L_2 = 0.00$ ($\sigma=0$) to $L_2 = 1.77$ ($\sigma=1.0$).
-   - Introducing a cosine-similarity gate ($\tau = 0.80$) allows the memory system to abstain on ambiguous queries. Under severe noise ($\sigma=1.0$), the gate rejects **54.83%** of queries (coverage: **45.17%**), boosting accepted-query accuracy from **64.5%** (ungated) to **73.80%**.
-
----
-
-## 4. Research Visualizations
-
-The following figures illustrate the primary empirical findings of Chapter 2:
-
-### Memory Storage Scaling
-![Memory Storage Scaling](chap-2/figures/memory_storage.png)
-
-**Figure 1:** Raw numerical payload byte scaling as stored associations increase from 1 to 100. The fixed-size recurrent state maintains a constant 36-byte footprint, whereas orthogonal matrices and explicit vector slots scale linearly to 1,200 bytes. Key materialization overhead is excluded.
-
----
-
-### Memory Interference Scaling
-![Memory Interference Scaling](chap-2/figures/memory_inference.png)
-
-**Figure 2:** Mean $L_2$ retrieval error progression across 1 to 100 stored associations. The fixed-size matrix suffers progressive interference as key directions overlap, while the idealized expanding orthogonal and explicit-slot baselines preserve target vectors exactly.
-
----
-
-### Retrieval Fidelity Under Gaussian Query Noise
-![Noisy Query Retrieval](chap-2/figures/noisy_retrieval.png)
-
-**Figure 3:** Impact of synthetic Gaussian query noise ($\sigma \in [0.0, 1.0]$) across 600 trials. Direct linear matrix reads exhibit monotonic $L_2$ degradation due to coefficient mixing. Hard row selection and indexed slots maintain exact retrieval until noise causes a false winner.
-
----
-
-### Cosine Confidence Gating & Abstention Trade-off
-![Confidence Gating](chap-2/figures/confidence_gate.png)
-
-**Figure 4:** Empirical coverage–accuracy trade-off under cosine similarity thresholding ($\tau = 0.80$). As noise increases, the gate abstains more frequently; accepted accuracy significantly exceeds ungated accuracy, demonstrating that refusal improves retrieval reliability.
-
----
-
-## 5. Independent Experimental Workbench: PrismLab
-
-Located in [`lfm3-prismlab/`](lfm3-prismlab/README.md), **PrismLab** evaluates Liquid AI's quantized models under local CPU inference:
-
-- **Phase 1 (Complete):** Deterministic 6-model capability router and standard-library Python HTTP client for `LFM3-1.7B` on `llama-server`.
-- **Phase 2 (Complete):** `LFM3-VL-2B` vision-language integration, resolution ablation, and a 10-image synthetic OCR evaluation suite:
-  - *Direct VL:* **10 / 10 exact matches (100%)**, median latency **38.53 s**.
-  - *Sequential Pipeline (VL OCR $\to$ Text):* **9 / 10 exact matches (90%)**, median latency **65.72 s**.
-- **Phase 3 (Planned):** Audio understanding and speech transcription with `LFM3-Audio-2B`.
-
-[Explore PrismLab Documentation](lfm3-prismlab/README.md)
-
----
-
-## 6. Long-Term 72-Chapter Research Roadmap
-
-FlowState Δ is structured as a progressive 72-chapter research curriculum exploring the transition from static Transformer decoders to dynamic, memory-augmented cognitive architectures:
-
-```text
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                           FLOWSTATE Δ 72-CHAPTER ROADMAP                         │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 1: Mathematical & Recurrent Foundations (Chapters 01 – 12)                  │
-│ • [Ch 01] Miniature Hybrid Recurrent Decoder (GatedDeltaNet + GQA) [COMPLETE]   │
-│ • [Ch 02] Reproducibility, Optimization & Associative Memory Capacity [COMPLETE] │
-│ • [Ch 03 – 06] State Tracking, Multi-Scale Decay & Recurrent State Topologies     │
-│ • [Ch 07 – 12] Causal Attention Compaction & Chunkwise Recurrence Dynamics       │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 2: Neural Memory & Continual Learning Dynamics (Chapters 13 – 24)           │
-│ • Dynamic Key-Value Compaction, Fast/Slow Weight Separation, Episodic Retrieval  │
-│ • Overwriting Dynamics, Catastrophic Forgetting Mitigations, Elastic Memory      │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 3: Continuous-Time & Liquid Neural Systems (Chapters 25 – 36)               │
-│ • Liquid Time-Constant (LTC) Networks, Neural ODEs, Adaptive Time-Stepping       │
-│ • Closed-Form Continuous-Time (CfC) Models, Non-linear State Transitions         │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 4: State-Space Models & Long-Sequence Dynamics (Chapters 37 – 48)           │
-│ • Structured State Spaces (S4), Selective SSMs (Mamba), HiPPO Orthogonal Proj.   │
-│ • Convolutional-Recurrent Dualities, Hardware-Aware Associative Scan Algorithms  │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 5: Efficiency, Quantization & Edge Systems (Chapters 49 – 60)               │
-│ • Extreme Quantization (1-bit / 2-bit Ternary Weights), KV Cache Compression     │
-│ • Sparse Linear Attention, Speculative Decoding, Kernel-Fused Recurrent Decoders │
-├──────────────────────────────────────────────────────────────────────────────────┤
-│ Tier 6: Unified Cognitive Architectures & Autonomous Agents (Chapters 61 – 72)   │
-│ • Multi-Agent Recurrent Communication, Working Memory Buffering, Self-Correction │
-│ • Hierarchical Planning Decoders, First-Principles Meta-Learning Architectures   │
-└──────────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 7. Research Integrity & Open Science
-
-- **Educational & Hypothesis-Driven:** Implementations inspired by published models (such as Qwen3.5 or Liquid LFM) are built from first principles for mechanistic understanding. Small-scale experiments are never presented as claims of superiority over production LLMs.
-- **Deterministic & Traceable:** All reported metrics correspond to reproducible JSON/CSV logs stored in this repository.
-- **Independence:** FlowState Δ is an independent personal research initiative with no commercial affiliation with Liquid AI, Qwen/Alibaba, or other model providers.
-
----
-
-**Author:** [Pratay Karali](https://github.com/prataykarali)  
-**Status:** Chapters 1 & 2 Complete · PrismLab P1 & P2 Complete · October 2026
+**Maintainer:** [Pratay Karali](https://github.com/prataykarali) · **Repository status:** active foundational study and experiment tracking.
