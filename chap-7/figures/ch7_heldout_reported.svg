@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-label="Reported held-out MSE TinyCfC versus constant baseline">
+<rect width="760" height="360" fill="#fcfcfd"/><text x="42" y="50" font-size="23" font-weight="700" fill="#16253b">Chapter 7: held-out evaluation</text>
+<text x="42" y="78" font-size="14" fill="#516278">One 8-step synthetic sequence · lower MSE is better</text>
+<line x1="102" y1="271" x2="703" y2="271" stroke="#9bacbf" stroke-width="1.5"/>
+<rect x="174" y="118" width="144" height="153" rx="5" fill="#3475b6"/>
+<rect x="430" y="120" width="144" height="151" rx="5" fill="#7e8da0"/>
+<text x="246" y="108" font-size="21" fill="#203553" text-anchor="middle" font-weight="700">0.062069</text>
+<text x="502" y="110" font-size="21" fill="#203553" text-anchor="middle" font-weight="700">0.061110</text>
+<text x="246" y="296" font-size="16" text-anchor="middle" fill="#23344a">TinyCfC</text>
+<text x="502" y="296" font-size="16" text-anchor="middle" fill="#23344a">Training-mean baseline</text>
+<text x="42" y="335" font-size="12" fill="#64748b">Previously reported values; not re-executed to produce this SVG. No multi-seed evidence.</text></svg>

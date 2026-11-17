@@ -6,7 +6,7 @@ FlowState Δ is an independent research and learning project. It starts with mat
 
 This is a work in progress, **not** a pretrained foundation model or a claim of architectural novelty. An educational result is recorded even when a simpler baseline performs better.
 
-> **Current status (14 November 2026):** Chapters **1–6** have code or experiment artifacts; Chapter 6's introductory LTC-style lab and evidence package are published. Chapter 7 (CfC) is next. Faithful reproduction of published LTC/CfC experiments belongs to Chapter 8.
+> **Current status (17 November 2026):** Chapters **1–7** have introductory educational code or experiment artifacts. Chapter 7 CfC-style lab, notebook, reported figures and provenance-labeled comparison have been documented. Faithful LTC/CfC reproduction, controlled multi-seed comparisons and accuracy/compute budgeting belong to Chapter 8.
 
 **Research progress ledger:** [Parallel milestones (C/P/E/B/M/N/W/R/T)](RESEARCH_MILESTONES.md) — current evidence status, paper-reading gates, Nishant N1 trigger and memory-research timing. This is the source of truth for *planned vs actually completed* activities.
 
@@ -29,10 +29,11 @@ PrismLab's exploratory observations may inform future FlowState experiments. Its
 | **[04](chap-4/README.md)** | Discrete/continuous state dynamics, eigenvalues, persistence and instability | [Dynamics lab](chap-4/dynamics_lab.ipynb) · [Plots](chap-4/plots/) | Educational experiments |
 | **[05](chap-5/README.md)** | Euler, midpoint RK2, RK4; error, stability, function-evaluation cost | [Final lab](chap-5/07_final_lab.ipynb) · [Figures](chap-5/figures/) | Numerical experiments |
 | **[06](chap-6/README.md)** | Scalar LTC-style neuron, BPTT training, EMA baseline and Euler/RK4 stability | [Executed lab](chap-6/FlowState_Ch06_LTC_Lab.ipynb) · [Figures and CSVs](chap-6/chapter6_outputs/) | **Introductory lab complete** |
+| **[07](chap-7/README.md)** | CfC-style gated state update, analytic targets, held-out loss and reported Ch1-adapted comparison | [New notebook](chap-7/FlowState_Ch07_CfC_Lab.ipynb) · [Comparison script](chap-7/compare_ch1_ch7.py) · [Figures](chap-7/figures/) | **Introductory lab complete; comparisons exploratory** |
 
 **Important scope distinction:** these chapters establish understanding and reproducible examples. They do not yet constitute a new competitive language-model architecture or publication-grade model comparison.
 
-## Chapter highlights — 1 through 6
+## Chapter highlights — 1 through 7
 
 The examples below are educational, limited-scope measurements. Each chapter's linked files contain the implementation and its specific assumptions.
 
@@ -87,6 +88,16 @@ Source: [Chapter 6 machine-readable results](chap-6/chapter6_outputs/summary_met
 
 The same chapter shows that **a stable continuous-time equation can become numerically unstable under explicit Euler integration** when the time step is too large. In the tested frozen-gate linear problem, Euler diverged at step size 2.5 while RK4 stayed bounded but inaccurate. [Read Chapter 6](chap-6/README.md).
 
+### Chapter 7 — CfC-style gating and an honest held-out test
+
+A 305-parameter TinyCfC-inspired sequence model implemented a learned time-gated recurrence and was trained on a six-point analytical synthetic sequence. Student-reported training MSE was **0.000173**, but its eight-step held-out MSE (**0.062069**) was slightly worse than the constant training-mean baseline (**0.061110**). This is a small, preliminary negative generalization result, not a faithful published CfC reproduction.
+
+![Reported Chapter 7 held-out model and constant baseline MSE](chap-7/figures/ch7_heldout_reported.svg)
+
+An earlier **local, uncommitted** Chapter 1-adapted vs Chapter 7 synthetic experiment was reported in chat; its numbers are preserved as a provenance-labelled summary, while a **new**, separately identified comparison script offers fresh, runnable experiments. The adapted models are not parameter/compute matched: do **not** interpret this as architecture superiority.
+
+[Chapter 7 methods, evidence and limitations](chap-7/README.md) · [Notebook](chap-7/FlowState_Ch07_CfC_Lab.ipynb) · [Reconstructed reported comparison](chap-7/results/ch1_ch7_reported_summary.csv)
+
 ## Research roadmap — curriculum v2.0 (October 2026)
 
 The numbered roadmap follows the **72-chapter FlowState Research Curriculum v2.0**. It is a learning and experimentation sequence, not a claim that all phases have been implemented.
@@ -122,6 +133,8 @@ python ltc_stability.py
 ```
 
 The [Chapter 6 notebook](chap-6/FlowState_Ch06_LTC_Lab.ipynb) exports figures and CSV records to [`chapter6_outputs/`](chap-6/chapter6_outputs/). See each chapter's README for dataset, seed, solver and environment caveats.
+
+For Chapter 7: `cd chap-7 && python cfc_cell.py && python temporal_target.py && python train_cfc.py`; then Run All in [the Chapter 7 notebook](chap-7/FlowState_Ch07_CfC_Lab.ipynb). For the independent synthetic Ch1-adapted comparison run `python chap-7/compare_ch1_ch7.py` **from the repository root**. Fresh outputs are produced only when those programs are executed.
 
 ## PrismLab — related, but separate
 

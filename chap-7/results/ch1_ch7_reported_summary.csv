@@ -1,0 +1,5 @@
+experiment,train_sequences,validation_sequences,test_sequences,steps_per_sequence,epochs,model,reported_parameters,reported_test_mse,provenance
+nov15_small,96,24,24,,8,Chapter7_TinyCfC,305,0.018835,prior_conversation_report_not_reverified
+nov15_small,96,24,24,,8,Chapter1_adapted_hybrid,60825,0.023686,prior_conversation_report_not_reverified
+nov15_larger,192,48,48,16,10,Chapter7_TinyCfC,305,0.005131,prior_conversation_report_not_reverified
+nov15_larger,192,48,48,16,10,Chapter1_adapted_hybrid,60825,0.013090,prior_conversation_report_not_reverified
