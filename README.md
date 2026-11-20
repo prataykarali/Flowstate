@@ -98,6 +98,12 @@ An earlier **local, uncommitted** Chapter 1-adapted vs Chapter 7 synthetic exper
 
 [Chapter 7 methods, evidence and limitations](chap-7/README.md) · [Notebook](chap-7/FlowState_Ch07_CfC_Lab.ipynb) · [Reconstructed reported comparison](chap-7/results/ch1_ch7_reported_summary.csv)
 
+## Primary syllabus — v2.1 (20 November 2026)
+
+**[Full canonical list of all 72 chapters with optional LittleBit-2 extensions](FLOWSTATE_PRIMARY_CURRICULUM_72_V2_1.md)** · [Detailed compression experiments and Android gates](LITTLEBIT2_QUANTIZATION_ENRICHMENT.md).
+
+The original October 2026 v2.0 72-chapter order and titles are unchanged. Compression is an *optional internal enrichment*, not a new chapter or a demonstrated edge speedup. The primary FlowState hypothesis and scientific milestones remain fixed.
+
 ## Research roadmap — curriculum v2.0 (October 2026)
 
 The numbered roadmap follows the **72-chapter FlowState Research Curriculum v2.0**. It is a learning and experimentation sequence, not a claim that all phases have been implemented.
