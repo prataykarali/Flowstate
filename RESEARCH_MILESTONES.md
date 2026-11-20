@@ -6,6 +6,10 @@
 >
 > **Evidence rule:** `Planned` ≠ `Started` ≠ `Verified` ≠ `Completed`. An actual literature reading, saved artifact, measured comparison or mentor reply is required before the associated milestone advances. Never turn a hypothesis, README claim, imagined result or message draft into a completed milestone.
 
+## Syllabus revision alignment — 20 November 2026
+
+**Canonical active chapter index:** [FlowState Primary Curriculum v2.1 — 72 chapters](FLOWSTATE_PRIMARY_CURRICULUM_72_V2_1.md), preserving all original v2.0 numbers/titles. The [LittleBit-2 enrichment](LITTLEBIT2_QUANTIZATION_ENRICHMENT.md) is PLANNED and linked to Chapters 13, 24, 37, 39 and 61–66, not a new research track. It must not distract from Chapter 8 reproduction / current learning prerequisites. Mobile speed and quality on Galaxy A16 remain **UNVERIFIED**. The status snapshot below is historical and does not override the README's current recorded Chapter 7 introductory completion.
+
 ## Status as of 15 November 2026
 
 | Code | Parallel track | Trigger / position | Real status | Next proof needed |
