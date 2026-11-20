@@ -118,6 +118,8 @@ The numbered roadmap follows the **72-chapter FlowState Research Curriculum v2.0
 
 The initial research claim should stay **narrow and falsifiable**. Multimodal, RL, agentic and edge systems are extensions, not prerequisites for every architecture experiment. Research logs, paper reading and reproducibility checks should begin early rather than waiting until Chapter 67.
 
+**Optional compression enrichment (planned, not performed):** [LittleBit / LittleBit-2 — low-rank binary factorization, QAT and future Android evaluation](LITTLEBIT2_QUANTIZATION_ENRICHMENT.md) augments Chapters 13, 24, 37–39 and 61–66 *without* changing the canonical chapter sequence. This is not a current implementation milestone or a claim of on-device performance.
+
 ## Reproduce the learning experiments
 
 The repository contains independent chapter folders rather than a single ready-to-install LLM product. Use a Python environment with the dependencies described in each chapter README, and run the relevant notebook or script from its documented working directory.
